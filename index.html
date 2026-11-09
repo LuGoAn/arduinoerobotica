@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arduino e Robótica</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400..800&display=swap">
+<style>
+/* Layout: palco fixo de 1920x1080 escalado para caber na tela (TV do corredor).
+   Duas áreas: apresentação em loop e simulador interativo, com barra de controle embaixo. */
+:root{
+  --navy:#0F1F4D; --blue:#2350E8; --cyan:#35D0F5; --yellow:#FFD23F;
+  --paper:#F4F8FF; --ink:#0F1F4D; --ink2:#243A6E; --soft:#DCE8FF;
+  --mint:#CDF3E2; --sky:#BDEBFA; --sun:#FFE9A8; --peach:#FFD9D0; --periwinkle:#CFE0FF;
+  --good:#1FA86A; --bad:#E8453C; --water:#35D0F5;
+  --display:'Fredoka','Trebuchet MS',Arial,sans-serif;
+  --text:'Nunito','Trebuchet MS',Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--navy);color:var(--ink);font-family:var(--text)}
+button{font-family:inherit;cursor:pointer}
+#frame{position:fixed;inset:0;background:var(--navy);overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--paper)}
+#views{position:absolute;left:0;top:0;width:1920px;height:1008px;overflow:hidden}
+.view{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s}
+.view.on{opacity:1;visibility:visible}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{font-family:var(--display)}
+
+/* barra inferior */
+#bar{position:absolute;left:0;top:1008px;width:1920px;height:72px;background:var(--navy);display:flex;align-items:center;gap:24px;padding:0 40px;color:#fff;z-index:5}
+#prog{position:absolute;left:0;top:0;height:5px;width:100%;background:var(--cyan);transform-origin:0 0;transform:scaleX(0)}
+.tabs{display:flex;gap:10px}
+.tab{font:600 28px var(--display);color:#fff;background:transparent;border:3px solid rgba(255,255,255,.35);border-radius:40px;padding:6px 26px;line-height:1.1}
+.tab.on{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
+#dots{flex:1;display:flex;justify-content:center;align-items:center;gap:14px}
+.dot{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.3);border:0;padding:0}
+.dot.on{background:var(--yellow);width:46px;border-radius:12px}
+.stab{font:600 26px var(--display);color:#fff;background:transparent;border:3px solid rgba(255,255,255,.3);border-radius:40px;padding:4px 22px}
+.stab.on{background:var(--cyan);border-color:var(--cyan);color:var(--navy)}
+.ctl-btns{display:flex;gap:10px}
+.ib{width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.35);background:transparent;color:#fff;display:grid;place-items:center;padding:0}
+.ib svg{width:26px;height:26px;fill:currentColor}
+
+/* entradas dos slides */
+.slide .b{opacity:0}
+.slide.active .b{animation:bin .75s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0) * .2s)}
+.slide.active .bf{animation:fin .9s ease both;animation-delay:calc(var(--d,0) * .2s)}
+.bf{opacity:0}
+@keyframes bin{from{opacity:0;transform:translateY(46px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .6s}
+.slide.active{opacity:1;visibility:visible}
+
+.card{border:5px solid var(--navy);border-radius:36px;box-shadow:10px 10px 0 var(--navy);rotate:var(--r,0deg)}
+.pill{display:inline-block;font:600 34px var(--display);border-radius:44px;padding:14px 30px}
+
+/* mascote */
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+.board{animation:bob 3.4s ease-in-out infinite}
+.glow{animation:glow 1.1s ease-in-out infinite}
+.st{transform-box:fill-box;transform-origin:center;animation:twinkle 2.2s ease-in-out infinite}
+@keyframes blink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.06)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes glow{0%,100%{opacity:.15}50%{opacity:.75}}
+@keyframes twinkle{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.4);opacity:.5}}
+@keyframes march{to{stroke-dashoffset:-40}}
+@keyframes chev{0%{transform:translateX(-16px);opacity:0}40%{opacity:1}100%{transform:translateX(16px);opacity:0}}
+@keyframes grow{0%{transform:scaleX(0)}60%,100%{transform:scaleX(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
+@keyframes fall{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(240px);opacity:.9}}
+@keyframes fallS{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(120px);opacity:.9}}
+@keyframes wave{to{transform:translateX(-120px)}}
+@keyframes ping{0%{opacity:0;transform:scale(.5)}40%{opacity:.9}100%{opacity:0;transform:scale(1.25)}}
+@keyframes blinkRed{0%,100%{opacity:.25}50%{opacity:.9}}
+
+/* ---- slide 1 capa ---- */
+.s-cover{background:radial-gradient(circle at 76% 46%,#2350E8 0%,#0F1F4D 62%);color:#fff}
+.s-cover .pill{position:absolute;left:112px;top:132px;background:var(--yellow);color:var(--navy);rotate:-2deg}
+.s-cover h1{position:absolute;left:112px;top:238px;font-size:156px;line-height:.98;font-weight:700}
+.s-cover h1 span{color:var(--cyan)}
+.s-cover .tag{position:absolute;left:112px;top:610px;width:880px;font:500 58px/1.2 var(--display);color:var(--soft)}
+.s-cover .foot{position:absolute;left:112px;bottom:54px;font-size:28px;line-height:1.45;color:#9DB4E8}
+.s-cover .mascot{position:absolute;left:1000px;top:200px;width:820px;height:615px}
+/* ---- slide 2 ---- */
+.s-onde,.s-fluxo,.s-wokwi{background:var(--paper)}
+.sh{position:absolute;left:112px;top:84px;font-size:104px;font-weight:700;line-height:1.05}
+.squig{position:absolute;left:112px;top:214px}
+.cards5{position:absolute;left:112px;top:330px;right:112px;display:grid;grid-template-columns:repeat(5,1fr);gap:28px}
+.cards5 .card{padding:26px 22px 30px;display:flex;flex-direction:column;gap:20px;align-items:center;text-align:center;min-height:560px}
+.cards5 h3{font-size:34px;font-weight:600;line-height:1.15}
+.cards5 svg{width:200px;height:200px}
+/* ---- slide 3 arduino ---- */
+.s-arduino{background:var(--blue);color:#fff}
+.s-arduino h2{position:absolute;left:112px;top:110px;font-size:120px;line-height:1;font-weight:700}
+.s-arduino h2 span{color:var(--yellow)}
+.s-arduino .big{position:absolute;left:112px;top:430px;width:720px;font:500 56px/1.22 var(--display)}
+.s-arduino .small{position:absolute;left:112px;top:730px;width:720px;font-size:38px;line-height:1.4;color:var(--soft)}
+.s-arduino svg.lab{position:absolute;left:860px;top:130px;width:1000px;height:720px}
+/* ---- slide 4 fluxo ---- */
+.s-fluxo .sh{font-size:88px}
+.flow{position:absolute;left:112px;right:112px;top:240px;display:grid;grid-template-columns:1fr 90px 1fr 90px 1fr;align-items:center}
+.flow .card{padding:34px;display:flex;flex-direction:column;gap:16px;min-height:480px}
+.flow h3{font-size:56px;font-weight:700;line-height:1.1}
+.flow p{font-size:34px;line-height:1.32;color:var(--ink2)}
+.flow svg.ic{width:150px;height:150px}
+.flow svg.arrow{width:90px;height:60px}
+.example{position:absolute;left:112px;right:112px;top:790px;display:flex;align-items:center;gap:30px;background:var(--navy);border-radius:48px;padding:30px 48px;color:#fff;rotate:-.5deg}
+.example p{font-size:36px;line-height:1.32;flex:1}
+.example b{color:var(--yellow)}
+.example svg{width:70px;height:70px;fill:var(--yellow);flex:none}
+/* ---- slide 5 profissoes ---- */
+.s-prof{background:var(--navy);color:#fff}
+.s-prof .sh{color:#fff;font-size:100px}
+.s-prof .sh span{color:var(--yellow)}
+.cards4{position:absolute;left:112px;right:112px;top:290px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.cards4 .pc{background:var(--paper);border-radius:32px;padding:18px 18px 30px;display:flex;flex-direction:column;gap:16px;color:var(--ink);rotate:var(--r,0deg);box-shadow:8px 8px 0 var(--sh,#35D0F5)}
+.cards4 svg{width:100%;height:auto;display:block}
+.cards4 h3{font-size:40px;font-weight:600;line-height:1.12}
+.cards4 p{font-size:30px;line-height:1.32;color:var(--ink2)}
+/* ---- slide 6 wokwi ---- */
+.s-wokwi h2{position:absolute;left:112px;top:110px;font-size:112px;line-height:1;font-weight:700}
+.s-wokwi h2 span{color:var(--blue)}
+.s-wokwi .txt{position:absolute;left:112px;top:400px;width:780px;font-size:42px;line-height:1.4;color:var(--ink2)}
+.s-wokwi .opts{position:absolute;left:112px;top:640px;display:flex;flex-direction:column;gap:20px}
+.s-wokwi .opts .pill{font-size:46px;width:fit-content;padding:14px 34px}
+.s-wokwi .win{position:absolute;left:960px;top:190px;width:860px;height:600px}
+/* ---- slide 7 experimentar ---- */
+.s-exp{background:var(--blue);color:#fff}
+.s-exp h2{position:absolute;left:112px;top:84px;font-size:100px;line-height:1;font-weight:700}
+.s-exp h2 span{color:var(--yellow)}
+.s-exp .sub{position:absolute;left:112px;top:210px;width:1700px;font-size:36px;color:var(--soft)}
+.xcards{position:absolute;left:112px;right:112px;top:290px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.xc{border-radius:32px;padding:26px 26px 28px;box-shadow:8px 8px 0 var(--navy);rotate:var(--r,0deg);color:var(--ink);display:flex;flex-direction:column;gap:12px;border:0;text-align:left;font-family:var(--text)}
+.xc .top{display:flex;justify-content:space-between;align-items:flex-start}
+.xc .n{font:700 96px/1 var(--display)}
+.xc .qrb{background:#fff;border:4px solid var(--navy);border-radius:16px;padding:6px;line-height:0}
+.xc .qrb svg{width:180px;height:180px}
+.xc h3{font-size:38px;font-weight:600;line-height:1.12}
+.xc p{font-size:30px;line-height:1.3;color:var(--ink2)}
+.xc .go{margin-top:6px;align-self:flex-start;font:600 28px var(--display);background:var(--navy);color:#fff;border-radius:30px;padding:8px 22px}
+.quote{position:absolute;left:112px;right:112px;top:858px;background:var(--navy);border-radius:48px;padding:26px 48px;rotate:-.4deg}
+.quote p{font:500 40px/1.22 var(--display);color:#fff}
+.quote span{color:var(--yellow)}
+
+/* ================= simulador ================= */
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .4s}
+.scene.on{opacity:1;visibility:visible}
+.stagecard{position:absolute;left:48px;top:36px;width:1200px;height:936px;border-radius:44px;border:6px solid var(--navy);overflow:hidden;box-shadow:10px 10px 0 var(--navy);background:#fff}
+.stagecard svg{width:100%;height:100%;display:block}
+.panel{position:absolute;left:1290px;top:30px;width:582px;height:950px;display:flex;flex-direction:column;gap:12px}
+.ptag{font:600 26px var(--display);background:var(--yellow);color:var(--navy);padding:6px 20px;border-radius:30px;width:fit-content}
+.panel h2{font-size:52px;line-height:1.05;font-weight:700}
+.pdesc{font-size:25px;line-height:1.35;color:var(--ink2)}
+.ctl{background:#fff;border:5px solid var(--navy);border-radius:28px;padding:12px 24px 14px;display:flex;flex-direction:column;gap:6px;box-shadow:6px 6px 0 var(--navy)}
+.ctl label{font:600 30px var(--display)}
+.ctl .big{font:700 46px/1 var(--display);color:var(--blue)}
+.ctl .big small{font-size:34px;color:var(--ink2)}
+.ctl input[type=range]{width:100%;height:36px;accent-color:var(--blue);margin:4px 0 0}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:600 26px var(--display);padding:10px 22px;border-radius:30px;border:4px solid var(--navy);background:var(--yellow);color:var(--navy)}
+.btn.on{background:var(--navy);color:#fff}
+.say{background:var(--navy);color:#fff;border-radius:28px;padding:16px 24px;font-size:28px;line-height:1.35}
+.say b{color:var(--yellow)}
+.status{font:600 34px/1.15 var(--display);border-radius:28px;padding:12px 22px;border:5px solid var(--navy);background:var(--mint)}
+.status.warn{background:var(--sun)}
+.status.bad{background:var(--peach)}
+.qrline{display:flex;gap:18px;align-items:center;margin-top:auto}
+.qrline .qrb{background:#fff;border:4px solid var(--navy);border-radius:16px;padding:6px;line-height:0}
+.qrline svg{width:146px;height:146px}
+.qrline a{font:600 28px/1.2 var(--display);color:var(--blue);text-decoration:none}
+.qrline span{display:block;font:500 22px var(--text);color:var(--ink2);margin-top:6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{font:600 23px var(--display);border:3px solid var(--navy);border-radius:24px;padding:3px 14px;line-height:1.2}.chip.in{background:var(--blue);color:#fff}.chip.br{background:#0FA3AE;color:#fff}.chip.out{background:var(--yellow);color:var(--navy)}
+.panel .pdesc{display:none}.disc{font-size:22px;line-height:1.3;color:var(--ink2);margin:0}
+#autobadge{position:absolute;left:1470px;top:34px;font:600 22px var(--display);background:var(--navy);color:#fff;border-radius:30px;padding:8px 18px;display:none}
+#autobadge.on{display:block}
+.rain{animation:rain .8s linear infinite}@keyframes rain{from{transform:translate(0,0)}to{transform:translate(-24px,290px)}}
+.flowdown{animation:fdown .45s linear infinite}@keyframes fdown{to{stroke-dashoffset:-36}}
+.wire{animation:march .8s linear infinite}
+.shaking{animation:shake .35s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 20%}
+.drop{animation:fall .9s linear infinite}
+.dropS{animation:fallS .8s linear infinite}
+.wavy{animation:wave 2.4s linear infinite}
+.pingc{transform-box:fill-box;transform-origin:center;animation:ping 1.4s ease-out infinite}
+.redblink{animation:blinkRed .7s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.board,.eye,.glow,.st,.wire,.drop,.dropS,.wavy,.pingc,.shaking,.redblink,.rain,.flowdown{animation:none}}
+</style>
+</head>
+<body>
+
+
+<div id="frame"><div id="stage">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="gWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7BE6FF"/><stop offset="1" stop-color="#1FB0E6"/></linearGradient>
+<linearGradient id="gMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2F6FC"/><stop offset="1" stop-color="#A7B6CD"/></linearGradient>
+<linearGradient id="gTerra" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F0955F"/><stop offset=".6" stop-color="#D9743F"/><stop offset="1" stop-color="#B85C33"/></linearGradient>
+<linearGradient id="gCyl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FF9A3D"/><stop offset=".3" stop-color="#FFC27A"/><stop offset="1" stop-color="#E5561A"/></linearGradient>
+<linearGradient id="gTank" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A8BFF"/><stop offset="1" stop-color="#2350E8"/></linearGradient>
+<linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ED8F5"/><stop offset="1" stop-color="#EAF6FF"/></linearGradient>
+<pattern id="tile" width="90" height="90" patternUnits="userSpaceOnUse"><path d="M90 0H0V90" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="3"/></pattern>
+<clipPath id="t-winclip"><rect x="64" y="114" width="232" height="252" rx="10"/></clipPath><clipPath id="r-clip"><rect x="380" y="300" width="360" height="500" rx="20"/></clipPath>
+<clipPath id="i-clip"><path d="M480 636H800L754 790H526z"/></clipPath>
+</defs></svg>
+<main id="views">
+
+<!-- ================= APRESENTAÇÃO ================= -->
+<section class="view on" id="v-present">
+
+<div class="slide s-cover" data-dur="8000">
+  <p class="pill b" style="--d:.2">Introdução à Robótica</p>
+  <h1 class="b" style="--d:.5">Arduino<br><span>e Robótica</span></h1>
+  <p class="tag b" style="--d:.9">Tecnologia que transforma ideias em soluções</p>
+  <div class="mascot b" style="--d:.3" data-mascot="stars"></div>
+</div>
+
+<div class="slide s-onde" data-dur="11000">
+  <h2 class="sh b" style="--d:.1">Onde encontramos a robótica?</h2>
+  <svg class="squig bf" style="--d:.4" width="520" height="28" viewBox="0 0 520 28"><path d="M6 14 Q36 -4 66 14 T126 14 T186 14 T246 14 T306 14 T366 14 T426 14 T486 14" fill="none" stroke="#FFD23F" stroke-width="10" stroke-linecap="round"/></svg>
+  <div class="cards5">
+    <div class="card b" style="--d:.8;--r:-2deg;background:#FFE9A8"><svg viewBox="0 0 140 140" aria-label="Planta com irrigador"><rect y="112" width="140" height="28" rx="8" fill="#A9743F"/><rect x="88" y="68" width="8" height="46" fill="#1B8F5A"/><path d="M92 90 C92 68 76 62 62 64 C62 80 74 92 92 90 Z" fill="#4CD08C"/><path d="M93 80 C93 58 110 52 124 54 C124 72 112 82 93 80 Z" fill="#1FA86A"/><rect x="20" y="82" width="10" height="32" fill="#64748B"/><circle cx="25" cy="76" r="11" fill="#0F1F4D"/><path d="M34 70 C58 34 86 40 98 70" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 12" stroke-linecap="round"/><circle cx="48" cy="58" r="6" fill="#35D0F5"/><circle cx="66" cy="44" r="6" fill="#35D0F5"/><circle cx="84" cy="46" r="5" fill="#35D0F5"/></svg><h3>Irrigação automática</h3></div>
+    <div class="card b" style="--d:1.3;--r:1.5deg;background:#BDEBFA"><svg viewBox="0 0 140 140" aria-label="Termômetro"><rect x="56" y="12" width="28" height="88" rx="14" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><circle cx="70" cy="110" r="24" fill="#FF5C5C" stroke="#0F1F4D" stroke-width="6"/><rect x="65" y="40" width="10" height="70" rx="5" fill="#FF5C5C"/><path d="M96 28 H110 M96 46 H106 M96 64 H110 M96 82 H106" stroke="#0F1F4D" stroke-width="6" stroke-linecap="round"/></svg><h3>Sensores de temperatura</h3></div>
+    <div class="card b" style="--d:1.8;--r:-1deg;background:#CFE0FF"><svg viewBox="0 0 140 140" aria-label="Caixa d’água"><rect x="40" y="114" width="12" height="22" fill="#64748B"/><rect x="88" y="114" width="12" height="22" fill="#64748B"/><rect x="26" y="22" width="88" height="94" rx="16" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><rect x="32" y="62" width="76" height="48" rx="10" fill="#35D0F5"/><rect x="68" y="30" width="5" height="32" fill="#0F1F4D"/><circle cx="70" cy="62" r="11" fill="#FFD23F" stroke="#0F1F4D" stroke-width="4"/></svg><h3>Monitoramento de reservatórios</h3></div>
+    <div class="card b" style="--d:2.3;--r:2deg;background:#CDF3E2"><svg viewBox="0 0 140 140" aria-label="Braço robótico"><rect x="20" y="108" width="80" height="24" rx="8" fill="#0F1F4D"/><path d="M60 108 V66" stroke="#0F1F4D" stroke-width="14" stroke-linecap="round"/><circle cx="60" cy="62" r="13" fill="#FFD23F" stroke="#0F1F4D" stroke-width="5"/><path d="M60 62 L104 36" stroke="#0F1F4D" stroke-width="14" stroke-linecap="round"/><path d="M104 36 L122 30 M104 36 L116 54" stroke="#0F1F4D" stroke-width="8" stroke-linecap="round"/></svg><h3>Equipamentos automatizados na indústria</h3></div>
+    <div class="card b" style="--d:2.8;--r:-1.5deg;background:#FFD9D0"><svg viewBox="0 0 140 140" aria-label="Prédios inteligentes"><rect y="132" width="140" height="8" fill="#64748B"/><rect x="26" y="40" width="64" height="92" fill="#2350E8"/><rect x="90" y="76" width="34" height="56" fill="#35D0F5"/><rect x="36" y="52" width="14" height="14" fill="#FFD23F"/><rect x="62" y="52" width="14" height="14" fill="#DCEBFF"/><rect x="36" y="76" width="14" height="14" fill="#DCEBFF"/><rect x="62" y="76" width="14" height="14" fill="#FFD23F"/><rect x="36" y="100" width="14" height="14" fill="#FFD23F"/><rect x="62" y="100" width="14" height="14" fill="#DCEBFF"/><circle cx="58" cy="24" r="5" fill="#0F1F4D"/><path d="M46 18 a16 16 0 0 1 24 0 M38 10 a28 28 0 0 1 40 0" fill="none" stroke="#0F1F4D" stroke-width="5" stroke-linecap="round"/></svg><h3>Sistemas inteligentes em construções</h3></div>
+  </div>
+</div>
+
+<div class="slide s-arduino" data-dur="11000">
+  <h2 class="b" style="--d:.1">O que é<br><span>Arduino?</span></h2>
+  <p class="big b" style="--d:.8">Uma plaquinha que funciona como o cérebro de um projeto.</p>
+  <p class="small b" style="--d:1.4">A gente liga sensores e luzes nela e escreve o que ela deve fazer.</p>
+  <svg class="lab" viewBox="0 0 1000 720" aria-label="Placa Arduino com a entrada USB, o chip e os pinos indicados">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#FFD23F"/></marker></defs>
+    <g transform="translate(150 40)" data-mascot-inner="1"></g>
+    <g class="bf" style="--d:2"><path d="M170 130 L246 226" stroke="#FFD23F" stroke-width="6" fill="none" marker-end="url(#ah)"/><rect x="20" y="52" width="300" height="76" rx="38" fill="#FFD23F"/><text x="170" y="105" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="600" font-size="38" fill="#0F1F4D">Entrada USB</text></g>
+    <g class="bf" style="--d:3.4"><path d="M870 560 L780 458" stroke="#FFD23F" stroke-width="6" fill="none" marker-end="url(#ah)"/><rect x="780" y="560" width="180" height="76" rx="38" fill="#FFD23F"/><text x="870" y="613" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="600" font-size="38" fill="#0F1F4D">Chip</text></g>
+    <g class="bf" style="--d:4.8"><path d="M500 624 L500 540" stroke="#FFD23F" stroke-width="6" fill="none" marker-end="url(#ah)"/><rect x="400" y="624" width="200" height="76" rx="38" fill="#FFD23F"/><text x="500" y="677" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="600" font-size="38" fill="#0F1F4D">Pinos</text></g>
+  </svg>
+</div>
+
+<div class="slide s-fluxo" data-dur="14000">
+  <h2 class="sh b" style="--d:.1">Como funciona um sistema com Arduino?</h2>
+  <div class="flow">
+    <div class="card b" style="--d:.9;--r:-1.5deg;background:#BDEBFA">
+      <svg class="ic" viewBox="0 0 150 150" aria-label="Sensor de umidade na terra"><rect y="122" width="150" height="28" rx="8" fill="#A9743F"/><rect x="48" y="14" width="56" height="62" rx="12" fill="#1B2440"/><rect x="62" y="30" width="28" height="12" rx="4" fill="#FFD23F"/><circle cx="64" cy="58" r="5" fill="#35D0F5"/><circle cx="88" cy="58" r="5" fill="#35D0F5"/><rect x="56" y="76" width="14" height="56" rx="6" fill="#C9D3E3"/><rect x="82" y="76" width="14" height="56" rx="6" fill="#C9D3E3"/><rect x="120" y="92" width="6" height="32" fill="#1B8F5A"/><path d="M123 108 C123 90 110 86 100 88 C100 102 110 110 123 108 Z" fill="#4CD08C"/></svg>
+      <h3>Entrada</h3><p>O sensor capta o que acontece no ambiente: calor, umidade, luz, nível de água.</p></div>
+    <svg class="arrow bf" style="--d:2" viewBox="0 0 90 60"><g fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path style="animation:chev 1.2s ease-in-out infinite" d="M20 10 L46 30 L20 50"/><path style="animation:chev 1.2s ease-in-out infinite .3s" d="M40 10 L66 30 L40 50"/></g></svg>
+    <div class="card b" style="--d:3.4;--r:1deg;background:#FFE9A8">
+      <svg class="ic" viewBox="0 0 150 150" aria-label="Placa Arduino sorridente"><rect x="14" y="30" width="122" height="94" rx="16" fill="#0FA3AE" stroke="#0A1638" stroke-width="6"/><rect x="34" y="38" width="80" height="10" rx="3" fill="#1B2440"/><line x1="38" y1="43" x2="112" y2="43" stroke="#FFD23F" stroke-width="5" stroke-dasharray="6 5"/><g class="eye"><circle cx="58" cy="76" r="14" fill="#fff" stroke="#0A1638" stroke-width="4"/><circle cx="62" cy="78" r="6" fill="#0A1638"/></g><g class="eye"><circle cx="94" cy="76" r="14" fill="#fff" stroke="#0A1638" stroke-width="4"/><circle cx="98" cy="78" r="6" fill="#0A1638"/></g><path d="M62 100 Q76 114 90 100" fill="none" stroke="#0A1638" stroke-width="5" stroke-linecap="round"/><rect x="34" y="112" width="80" height="8" rx="3" fill="#1B2440"/></svg>
+      <h3>Processamento</h3><p>O Arduino lê essa informação e decide o que fazer com ela.</p></div>
+    <svg class="arrow bf" style="--d:4.6" viewBox="0 0 90 60"><g fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path style="animation:chev 1.2s ease-in-out infinite" d="M20 10 L46 30 L20 50"/><path style="animation:chev 1.2s ease-in-out infinite .3s" d="M40 10 L66 30 L40 50"/></g></svg>
+    <div class="card b" style="--d:6;--r:-1deg;background:#CDF3E2">
+      <svg class="ic" viewBox="0 0 150 150" aria-label="Lâmpada acesa"><circle class="glow" cx="75" cy="68" r="52" fill="#FFD23F"/><circle cx="75" cy="68" r="36" fill="#FFD23F" stroke="#0F1F4D" stroke-width="6"/><rect x="59" y="104" width="32" height="22" rx="6" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="5"/><path d="M75 12 V0 M30 30 L22 22 M120 30 L128 22 M14 70 H2 M136 70 H148" stroke="#FF9F1C" stroke-width="6" stroke-linecap="round"/></svg>
+      <h3>Saída</h3><p>Algo acontece: acende um LED, toca um alarme ou liga um motor.</p></div>
+  </div>
+  <div class="example b" style="--d:8"><svg viewBox="0 0 24 24" aria-label="Ideia"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg><p><b>Exemplo na horta:</b> o sensor percebe que a terra está seca, o Arduino decide regar e a bomba d’água liga.</p></div>
+</div>
+
+<div class="slide s-prof" data-dur="14000">
+  <h2 class="sh b" style="--d:.1">Robótica nas <span>nossas profissões</span></h2>
+  <div class="cards4">
+    <div class="pc b" style="--d:.8;--r:-1.5deg;--sh:#35D0F5"><svg viewBox="0 0 360 220" aria-label="Plantação com irrigação"><rect width="360" height="220" rx="22" fill="#CDF3E2"/><circle cx="300" cy="46" r="24" fill="#FFD23F"/><rect y="168" width="360" height="52" fill="#A9743F"/><rect x="60" y="112" width="10" height="58" fill="#64748B"/><circle cx="65" cy="106" r="13" fill="#0F1F4D"/><path d="M78 98 C112 56 150 62 172 106" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 12" stroke-linecap="round"/><path d="M80 108 C118 90 156 102 178 134" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 12" stroke-linecap="round"/><rect x="176" y="118" width="8" height="52" fill="#1B8F5A"/><path d="M180 140 C180 118 164 112 150 114 C150 130 162 142 180 140 Z" fill="#4CD08C"/><path d="M181 130 C181 108 198 102 212 104 C212 122 200 132 181 130 Z" fill="#1FA86A"/><rect x="256" y="130" width="8" height="40" fill="#1B8F5A"/><path d="M260 148 C260 128 246 124 234 126 C234 140 244 150 260 148 Z" fill="#4CD08C"/><path d="M261 140 C261 120 276 114 290 116 C290 132 278 142 261 140 Z" fill="#1FA86A"/></svg><h3>Agroindústria</h3><p>Irrigação automatizada e monitoramento das condições de armazenamento.</p></div>
+    <div class="pc b" style="--d:2.2;--r:1.5deg;--sh:#FFD23F"><svg viewBox="0 0 360 220" aria-label="Geladeira com termômetro"><rect width="360" height="220" rx="22" fill="#BDEBFA"/><rect x="110" y="20" width="130" height="180" rx="14" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><line x1="110" y1="92" x2="240" y2="92" stroke="#0F1F4D" stroke-width="6"/><rect x="214" y="40" width="8" height="34" rx="4" fill="#0F1F4D"/><rect x="214" y="112" width="8" height="48" rx="4" fill="#0F1F4D"/><rect x="128" y="40" width="50" height="26" rx="6" fill="#0F1F4D"/><circle cx="142" cy="53" r="5" fill="#4CD08C"/><rect x="152" y="49" width="18" height="8" rx="4" fill="#35D0F5"/><rect x="268" y="52" width="20" height="96" rx="10" fill="#fff" stroke="#0F1F4D" stroke-width="5"/><circle cx="278" cy="158" r="18" fill="#FF5C5C" stroke="#0F1F4D" stroke-width="5"/><rect x="274" y="90" width="8" height="66" rx="4" fill="#FF5C5C"/><circle cx="66" cy="150" r="30" fill="#FF5C5C"/><path d="M66 122 C66 110 74 104 82 102" fill="none" stroke="#1B8F5A" stroke-width="6" stroke-linecap="round"/></svg><h3>Nutrição e Dietética</h3><p>Monitoramento da temperatura e do ambiente onde os alimentos são guardados e manipulados.</p></div>
+    <div class="pc b" style="--d:3.6;--r:-1deg;--sh:#7BE0B0"><svg viewBox="0 0 360 220" aria-label="Reservatório de água"><rect width="360" height="220" rx="22" fill="#CFE0FF"/><rect x="60" y="150" width="70" height="14" fill="#64748B"/><rect x="230" y="168" width="70" height="14" fill="#64748B"/><rect x="120" y="30" width="130" height="132" rx="16" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><rect x="127" y="88" width="116" height="68" rx="10" fill="#35D0F5"/><rect x="180" y="40" width="6" height="48" fill="#0F1F4D"/><circle cx="183" cy="90" r="13" fill="#FFD23F" stroke="#0F1F4D" stroke-width="4"/><rect x="138" y="164" width="12" height="40" fill="#64748B"/><rect x="220" y="164" width="12" height="40" fill="#64748B"/></svg><h3>Saneamento</h3><p>Monitoramento de reservatórios e controle do nível de água.</p></div>
+    <div class="pc b" style="--d:5;--r:1deg;--sh:#FF8FA3"><svg viewBox="0 0 360 220" aria-label="Prédios com sensor"><rect width="360" height="220" rx="22" fill="#FFE9A8"/><rect y="196" width="360" height="24" fill="#64748B"/><rect x="80" y="50" width="104" height="150" fill="#2350E8"/><rect x="184" y="100" width="76" height="100" fill="#35D0F5"/><rect x="96" y="68" width="22" height="22" fill="#FFD23F"/><rect x="138" y="68" width="22" height="22" fill="#DCEBFF"/><rect x="96" y="108" width="22" height="22" fill="#DCEBFF"/><rect x="138" y="108" width="22" height="22" fill="#FFD23F"/><rect x="96" y="148" width="22" height="22" fill="#FFD23F"/><rect x="138" y="148" width="22" height="22" fill="#DCEBFF"/><rect x="198" y="118" width="20" height="20" fill="#fff"/><rect x="226" y="118" width="20" height="20" fill="#FFD23F"/><circle cx="132" cy="30" r="7" fill="#0F1F4D"/><path d="M114 22 a24 24 0 0 1 36 0 M102 10 a42 42 0 0 1 60 0" fill="none" stroke="#0F1F4D" stroke-width="6" stroke-linecap="round"/></svg><h3>Desenho da Construção Civil</h3><p>Automação de ambientes, monitoramento das condições ambientais e sistemas inteligentes em edificações.</p></div>
+  </div>
+</div>
+
+<div class="slide s-wokwi" data-dur="11000">
+  <h2 class="b" style="--d:.1">Conhecendo<br>o <span>Wokwi</span></h2>
+  <p class="txt b" style="--d:.8">Um simulador online: a gente monta o circuito, programa a placa e testa tudo no navegador.</p>
+  <div class="opts">
+    <p class="pill b" style="--d:1.8;background:#FFE9A8;rotate:-1.5deg">Sem comprar componentes</p>
+    <p class="pill b" style="--d:2.8;background:#BDEBFA;rotate:1deg">Sem instalar programas</p>
+    <p class="pill b" style="--d:3.8;background:#CDF3E2;rotate:-1deg">Sem risco de queimar nada</p>
+  </div>
+  <svg class="win b" style="--d:.5" viewBox="0 0 860 600" aria-label="Janela de um simulador online com código e uma placa Arduino">
+    <defs><clipPath id="wclip"><rect width="848" height="586" rx="28"/></clipPath></defs>
+    <rect x="12" y="14" width="848" height="586" rx="28" fill="#0F1F4D"/>
+    <rect width="848" height="586" rx="28" fill="#fff"/>
+    <g clip-path="url(#wclip)">
+      <path d="M0 28 a28 28 0 0 1 28 -28 H820 a28 28 0 0 1 28 28 V64 H0 Z" fill="#CFE0FF"/>
+      <circle cx="40" cy="32" r="9" fill="#FF5C5C"/><circle cx="70" cy="32" r="9" fill="#FFD23F"/><circle cx="100" cy="32" r="9" fill="#4CD08C"/>
+      <rect x="140" y="14" width="380" height="36" rx="18" fill="#fff"/>
+      <text x="160" y="40" font-family="Fredoka,Arial,sans-serif" font-weight="600" font-size="24" fill="#2350E8">wokwi.com</text>
+      <g style="transform-box:fill-box;transform-origin:center;animation:pulse 1.4s ease-in-out infinite"><circle cx="780" cy="32" r="20" fill="#4CD08C"/><polygon points="773,21 773,43 792,32" fill="#0F1F4D"/></g>
+      <rect x="0" y="64" width="300" height="522" fill="#0F1F4D"/>
+      <g id="codelines"></g>
+      <rect x="300" y="64" width="548" height="522" fill="#EAF2FF"/>
+      <g class="board"><g transform="translate(340 220) scale(.62)">
+        <rect x="20" y="40" width="480" height="300" rx="28" fill="#0FA3AE" stroke="#0A1638" stroke-width="8"/>
+        <rect x="0" y="92" width="96" height="92" rx="8" fill="#C9D3E3" stroke="#0A1638" stroke-width="8"/>
+        <rect x="130" y="50" width="320" height="28" rx="4" fill="#1B2440"/>
+        <line x1="140" y1="64" x2="440" y2="64" stroke="#FFD23F" stroke-width="12" stroke-dasharray="12 10"/>
+        <rect x="300" y="170" width="170" height="52" rx="4" fill="#1B2440"/>
+        <g class="eye"><circle cx="200" cy="150" r="22" fill="#fff" stroke="#0A1638" stroke-width="5"/><circle cx="206" cy="153" r="10" fill="#0A1638"/></g>
+        <g class="eye"><circle cx="260" cy="150" r="22" fill="#fff" stroke="#0A1638" stroke-width="5"/><circle cx="266" cy="153" r="10" fill="#0A1638"/></g>
+        <path d="M208 196 Q230 220 252 196" fill="none" stroke="#0A1638" stroke-width="6" stroke-linecap="round"/>
+      </g></g>
+      <circle class="glow" cx="700" cy="170" r="44" fill="#FFD23F"/>
+      <circle cx="700" cy="170" r="22" fill="#FFD23F" stroke="#0F1F4D" stroke-width="5"/>
+      <path d="M700 194 V250 C700 330 560 300 560 360" fill="none" stroke="#FF5C5C" stroke-width="6" stroke-linecap="round"/>
+      <polygon class="st" points="0,-24 7,-7 24,0 7,7 0,24 -7,7 -24,0 -7,-7" fill="#35D0F5" transform="translate(790 520)"/>
+    </g>
+    <rect x="3" y="3" width="842" height="580" rx="25" fill="none" stroke="#0F1F4D" stroke-width="6"/>
+  </svg>
+</div>
+
+<div class="slide s-exp" data-dur="14000">
+  <h2 class="b" style="--d:.1">Vamos <span>experimentar!</span></h2>
+  <p class="sub bf" style="--d:.6">Aponte a câmera do celular para o QR Code e abra o projeto. A seguir, veja cada um funcionando!</p>
+  <div class="xcards">
+    <button class="xc b" data-go="0" style="--d:1.2;--r:-2deg;background:#fff"><div class="top"><span class="n" style="color:#2350E8">1</span><span class="qrb" data-qr="1"></span></div><h3>Monitoramento ambiental</h3><p>Temperatura e umidade.</p></button>
+    <button class="xc b" data-go="1" style="--d:2.2;--r:1.5deg;background:#FFE9A8"><div class="top"><span class="n">2</span><span class="qrb" data-qr="2"></span></div><h3>Controle de reservatórios</h3><p>Monitoramento do nível de água.</p></button>
+    <button class="xc b" data-go="2" style="--d:3.2;--r:-1deg;background:#CDF3E2"><div class="top"><span class="n" style="color:#1B8F5A">3</span><span class="qrb" data-qr="3"></span></div><h3>Irrigação inteligente</h3><p>Monitoramento da umidade do solo.</p></button>
+    <button class="xc b" data-go="3" style="--d:4.2;--r:2deg;background:#BDEBFA"><div class="top"><span class="n" style="color:#0B7FA6">4</span><span class="qrb" data-qr="4"></span></div><h3>Qualidade do ar</h3><p>Monitoramento de gases e condições ambientais.</p></button>
+  </div>
+  <div class="quote b" style="--d:5.6"><p>“Não é preciso ser especialista em tecnologia para descobrir como ela pode <span>transformar a sua profissão!</span>”</p></div>
+</div>
+
+</section>
+
+<!-- ================= SIMULADOR ================= -->
+<section class="view" id="v-sim">
+<div id="autobadge">Demonstração automática</div>
+
+<!-- 1: temperatura e umidade -->
+<div class="scene" id="sc0">
+  <div class="stagecard"><svg viewBox="0 0 1200 936" aria-label="Armazém com sensor de temperatura e umidade, termômetro, LEDs e buzzer"><rect id="t-wall" width="1200" height="700" fill="#DCEBFF"/><rect width="1200" height="700" fill="url(#tile)"/><rect y="700" width="1200" height="236" fill="#C9A26B"/><path d="M0 700H1200" stroke="#A9743F" stroke-width="10"/><path d="M0 790H1200M0 870H1200" stroke="#B58F5C" stroke-width="4"/><rect x="60" y="110" width="240" height="260" rx="14" fill="#EAF6FF" stroke="#0F1F4D" stroke-width="8"/><rect id="t-sky" x="64" y="114" width="232" height="252" rx="10" fill="#EAF6FF"/><g id="t-drops" clip-path="url(#t-winclip)"></g><path d="M180 110V370M60 240H300" stroke="#0F1F4D" stroke-width="6"/><rect x="46" y="370" width="268" height="16" rx="6" fill="#fff" stroke="#0F1F4D" stroke-width="5"/><rect x="380" y="410" width="14" height="290" fill="#7B5A33"/><rect x="886" y="410" width="14" height="290" fill="#7B5A33"/><rect x="370" y="520" width="540" height="14" rx="3" fill="#7B5A33"/><rect x="370" y="650" width="540" height="14" rx="3" fill="#7B5A33"/><circle cx="432" cy="424" r="26" fill="#E8453C"/><circle cx="424" cy="414" r="6" fill="#fff" opacity=".5"/><circle cx="468" cy="418" r="26" fill="#E8453C"/><circle cx="460" cy="408" r="6" fill="#fff" opacity=".5"/><circle cx="504" cy="426" r="25" fill="#E8453C"/><circle cx="496" cy="416" r="6" fill="#fff" opacity=".5"/><rect x="402" y="430" width="130" height="90" rx="4" fill="#E3B36A" stroke="#0F1F4D" stroke-width="5"/><path d="M402 460H532 M402 490H532" stroke="#B98A45" stroke-width="4"/><circle cx="592" cy="424" r="26" fill="#FFA630"/><circle cx="584" cy="414" r="6" fill="#fff" opacity=".5"/><circle cx="628" cy="418" r="26" fill="#FFA630"/><circle cx="620" cy="408" r="6" fill="#fff" opacity=".5"/><circle cx="664" cy="426" r="25" fill="#FFA630"/><circle cx="656" cy="416" r="6" fill="#fff" opacity=".5"/><rect x="562" y="430" width="130" height="90" rx="4" fill="#E3B36A" stroke="#0F1F4D" stroke-width="5"/><path d="M562 460H692 M562 490H692" stroke="#B98A45" stroke-width="4"/><circle cx="752" cy="424" r="26" fill="#7BC74D"/><circle cx="744" cy="414" r="6" fill="#fff" opacity=".5"/><circle cx="788" cy="418" r="26" fill="#7BC74D"/><circle cx="780" cy="408" r="6" fill="#fff" opacity=".5"/><circle cx="824" cy="426" r="25" fill="#7BC74D"/><circle cx="816" cy="416" r="6" fill="#fff" opacity=".5"/><rect x="722" y="430" width="130" height="90" rx="4" fill="#E3B36A" stroke="#0F1F4D" stroke-width="5"/><path d="M722 460H852 M722 490H852" stroke="#B98A45" stroke-width="4"/><circle cx="432" cy="554" r="26" fill="#7BC74D"/><circle cx="424" cy="544" r="6" fill="#fff" opacity=".5"/><circle cx="468" cy="548" r="26" fill="#7BC74D"/><circle cx="460" cy="538" r="6" fill="#fff" opacity=".5"/><circle cx="504" cy="556" r="25" fill="#7BC74D"/><circle cx="496" cy="546" r="6" fill="#fff" opacity=".5"/><rect x="402" y="560" width="130" height="90" rx="4" fill="#E3B36A" stroke="#0F1F4D" stroke-width="5"/><path d="M402 590H532 M402 620H532" stroke="#B98A45" stroke-width="4"/><circle cx="592" cy="554" r="26" fill="#E8453C"/><circle cx="584" cy="544" r="6" fill="#fff" opacity=".5"/><circle cx="628" cy="548" r="26" fill="#E8453C"/><circle cx="620" cy="538" r="6" fill="#fff" opacity=".5"/><circle cx="664" cy="556" r="25" fill="#E8453C"/><circle cx="656" cy="546" r="6" fill="#fff" opacity=".5"/><rect x="562" y="560" width="130" height="90" rx="4" fill="#E3B36A" stroke="#0F1F4D" stroke-width="5"/><path d="M562 590H692 M562 620H692" stroke="#B98A45" stroke-width="4"/><circle cx="752" cy="554" r="26" fill="#FFA630"/><circle cx="744" cy="544" r="6" fill="#fff" opacity=".5"/><circle cx="788" cy="548" r="26" fill="#FFA630"/><circle cx="780" cy="538" r="6" fill="#fff" opacity=".5"/><circle cx="824" cy="556" r="25" fill="#FFA630"/><circle cx="816" cy="546" r="6" fill="#fff" opacity=".5"/><rect x="722" y="560" width="130" height="90" rx="4" fill="#E3B36A" stroke="#0F1F4D" stroke-width="5"/><path d="M722 590H852 M722 620H852" stroke="#B98A45" stroke-width="4"/><rect x="380" y="120" width="100" height="130" rx="14" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><circle cx="410" cy="150" r="6" fill="#B7C4DE"/><circle cx="410" cy="175" r="6" fill="#B7C4DE"/><circle cx="410" cy="200" r="6" fill="#B7C4DE"/><circle cx="410" cy="225" r="6" fill="#B7C4DE"/><circle cx="430" cy="150" r="6" fill="#B7C4DE"/><circle cx="430" cy="175" r="6" fill="#B7C4DE"/><circle cx="430" cy="200" r="6" fill="#B7C4DE"/><circle cx="430" cy="225" r="6" fill="#B7C4DE"/><circle cx="450" cy="150" r="6" fill="#B7C4DE"/><circle cx="450" cy="175" r="6" fill="#B7C4DE"/><circle cx="450" cy="200" r="6" fill="#B7C4DE"/><circle cx="450" cy="225" r="6" fill="#B7C4DE"/><rect x="410" y="250" width="8" height="26" fill="#9AA6BC"/><rect x="426" y="250" width="8" height="26" fill="#9AA6BC"/><rect x="442" y="250" width="8" height="26" fill="#9AA6BC"/><path d="M430 276V300H620V250" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><g id="t-board"></g><path d="M820 130H1125V162M890 130V162M1020 130V162" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><circle id="t-lamp-g-h" cx="890" cy="200" r="52" fill="#1FA86A" opacity="0"/><path d="M881 226V268m0 0M899 226V256" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="t-lamp-g" d="M868 226V184a22 22 0 0 1 44 0V226z" fill="#1FA86A" stroke="#0F1F4D" stroke-width="5"/><rect x="864" y="222" width="52" height="10" rx="3" fill="#1FA86A" stroke="#0F1F4D" stroke-width="4"/><path d="M879 206V188" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><circle id="t-lamp-r-h" cx="1020" cy="200" r="52" fill="#E8453C" opacity="0"/><path d="M1011 226V268m0 0M1029 226V256" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="t-lamp-r" d="M998 226V184a22 22 0 0 1 44 0V226z" fill="#E8453C" stroke="#0F1F4D" stroke-width="5"/><rect x="994" y="222" width="52" height="10" rx="3" fill="#E8453C" stroke="#0F1F4D" stroke-width="4"/><path d="M1009 206V188" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><g id="t-bell"><circle cx="1125" cy="200" r="38" fill="#1B2440" stroke="#0F1F4D" stroke-width="5"/><circle cx="1125" cy="200" r="22" fill="#3A4666"/><circle cx="1125" cy="200" r="6" fill="#1B2440"/><text x="1101" y="196" font-family="Fredoka,Arial" font-weight="700" font-size="22" fill="#9DB4E8">+</text></g><g id="t-sound" opacity="0"><path d="M1080 184q-14 16 0 32" fill="none" stroke="#E8453C" stroke-width="6" stroke-linecap="round" class="pingc"/><path d="M1068 174q-24 26 0 52" fill="none" stroke="#E8453C" stroke-width="6" stroke-linecap="round" class="pingc" style="animation-delay:.3s"/></g><rect id="t-heat" width="1200" height="936" fill="#FF8A3D" opacity="0"/><rect id="t-alert" x="11" y="11" width="1178" height="914" rx="34" fill="none" stroke="#E8453C" stroke-width="20" opacity="0"/><rect x="60" y="780" width="430" height="120" rx="26" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><text id="t-r1" x="90" y="840" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="44" fill="#0F1F4D"></text><text id="t-r2" x="90" y="886" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="44" fill="#2350E8"></text></svg></div>
+  <aside class="panel">
+    <p class="ptag">Projeto 1</p>
+    <h2>Monitoramento de temperatura e umidade</h2>
+    <p class="pdesc">Um armazém de alimentos. Mexa nos controles e veja o alerta disparar.</p>
+    <div class="ctl"><label for="t-sl-t">Temperatura</label><div class="big"><span id="t-vt">25</span><small> °C</small></div><input id="t-sl-t" type="range" min="10" max="45" value="25">
+      <label for="t-sl-h" style="margin-top:8px">Umidade do ar</label><div class="big"><span id="t-vh">50</span><small> %</small></div><input id="t-sl-h" type="range" min="20" max="100" value="50"></div>
+    <div class="say"><b>O Arduino decide:</b> se a temperatura passar de <b>30 °C</b> ou a umidade passar de <b>70 %</b>, é alerta: luz vermelha e apito.</div>
+    <div class="status" id="t-status">Tudo normal</div>
+    <div class="qrline"><span class="qrb" data-qr="1"></span><div><a href="https://wokwi.com/projects/479813786942695425" target="_blank" rel="noopener">Abrir no Wokwi</a><span>Aponte a câmera para abrir o circuito de verdade.</span></div></div>
+  </aside>
+</div>
+
+<!-- 2: reservatório -->
+<div class="scene" id="sc1">
+  <div class="stagecard"><svg viewBox="0 0 1200 936" aria-label="Reservatório de água com sensor de nível, semáforo de LEDs e buzzer"><rect width="1200" height="936" fill="#EAF2FF"/><rect y="830" width="1200" height="106" fill="#B9C4D6"/><path d="M0 830H1200" stroke="#8A98B3" stroke-width="8"/><path d="M0 880H1200" stroke="#A7B6CD" stroke-width="4"/><path d="M80 190H400V280" fill="none" stroke="#64748B" stroke-width="26" stroke-linejoin="round"/><rect x="62" y="150" width="62" height="80" rx="10" fill="#475569" stroke="#0F1F4D" stroke-width="5"/><rect x="42" y="128" width="102" height="26" rx="8" fill="#E5561A" stroke="#0F1F4D" stroke-width="5"/><rect x="340" y="262" width="440" height="560" rx="30" fill="url(#gTank)" stroke="#0F1F4D" stroke-width="10"/><path d="M344 430H380M740 430H776M344 610H380M740 610H776M344 770H380M740 770H776" stroke="#1B3FB8" stroke-width="8"/><rect x="352" y="300" width="14" height="480" rx="7" fill="#fff" opacity=".3"/><rect x="380" y="300" width="360" height="500" rx="20" fill="#fff"/><g clip-path="url(#r-clip)"><g id="r-water"><rect id="r-wbody" x="340" y="600" width="480" height="700" fill="url(#gWater)"/><g class="wavy"><path id="r-wave" d="M280 600 q30 -20 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 V640 H280 Z" fill="#5FD8FA"/></g></g></g><path d="M380 542H740" stroke="#E0A800" stroke-width="5" stroke-dasharray="14 10"/><path d="M380 434H740" stroke="#E8453C" stroke-width="5" stroke-dasharray="14 10"/><rect x="380" y="300" width="360" height="500" rx="20" fill="none" stroke="#0F1F4D" stroke-width="5" stroke-dasharray="18 10"/><text x="800" y="550" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="28" fill="#B27F00" paint-order="stroke" stroke="#EAF2FF" stroke-width="7">60%</text><text x="800" y="442" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="28" fill="#E8453C" paint-order="stroke" stroke="#EAF2FF" stroke-width="7">85%</text><path d="M326 280Q560 196 794 280Z" fill="url(#gTank)" stroke="#0F1F4D" stroke-width="8" stroke-linejoin="round"/><rect x="326" y="262" width="468" height="30" rx="12" fill="#2350E8" stroke="#0F1F4D" stroke-width="8"/><line id="r-stream" x1="400" y1="292" x2="400" y2="600" stroke="#35D0F5" stroke-width="12" stroke-linecap="round" stroke-dasharray="26 10" class="flowdown" style="display:none"/><path d="M780 740H940" stroke="#64748B" stroke-width="26"/><rect x="926" y="728" width="26" height="40" rx="6" fill="#475569" stroke="#0F1F4D" stroke-width="4"/><circle cx="860" cy="740" r="22" fill="#E5561A" stroke="#0F1F4D" stroke-width="5"/><line id="r-dstream" x1="939" y1="770" x2="939" y2="850" stroke="#35D0F5" stroke-width="12" stroke-linecap="round" stroke-dasharray="26 10" class="flowdown" style="display:none"/><rect x="520" y="290" width="160" height="62" rx="10" fill="#1F5BFF" stroke="#0F1F4D" stroke-width="6"/><circle cx="565" cy="321" r="21" fill="url(#gMetal)" stroke="#0F1F4D" stroke-width="4"/><circle cx="565" cy="321" r="9" fill="#3A4666"/><circle cx="635" cy="321" r="21" fill="url(#gMetal)" stroke="#0F1F4D" stroke-width="4"/><circle cx="635" cy="321" r="9" fill="#3A4666"/><g id="r-waves"><path d="M545 372q55 28 110 0" fill="none" stroke="#2350E8" stroke-width="6" stroke-linecap="round" class="pingc"/><path d="M525 396q75 40 150 0" fill="none" stroke="#2350E8" stroke-width="6" stroke-linecap="round" class="pingc" style="animation-delay:.35s"/></g><line id="r-dist" x1="600" y1="352" x2="600" y2="600" stroke="#0F1F4D" stroke-width="5" stroke-dasharray="14 10"/><rect id="r-dlab" x="612" y="440" width="124" height="50" rx="14" fill="#fff" stroke="#0F1F4D" stroke-width="5"/><text id="r-dtxt" x="674" y="476" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="600" font-size="30" fill="#0F1F4D"></text><g id="r-board"></g><path d="M620 290V180" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><path d="M840 110H1130V202M960 110V202M1045 110V202" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><path d="M1130 110H1170V470H1091" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><circle id="r-lg-h" cx="960" cy="240" r="52" fill="#1FA86A" opacity="0"/><path d="M951 266V308m0 0M969 266V296" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="r-lg" d="M938 266V224a22 22 0 0 1 44 0V266z" fill="#1FA86A" stroke="#0F1F4D" stroke-width="5"/><rect x="934" y="262" width="52" height="10" rx="3" fill="#1FA86A" stroke="#0F1F4D" stroke-width="4"/><path d="M949 246V228" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><circle id="r-ly-h" cx="1045" cy="240" r="52" fill="#FFD23F" opacity="0"/><path d="M1036 266V308m0 0M1054 266V296" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="r-ly" d="M1023 266V224a22 22 0 0 1 44 0V266z" fill="#FFD23F" stroke="#0F1F4D" stroke-width="5"/><rect x="1019" y="262" width="52" height="10" rx="3" fill="#FFD23F" stroke="#0F1F4D" stroke-width="4"/><path d="M1034 246V228" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><circle id="r-lr-h" cx="1130" cy="240" r="52" fill="#E8453C" opacity="0"/><path d="M1121 266V308m0 0M1139 266V296" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="r-lr" d="M1108 266V224a22 22 0 0 1 44 0V266z" fill="#E8453C" stroke="#0F1F4D" stroke-width="5"/><rect x="1104" y="262" width="52" height="10" rx="3" fill="#E8453C" stroke="#0F1F4D" stroke-width="4"/><path d="M1119 246V228" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><g id="r-buzz"><circle cx="1045" cy="470" r="46" fill="#1B2440" stroke="#0F1F4D" stroke-width="5"/><circle cx="1045" cy="470" r="30" fill="#3A4666"/><circle cx="1045" cy="470" r="6" fill="#1B2440"/><text x="1013" y="458" font-family="Fredoka,Arial" font-weight="700" font-size="22" fill="#9DB4E8">+</text></g><g id="r-sound" opacity="0"><path d="M990 450q-22 20 0 40" fill="none" stroke="#E8453C" stroke-width="7" stroke-linecap="round" class="pingc"/><path d="M970 438q-32 32 0 64" fill="none" stroke="#E8453C" stroke-width="7" stroke-linecap="round" class="pingc" style="animation-delay:.3s"/></g><rect id="r-alert" x="11" y="11" width="1178" height="914" rx="34" fill="none" stroke="#E8453C" stroke-width="20" opacity="0"/><rect x="60" y="760" width="230" height="110" rx="26" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><text id="r-pct" x="175" y="835" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="64" fill="#2350E8"></text></svg></div>
+  <aside class="panel">
+    <p class="ptag">Projeto 2</p>
+    <h2>Monitoramento do nível de água</h2>
+    <p class="pdesc">Um sensor na tampa mede a distância até a água. Quanto mais perto, mais cheio.</p>
+    <div class="ctl"><label for="r-sl">Nível da água</label><div class="big"><span id="r-v">30</span><small> %</small></div><input id="r-sl" type="range" min="0" max="100" value="30">
+      <div class="btnrow" style="margin-top:8px"><button class="btn" id="r-fill">Abrir torneira</button><button class="btn" id="r-drain">Abrir a saída</button></div></div>
+    <div class="say"><b>O Arduino decide:</b> abaixo de <b>60 %</b> luz verde. De <b>60 % a 84 %</b> luz amarela. A partir de <b>85 %</b> luz vermelha e apito: risco de transbordar.</div>
+    <div class="status" id="r-status">Nível normal</div>
+    <div class="qrline"><span class="qrb" data-qr="2"></span><div><a href="https://wokwi.com/projects/479813915504455681" target="_blank" rel="noopener">Abrir no Wokwi</a><span>Aponte a câmera para abrir o circuito de verdade.</span></div></div>
+  </aside>
+</div>
+
+<!-- 3: irrigação -->
+<div class="scene" id="sc2">
+  <div class="stagecard"><svg viewBox="0 0 1200 936" aria-label="Vaso com planta, sensor de umidade no solo, bomba d’água, caixa d’água e irrigador"><rect width="1200" height="936" fill="url(#gSky)"/><circle cx="1070" cy="110" r="54" fill="#FFD23F"/><g stroke="#FFD23F" stroke-width="8" stroke-linecap="round"><path d="M1070 30V10M1070 190V210M990 110H970M1150 110H1170M1014 54L1000 40M1126 166L1140 180M1126 54L1140 40M1014 166L1000 180"/></g><ellipse cx="800" cy="130" rx="90" ry="34" fill="#fff" opacity=".9"/><ellipse cx="860" cy="116" rx="60" ry="30" fill="#fff" opacity=".9"/><rect y="800" width="1200" height="136" fill="#6CBF5E"/><path d="M0 800H1200" stroke="#4A9A47" stroke-width="8"/><rect x="70" y="540" width="190" height="260" rx="22" fill="url(#gTank)" stroke="#0F1F4D" stroke-width="7"/><rect x="96" y="580" width="138" height="196" rx="12" fill="#fff"/><rect x="96" y="650" width="138" height="126" rx="12" fill="url(#gWater)"/><rect x="96" y="580" width="138" height="196" rx="12" fill="none" stroke="#0F1F4D" stroke-width="4" stroke-dasharray="12 8"/><path d="M60 548Q165 496 270 548Z" fill="url(#gTank)" stroke="#0F1F4D" stroke-width="6" stroke-linejoin="round"/><rect x="58" y="536" width="214" height="22" rx="10" fill="#2350E8" stroke="#0F1F4D" stroke-width="6"/><path d="M260 772H300" stroke="#64748B" stroke-width="18"/><rect x="300" y="710" width="110" height="90" rx="16" fill="#334155" stroke="#0F1F4D" stroke-width="6"/><rect x="330" y="684" width="50" height="30" rx="6" fill="#64748B" stroke="#0F1F4D" stroke-width="5"/><circle id="i-pled" cx="355" cy="755" r="13" fill="#35D0F5" stroke="#0F1F4D" stroke-width="4" opacity=".25"/><path d="M410 750H460V300Q460 262 500 262H620V312" fill="none" stroke="#0F1F4D" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><path d="M410 750H460V300Q460 262 500 262H620V312" fill="none" stroke="#2B2F3A" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><path id="i-flow" d="M410 750H460V300Q460 262 500 262H620V312" fill="none" stroke="#35D0F5" stroke-width="7" stroke-dasharray="16 14" stroke-linecap="round" stroke-linejoin="round" opacity="0"/><path d="M606 312h28l-6 26h-16z" fill="#0F1F4D" stroke="#0F1F4D" stroke-width="3"/><path d="M460 612H820L760 800H520z" fill="url(#gTerra)" stroke="#0F1F4D" stroke-width="7" stroke-linejoin="round"/><path id="i-soil" d="M480 636H800L754 790H526z" fill="#D9B27A"/><g clip-path="url(#i-clip)"><g id="i-cracks" stroke="#8A6A3C" stroke-width="5" fill="none" stroke-linecap="round"><path d="M540 640l26 50l-18 44"/><path d="M640 640l-18 60l30 40"/><path d="M730 640l20 56l-22 40"/><path d="M590 740l30 30"/></g><g id="i-wet" fill="#3A2412"></g></g><rect x="445" y="596" width="390" height="40" rx="12" fill="url(#gTerra)" stroke="#0F1F4D" stroke-width="7"/><ellipse id="i-soil2" cx="640" cy="598" rx="170" ry="16" fill="#D9B27A"/><path id="i-stem" d="M640 600V392" stroke="#1B8F5A" stroke-width="16" fill="none" stroke-linecap="round"/><g id="i-lA"><path d="M0 0C-26 -44 -96 -54 -130 -14C-104 28 -44 36 0 0Z" fill="#4CD08C" class="lf"/><path d="M0 0C-40 -8 -80 -14 -112 -14" stroke="#1B8F5A" stroke-width="4" fill="none" opacity=".6"/></g><g id="i-lB"><path d="M0 0C-26 -44 -96 -54 -130 -14C-104 28 -44 36 0 0Z" fill="#4CD08C" class="lf"/><path d="M0 0C-40 -8 -80 -14 -112 -14" stroke="#1B8F5A" stroke-width="4" fill="none" opacity=".6"/></g><g id="i-lC"><path d="M0 0C-26 -44 -96 -54 -130 -14C-104 28 -44 36 0 0Z" fill="#4CD08C" class="lf"/><path d="M0 0C-40 -8 -80 -14 -112 -14" stroke="#1B8F5A" stroke-width="4" fill="none" opacity=".6"/></g><g id="i-lD"><path d="M0 0C-26 -44 -96 -54 -130 -14C-104 28 -44 36 0 0Z" fill="#4CD08C" class="lf"/><path d="M0 0C-40 -8 -80 -14 -112 -14" stroke="#1B8F5A" stroke-width="4" fill="none" opacity=".6"/></g><g id="i-lE"><path d="M0 0C-26 -50 0 -100 0 -100C0 -100 26 -50 0 0Z" fill="#4CD08C" class="lf"/></g><rect x="722" y="594" width="12" height="176" rx="6" fill="#E6C86E" stroke="#0F1F4D" stroke-width="3"/><rect x="756" y="594" width="12" height="176" rx="6" fill="#E6C86E" stroke="#0F1F4D" stroke-width="3"/><rect x="712" y="522" width="66" height="76" rx="8" fill="#1B2440" stroke="#0F1F4D" stroke-width="5"/><rect x="724" y="552" width="42" height="34" rx="4" fill="#FFD23F"/><circle id="i-sled" cx="745" cy="538" r="8" fill="#35D0F5"/><path d="M778 560H1170V190H400" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><path d="M282 212V740H300" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><path d="M160 212V290" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><path d="M360 212V290" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><g id="i-board"></g><circle id="i-lg-h" cx="160" cy="304" r="52" fill="#1FA86A" opacity="0"/><path d="M151 330V372m0 0M169 330V360" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="i-lg" d="M138 330V288a22 22 0 0 1 44 0V330z" fill="#1FA86A" stroke="#0F1F4D" stroke-width="5"/><rect x="134" y="326" width="52" height="10" rx="3" fill="#1FA86A" stroke="#0F1F4D" stroke-width="4"/><path d="M149 310V292" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><circle id="i-lb-h" cx="360" cy="304" r="52" fill="#2350E8" opacity="0"/><path d="M351 330V372m0 0M369 330V360" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="i-lb" d="M338 330V288a22 22 0 0 1 44 0V330z" fill="#2350E8" stroke="#0F1F4D" stroke-width="5"/><rect x="334" y="326" width="52" height="10" rx="3" fill="#2350E8" stroke="#0F1F4D" stroke-width="4"/><path d="M349 310V292" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><g id="i-drops"></g><rect x="880" y="810" width="270" height="100" rx="26" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><text id="i-pct" x="1015" y="880" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="58" fill="#2350E8"></text></svg></div>
+  <aside class="panel">
+    <p class="ptag">Projeto 3</p>
+    <h2>Irrigação automatizada</h2>
+    <p class="pdesc">Um sensor enterrado mede a umidade. Se o solo secar, a bomba liga sozinha.</p>
+    <div class="ctl"><label for="i-sl">Umidade do solo</label><div class="big"><span id="i-v">60</span><small> %</small></div><input id="i-sl" type="range" min="0" max="100" value="60">
+      <div class="btnrow" style="margin-top:8px"><button class="btn" id="i-dry">Secar agora</button><button class="btn" id="i-sun">Sol forte (seca rápido)</button></div></div>
+    <div class="say"><b>O Arduino decide:</b> abaixo de <b>30 %</b> liga a bomba. Ela só desliga quando passar de <b>50 %</b>, para não ligar e desligar toda hora.</div>
+    <div class="status" id="i-status">Solo com água suficiente</div>
+    <div class="qrline"><span class="qrb" data-qr="3"></span><div><a href="https://wokwi.com/projects/479814489557053441" target="_blank" rel="noopener">Abrir no Wokwi</a><span>No Wokwi, um botão giratório faz o papel do sensor.</span></div></div>
+  </aside>
+</div>
+
+<!-- 4: qualidade do ar -->
+<div class="scene" id="sc3">
+  <div class="stagecard"><svg viewBox="0 0 1200 936" aria-label="Cozinha com fogão e botijão de gás, sensor de gás, semáforo de LEDs e buzzer"><rect id="a-wall" width="1200" height="700" fill="#EAF2FF"/><rect width="1200" height="700" fill="url(#tile)"/><rect y="700" width="1200" height="236" fill="#C9D3E3"/><path d="M0 700H1200" stroke="#9DB4E8" stroke-width="8"/><path d="M0 800H1200M0 880H1200" stroke="#B7C4DE" stroke-width="4"/><rect x="60" y="100" width="240" height="230" rx="14" fill="#CFE9FF" stroke="#0F1F4D" stroke-width="8"/><path d="M180 100V330M60 215H300" stroke="#0F1F4D" stroke-width="6"/><rect x="100" y="790" width="40" height="14" fill="#0F1F4D"/><rect x="400" y="790" width="40" height="14" fill="#0F1F4D"/><rect x="80" y="500" width="380" height="290" rx="16" fill="url(#gMetal)" stroke="#0F1F4D" stroke-width="7"/><rect x="70" y="486" width="400" height="26" rx="8" fill="#475569" stroke="#0F1F4D" stroke-width="6"/><circle cx="130" cy="548" r="20" fill="#1B2440" stroke="#0F1F4D" stroke-width="4"/><path d="M130 548V532" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="210" cy="548" r="20" fill="#1B2440" stroke="#0F1F4D" stroke-width="4"/><path d="M210 548V532" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="330" cy="548" r="20" fill="#1B2440" stroke="#0F1F4D" stroke-width="4"/><path d="M330 548V532" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="410" cy="548" r="20" fill="#1B2440" stroke="#0F1F4D" stroke-width="4"/><path d="M410 548V532" stroke="#fff" stroke-width="5" stroke-linecap="round"/><rect x="120" y="590" width="300" height="170" rx="12" fill="#1B2440" stroke="#0F1F4D" stroke-width="6"/><rect x="140" y="612" width="260" height="110" rx="8" fill="#3A4666"/><path d="M160 722L230 612H270L200 722z" fill="#fff" opacity=".12"/><rect x="150" y="572" width="240" height="12" rx="6" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="3"/><g id="a-flame"><path d="M200 512c-14 -14 -6 -24 0 -34c8 12 16 20 0 34z" fill="#FF9F1C"/><path d="M200 512c-7 -8 -3 -14 0 -20c4 7 8 12 0 20z" fill="#FFD23F"/><path d="M270 512c-14 -14 -6 -24 0 -34c8 12 16 20 0 34z" fill="#FF9F1C"/><path d="M270 512c-7 -8 -3 -14 0 -20c4 7 8 12 0 20z" fill="#FFD23F"/><path d="M340 512c-14 -14 -6 -24 0 -34c8 12 16 20 0 34z" fill="#FF9F1C"/><path d="M340 512c-7 -8 -3 -14 0 -20c4 7 8 12 0 20z" fill="#FFD23F"/></g><path d="M150 400h240v82q0 8 -8 8H158q-8 0 -8 -8z" fill="#334155" stroke="#0F1F4D" stroke-width="6"/><rect x="255" y="384" width="30" height="16" rx="8" fill="#0F1F4D"/><rect x="128" y="426" width="22" height="12" rx="6" fill="#0F1F4D"/><rect x="390" y="426" width="22" height="12" rx="6" fill="#0F1F4D"/><path d="M600 532C600 462 530 540 462 612" fill="none" stroke="#0F1F4D" stroke-width="22" stroke-linecap="round"/><path d="M600 532C600 462 530 540 462 612" fill="none" stroke="#FFD23F" stroke-width="12" stroke-linecap="round"/><rect x="540" y="580" width="120" height="210" rx="40" fill="url(#gCyl)" stroke="#0F1F4D" stroke-width="7"/><rect x="558" y="556" width="84" height="36" rx="10" fill="#D9490F" stroke="#0F1F4D" stroke-width="6"/><rect x="586" y="530" width="28" height="30" rx="6" fill="#FFD23F" stroke="#0F1F4D" stroke-width="5"/><rect x="570" y="522" width="60" height="12" rx="6" fill="#0F1F4D"/><rect x="552" y="782" width="96" height="12" rx="4" fill="#9A3412"/><text x="600" y="705" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="40" fill="#fff">GÁS</text><g id="a-parts"></g><rect x="790" y="230" width="110" height="130" rx="12" fill="#2350E8" stroke="#0F1F4D" stroke-width="6"/><circle cx="845" cy="290" r="40" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="5"/><path d="M820 272H870M816 290H874M820 308H870" stroke="#7A8AA6" stroke-width="4"/><rect x="808" y="336" width="74" height="14" rx="3" fill="#FFD23F"/><g id="a-board"></g><path d="M845 230V150H740" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><path d="M740 110H1130V172M970 110V172M1050 110V172" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><path d="M1130 110H1170V420H1094" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 14" stroke-linecap="round" class="wire"/><circle id="a-lg-h" cx="970" cy="210" r="52" fill="#1FA86A" opacity="0"/><path d="M961 236V278m0 0M979 236V266" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="a-lg" d="M948 236V194a22 22 0 0 1 44 0V236z" fill="#1FA86A" stroke="#0F1F4D" stroke-width="5"/><rect x="944" y="232" width="52" height="10" rx="3" fill="#1FA86A" stroke="#0F1F4D" stroke-width="4"/><path d="M959 216V198" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><circle id="a-ly-h" cx="1050" cy="210" r="52" fill="#FFD23F" opacity="0"/><path d="M1041 236V278m0 0M1059 236V266" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="a-ly" d="M1028 236V194a22 22 0 0 1 44 0V236z" fill="#FFD23F" stroke="#0F1F4D" stroke-width="5"/><rect x="1024" y="232" width="52" height="10" rx="3" fill="#FFD23F" stroke="#0F1F4D" stroke-width="4"/><path d="M1039 216V198" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><circle id="a-lr-h" cx="1130" cy="210" r="52" fill="#E8453C" opacity="0"/><path d="M1121 236V278m0 0M1139 236V266" stroke="#9AA6BC" stroke-width="5" stroke-linecap="round"/><path id="a-lr" d="M1108 236V194a22 22 0 0 1 44 0V236z" fill="#E8453C" stroke="#0F1F4D" stroke-width="5"/><rect x="1104" y="232" width="52" height="10" rx="3" fill="#E8453C" stroke="#0F1F4D" stroke-width="4"/><path d="M1119 216V198" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" fill="none"/><g id="a-buzz"><circle cx="1050" cy="420" r="44" fill="#1B2440" stroke="#0F1F4D" stroke-width="5"/><circle cx="1050" cy="420" r="28" fill="#3A4666"/><circle cx="1050" cy="420" r="6" fill="#1B2440"/><text x="1020" y="410" font-family="Fredoka,Arial" font-weight="700" font-size="22" fill="#9DB4E8">+</text></g><g id="a-sound" opacity="0"><path d="M996 400q-20 18 0 36" fill="none" stroke="#E8453C" stroke-width="7" stroke-linecap="round" class="pingc"/><path d="M976 388q-30 30 0 60" fill="none" stroke="#E8453C" stroke-width="7" stroke-linecap="round" class="pingc" style="animation-delay:.3s"/></g><rect id="a-alert" x="11" y="11" width="1178" height="914" rx="34" fill="none" stroke="#E8453C" stroke-width="20" opacity="0"/><rect x="640" y="790" width="520" height="110" rx="26" fill="#fff" stroke="#0F1F4D" stroke-width="6"/><text id="a-r1" x="670" y="840" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="38" fill="#0F1F4D"></text><text id="a-r2" x="670" y="882" font-family="Fredoka,Arial,sans-serif" font-weight="600" font-size="30" fill="#2350E8"></text></svg></div>
+  <aside class="panel">
+    <p class="ptag">Projeto 4</p>
+    <h2>Monitoramento da qualidade do ar</h2>
+    <p class="pdesc">O sensor percebe o gás no ar. Quanto mais gás, mais pontinhos na sala.</p>
+    <div class="ctl"><label for="a-sl">Concentração de gás</label><div class="big"><span id="a-v">3</span><small> ppm</small></div><input id="a-sl" type="range" min="0" max="100" value="16"></div>
+    <div class="say"><b>O Arduino decide:</b> abaixo de <b>10 ppm</b> luz verde. De <b>10 a 49 ppm</b> luz amarela. A partir de <b>50 ppm</b> luz vermelha e apito.</div>
+    <div class="status" id="a-status">Ar normal</div>
+    <p class="disc">Só uma demonstração didática: não é um equipamento certificado de medição ou segurança.</p>
+    <div class="qrline"><span class="qrb" data-qr="4"></span><div><a href="https://wokwi.com/projects/479814257798553601" target="_blank" rel="noopener">Abrir no Wokwi</a><span>Aponte a câmera para abrir o circuito de verdade.</span></div></div>
+  </aside>
+</div>
+
+</section>
+</main>
+
+<nav id="bar" aria-label="Controles">
+  <div id="prog"></div>
+  <div class="tabs"><button class="tab on" id="tab-p">Apresentação</button><button class="tab" id="tab-s">Simulador</button></div>
+  <div id="dots"></div>
+  <div class="ctl-btns">
+    <button class="ib" id="b-prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-8 7 8 7z"/></svg></button>
+    <button class="ib" id="b-play" aria-label="Pausar"><svg viewBox="0 0 24 24" id="pp"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
+    <button class="ib" id="b-next" aria-label="Próximo"><svg viewBox="0 0 24 24"><path d="M9 5l8 7-8 7z"/></svg></button>
+    <button class="ib" id="b-snd" aria-label="Som" title="Som do alarme"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9z"/><path id="snd-on" d="M15 8.5a5 5 0 0 1 0 7M17.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path id="snd-off" d="M16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"/></svg></button>
+    <button class="ib" id="b-full" aria-label="Tela cheia"><svg viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zM14 4h6v6h-2V6h-4zM4 14h2v4h4v2H4zM18 14h2v6h-6v-2h4z"/></svg></button>
+  </div>
+</nav>
+</div></div>
+
+<script>
+const QR={"1": [37, "M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM13 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM23 2h1v1h-1zM25 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM23 3h1v1h-1zM24 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM23 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM17 5h1v1h-1zM20 5h1v1h-1zM21 5h1v1h-1zM23 5h1v1h-1zM25 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM13 6h1v1h-1zM14 6h1v1h-1zM15 6h1v1h-1zM16 6h1v1h-1zM17 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM11 7h1v1h-1zM12 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM24 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM16 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM25 9h1v1h-1zM26 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM11 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1zM18 10h1v1h-1zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM16 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM25 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM33 11h1v1h-1zM34 11h1v1h-1zM2 12h1v1h-1zM3 12h1v1h-1zM5 12h1v1h-1zM7 12h1v1h-1zM8 12h1v1h-1zM11 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM19 12h1v1h-1zM24 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM2 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM10 13h1v1h-1zM13 13h1v1h-1zM15 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM25 13h1v1h-1zM28 13h1v1h-1zM30 13h1v1h-1zM31 13h1v1h-1zM32 13h1v1h-1zM33 13h1v1h-1zM34 13h1v1h-1zM2 14h1v1h-1zM4 14h1v1h-1zM5 14h1v1h-1zM8 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM16 14h1v1h-1zM17 14h1v1h-1zM18 14h1v1h-1zM22 14h1v1h-1zM23 14h1v1h-1zM24 14h1v1h-1zM30 14h1v1h-1zM31 14h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM17 15h1v1h-1zM20 15h1v1h-1zM23 15h1v1h-1zM25 15h1v1h-1zM26 15h1v1h-1zM27 15h1v1h-1zM28 15h1v1h-1zM29 15h1v1h-1zM31 15h1v1h-1zM32 15h1v1h-1zM33 15h1v1h-1zM34 15h1v1h-1zM2 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM13 16h1v1h-1zM14 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM22 16h1v1h-1zM26 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM31 16h1v1h-1zM33 16h1v1h-1zM3 17h1v1h-1zM4 17h1v1h-1zM6 17h1v1h-1zM9 17h1v1h-1zM11 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM17 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM27 17h1v1h-1zM28 17h1v1h-1zM32 17h1v1h-1zM3 18h1v1h-1zM5 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM18 18h1v1h-1zM19 18h1v1h-1zM22 18h1v1h-1zM24 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM34 18h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM6 19h1v1h-1zM7 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM14 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM25 19h1v1h-1zM27 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM33 19h1v1h-1zM34 19h1v1h-1zM2 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM13 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM20 20h1v1h-1zM23 20h1v1h-1zM27 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM2 21h1v1h-1zM4 21h1v1h-1zM9 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM16 21h1v1h-1zM18 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM26 21h1v1h-1zM28 21h1v1h-1zM29 21h1v1h-1zM30 21h1v1h-1zM31 21h1v1h-1zM32 21h1v1h-1zM33 21h1v1h-1zM2 22h1v1h-1zM4 22h1v1h-1zM8 22h1v1h-1zM12 22h1v1h-1zM13 22h1v1h-1zM15 22h1v1h-1zM20 22h1v1h-1zM23 22h1v1h-1zM25 22h1v1h-1zM30 22h1v1h-1zM31 22h1v1h-1zM2 23h1v1h-1zM5 23h1v1h-1zM6 23h1v1h-1zM7 23h1v1h-1zM10 23h1v1h-1zM13 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM22 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM27 23h1v1h-1zM28 23h1v1h-1zM29 23h1v1h-1zM34 23h1v1h-1zM2 24h1v1h-1zM7 24h1v1h-1zM8 24h1v1h-1zM12 24h1v1h-1zM13 24h1v1h-1zM14 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM24 24h1v1h-1zM27 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM2 25h1v1h-1zM4 25h1v1h-1zM5 25h1v1h-1zM6 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM14 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM18 25h1v1h-1zM21 25h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM29 25h1v1h-1zM30 25h1v1h-1zM32 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM5 26h1v1h-1zM7 26h1v1h-1zM8 26h1v1h-1zM9 26h1v1h-1zM11 26h1v1h-1zM15 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM22 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM31 26h1v1h-1zM33 26h1v1h-1zM34 26h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM33 27h1v1h-1zM34 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM14 28h1v1h-1zM16 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM19 28h1v1h-1zM22 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM16 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM21 29h1v1h-1zM22 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h1v1h-1zM14 30h1v1h-1zM15 30h1v1h-1zM17 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM23 30h1v1h-1zM24 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM31 30h1v1h-1zM34 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM15 31h1v1h-1zM16 31h1v1h-1zM17 31h1v1h-1zM20 31h1v1h-1zM25 31h1v1h-1zM27 31h1v1h-1zM30 31h1v1h-1zM31 31h1v1h-1zM32 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM11 32h1v1h-1zM12 32h1v1h-1zM13 32h1v1h-1zM14 32h1v1h-1zM15 32h1v1h-1zM16 32h1v1h-1zM17 32h1v1h-1zM18 32h1v1h-1zM22 32h1v1h-1zM23 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM11 33h1v1h-1zM14 33h1v1h-1zM17 33h1v1h-1zM20 33h1v1h-1zM23 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM28 33h1v1h-1zM30 33h1v1h-1zM32 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM13 34h1v1h-1zM17 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM26 34h1v1h-1zM27 34h1v1h-1zM29 34h1v1h-1zM31 34h1v1h-1zM33 34h1v1h-1z"], "2": [37, "M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM10 2h1v1h-1zM14 2h1v1h-1zM15 2h1v1h-1zM18 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM23 2h1v1h-1zM24 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM11 3h1v1h-1zM14 3h1v1h-1zM15 3h1v1h-1zM16 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM21 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM15 4h1v1h-1zM16 4h1v1h-1zM22 4h1v1h-1zM23 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM11 5h1v1h-1zM12 5h1v1h-1zM16 5h1v1h-1zM18 5h1v1h-1zM20 5h1v1h-1zM21 5h1v1h-1zM22 5h1v1h-1zM24 5h1v1h-1zM25 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM15 6h1v1h-1zM17 6h1v1h-1zM18 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM17 7h1v1h-1zM18 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM23 7h1v1h-1zM25 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM15 9h1v1h-1zM17 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM26 9h1v1h-1zM2 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM11 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM19 10h1v1h-1zM25 10h1v1h-1zM26 10h1v1h-1zM27 10h1v1h-1zM30 10h1v1h-1zM32 10h1v1h-1zM33 10h1v1h-1zM34 10h1v1h-1zM3 11h1v1h-1zM4 11h1v1h-1zM6 11h1v1h-1zM7 11h1v1h-1zM10 11h1v1h-1zM11 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM17 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM25 11h1v1h-1zM30 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM33 11h1v1h-1zM2 12h1v1h-1zM4 12h1v1h-1zM5 12h1v1h-1zM8 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM13 12h1v1h-1zM15 12h1v1h-1zM17 12h1v1h-1zM22 12h1v1h-1zM24 12h1v1h-1zM25 12h1v1h-1zM27 12h1v1h-1zM28 12h1v1h-1zM30 12h1v1h-1zM31 12h1v1h-1zM32 12h1v1h-1zM34 12h1v1h-1zM2 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM10 13h1v1h-1zM11 13h1v1h-1zM15 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM23 13h1v1h-1zM24 13h1v1h-1zM29 13h1v1h-1zM32 13h1v1h-1zM33 13h1v1h-1zM34 13h1v1h-1zM2 14h1v1h-1zM3 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM8 14h1v1h-1zM9 14h1v1h-1zM15 14h1v1h-1zM17 14h1v1h-1zM19 14h1v1h-1zM21 14h1v1h-1zM23 14h1v1h-1zM25 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM33 14h1v1h-1zM34 14h1v1h-1zM4 15h1v1h-1zM5 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM11 15h1v1h-1zM12 15h1v1h-1zM13 15h1v1h-1zM14 15h1v1h-1zM15 15h1v1h-1zM16 15h1v1h-1zM20 15h1v1h-1zM21 15h1v1h-1zM22 15h1v1h-1zM25 15h1v1h-1zM26 15h1v1h-1zM2 16h1v1h-1zM3 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM10 16h1v1h-1zM12 16h1v1h-1zM15 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM21 16h1v1h-1zM22 16h1v1h-1zM24 16h1v1h-1zM26 16h1v1h-1zM28 16h1v1h-1zM29 16h1v1h-1zM30 16h1v1h-1zM31 16h1v1h-1zM32 16h1v1h-1zM3 17h1v1h-1zM4 17h1v1h-1zM12 17h1v1h-1zM13 17h1v1h-1zM14 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM18 17h1v1h-1zM22 17h1v1h-1zM25 17h1v1h-1zM27 17h1v1h-1zM30 17h1v1h-1zM32 17h1v1h-1zM34 17h1v1h-1zM3 18h1v1h-1zM5 18h1v1h-1zM7 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM17 18h1v1h-1zM18 18h1v1h-1zM24 18h1v1h-1zM25 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM5 19h1v1h-1zM13 19h1v1h-1zM14 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM24 19h1v1h-1zM27 19h1v1h-1zM28 19h1v1h-1zM30 19h1v1h-1zM32 19h1v1h-1zM33 19h1v1h-1zM34 19h1v1h-1zM2 20h1v1h-1zM3 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM25 20h1v1h-1zM28 20h1v1h-1zM29 20h1v1h-1zM31 20h1v1h-1zM32 20h1v1h-1zM33 20h1v1h-1zM34 20h1v1h-1zM2 21h1v1h-1zM5 21h1v1h-1zM6 21h1v1h-1zM10 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM30 21h1v1h-1zM31 21h1v1h-1zM32 21h1v1h-1zM34 21h1v1h-1zM4 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM9 22h1v1h-1zM10 22h1v1h-1zM12 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM18 22h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM27 22h1v1h-1zM31 22h1v1h-1zM33 22h1v1h-1zM2 23h1v1h-1zM3 23h1v1h-1zM4 23h1v1h-1zM5 23h1v1h-1zM7 23h1v1h-1zM9 23h1v1h-1zM11 23h1v1h-1zM14 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM23 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM27 23h1v1h-1zM30 23h1v1h-1zM32 23h1v1h-1zM2 24h1v1h-1zM4 24h1v1h-1zM8 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM16 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM27 24h1v1h-1zM28 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM34 24h1v1h-1zM2 25h1v1h-1zM4 25h1v1h-1zM5 25h1v1h-1zM7 25h1v1h-1zM11 25h1v1h-1zM13 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM17 25h1v1h-1zM19 25h1v1h-1zM21 25h1v1h-1zM22 25h1v1h-1zM25 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM29 25h1v1h-1zM30 25h1v1h-1zM31 25h1v1h-1zM32 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM9 26h1v1h-1zM10 26h1v1h-1zM11 26h1v1h-1zM12 26h1v1h-1zM13 26h1v1h-1zM16 26h1v1h-1zM18 26h1v1h-1zM25 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM16 27h1v1h-1zM17 27h1v1h-1zM19 27h1v1h-1zM23 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM14 28h1v1h-1zM15 28h1v1h-1zM16 28h1v1h-1zM17 28h1v1h-1zM19 28h1v1h-1zM21 28h1v1h-1zM22 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM33 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM15 29h1v1h-1zM16 29h1v1h-1zM17 29h1v1h-1zM18 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM21 29h1v1h-1zM23 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM34 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h1v1h-1zM13 30h1v1h-1zM14 30h1v1h-1zM17 30h1v1h-1zM18 30h1v1h-1zM19 30h1v1h-1zM21 30h1v1h-1zM23 30h1v1h-1zM24 30h1v1h-1zM25 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM11 31h1v1h-1zM14 31h1v1h-1zM15 31h1v1h-1zM18 31h1v1h-1zM19 31h1v1h-1zM20 31h1v1h-1zM23 31h1v1h-1zM24 31h1v1h-1zM27 31h1v1h-1zM29 31h1v1h-1zM32 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM11 32h1v1h-1zM14 32h1v1h-1zM17 32h1v1h-1zM19 32h1v1h-1zM21 32h1v1h-1zM23 32h1v1h-1zM27 32h1v1h-1zM29 32h1v1h-1zM30 32h1v1h-1zM32 32h1v1h-1zM33 32h1v1h-1zM34 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM14 33h1v1h-1zM15 33h1v1h-1zM16 33h1v1h-1zM20 33h1v1h-1zM21 33h1v1h-1zM22 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM28 33h1v1h-1zM29 33h1v1h-1zM30 33h1v1h-1zM32 33h1v1h-1zM33 33h1v1h-1zM34 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM12 34h1v1h-1zM13 34h1v1h-1zM15 34h1v1h-1zM17 34h1v1h-1zM19 34h1v1h-1zM21 34h1v1h-1zM24 34h1v1h-1zM26 34h1v1h-1zM29 34h1v1h-1zM30 34h1v1h-1zM31 34h1v1h-1z"], "3": [37, "M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM13 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM23 2h1v1h-1zM25 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM23 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM23 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM17 5h1v1h-1zM20 5h1v1h-1zM21 5h1v1h-1zM23 5h1v1h-1zM25 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM13 6h1v1h-1zM15 6h1v1h-1zM16 6h1v1h-1zM17 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM11 7h1v1h-1zM12 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM24 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM16 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM11 10h1v1h-1zM12 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1zM18 10h1v1h-1zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM6 11h1v1h-1zM7 11h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM16 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM25 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM33 11h1v1h-1zM34 11h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM7 12h1v1h-1zM8 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM19 12h1v1h-1zM24 12h1v1h-1zM27 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM2 13h1v1h-1zM3 13h1v1h-1zM9 13h1v1h-1zM10 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM15 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM25 13h1v1h-1zM27 13h1v1h-1zM28 13h1v1h-1zM30 13h1v1h-1zM31 13h1v1h-1zM32 13h1v1h-1zM4 14h1v1h-1zM5 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM16 14h1v1h-1zM17 14h1v1h-1zM18 14h1v1h-1zM22 14h1v1h-1zM23 14h1v1h-1zM24 14h1v1h-1zM30 14h1v1h-1zM31 14h1v1h-1zM33 14h1v1h-1zM12 15h1v1h-1zM17 15h1v1h-1zM20 15h1v1h-1zM23 15h1v1h-1zM25 15h1v1h-1zM26 15h1v1h-1zM27 15h1v1h-1zM28 15h1v1h-1zM29 15h1v1h-1zM31 15h1v1h-1zM32 15h1v1h-1zM33 15h1v1h-1zM34 15h1v1h-1zM2 16h1v1h-1zM4 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM22 16h1v1h-1zM26 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM32 16h1v1h-1zM33 16h1v1h-1zM3 17h1v1h-1zM4 17h1v1h-1zM6 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM17 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM27 17h1v1h-1zM28 17h1v1h-1zM32 17h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM18 18h1v1h-1zM19 18h1v1h-1zM22 18h1v1h-1zM24 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM34 18h1v1h-1zM3 19h1v1h-1zM7 19h1v1h-1zM12 19h1v1h-1zM14 19h1v1h-1zM15 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM25 19h1v1h-1zM27 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM33 19h1v1h-1zM34 19h1v1h-1zM3 20h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM10 20h1v1h-1zM13 20h1v1h-1zM15 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM20 20h1v1h-1zM23 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM2 21h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM6 21h1v1h-1zM9 21h1v1h-1zM11 21h1v1h-1zM12 21h1v1h-1zM13 21h1v1h-1zM18 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM26 21h1v1h-1zM29 21h1v1h-1zM30 21h1v1h-1zM31 21h1v1h-1zM32 21h1v1h-1zM33 21h1v1h-1zM2 22h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM8 22h1v1h-1zM11 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM16 22h1v1h-1zM20 22h1v1h-1zM23 22h1v1h-1zM25 22h1v1h-1zM30 22h1v1h-1zM31 22h1v1h-1zM2 23h1v1h-1zM3 23h1v1h-1zM6 23h1v1h-1zM7 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM22 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM27 23h1v1h-1zM28 23h1v1h-1zM29 23h1v1h-1zM34 23h1v1h-1zM2 24h1v1h-1zM4 24h1v1h-1zM5 24h1v1h-1zM7 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM12 24h1v1h-1zM13 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM24 24h1v1h-1zM27 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM2 25h1v1h-1zM6 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM18 25h1v1h-1zM21 25h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM25 25h1v1h-1zM26 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM32 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM7 26h1v1h-1zM8 26h1v1h-1zM11 26h1v1h-1zM13 26h1v1h-1zM15 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM22 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM31 26h1v1h-1zM33 26h1v1h-1zM34 26h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM33 27h1v1h-1zM34 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM13 28h1v1h-1zM14 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM19 28h1v1h-1zM22 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM11 29h1v1h-1zM15 29h1v1h-1zM16 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM21 29h1v1h-1zM22 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h1v1h-1zM12 30h1v1h-1zM15 30h1v1h-1zM16 30h1v1h-1zM17 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM23 30h1v1h-1zM24 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM31 30h1v1h-1zM34 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM12 31h1v1h-1zM13 31h1v1h-1zM15 31h1v1h-1zM16 31h1v1h-1zM17 31h1v1h-1zM20 31h1v1h-1zM25 31h1v1h-1zM27 31h1v1h-1zM30 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM11 32h1v1h-1zM12 32h1v1h-1zM13 32h1v1h-1zM14 32h1v1h-1zM15 32h1v1h-1zM16 32h1v1h-1zM17 32h1v1h-1zM18 32h1v1h-1zM22 32h1v1h-1zM23 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM31 32h1v1h-1zM32 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM11 33h1v1h-1zM17 33h1v1h-1zM20 33h1v1h-1zM23 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM27 33h1v1h-1zM30 33h1v1h-1zM32 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM13 34h1v1h-1zM17 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM26 34h1v1h-1zM27 34h1v1h-1zM29 34h1v1h-1zM31 34h1v1h-1zM33 34h1v1h-1z"], "4": [37, "M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM13 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM23 2h1v1h-1zM25 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM23 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM21 4h1v1h-1zM22 4h1v1h-1zM23 4h1v1h-1zM24 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM17 5h1v1h-1zM20 5h1v1h-1zM21 5h1v1h-1zM23 5h1v1h-1zM25 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM13 6h1v1h-1zM15 6h1v1h-1zM16 6h1v1h-1zM17 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM11 7h1v1h-1zM12 7h1v1h-1zM13 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM24 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM16 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM26 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM11 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1zM18 10h1v1h-1zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM6 11h1v1h-1zM7 11h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM16 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM25 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM33 11h1v1h-1zM34 11h1v1h-1zM2 12h1v1h-1zM3 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM12 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM19 12h1v1h-1zM24 12h1v1h-1zM28 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM9 13h1v1h-1zM10 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM15 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM25 13h1v1h-1zM30 13h1v1h-1zM31 13h1v1h-1zM32 13h1v1h-1zM3 14h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM8 14h1v1h-1zM11 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM16 14h1v1h-1zM17 14h1v1h-1zM18 14h1v1h-1zM22 14h1v1h-1zM23 14h1v1h-1zM24 14h1v1h-1zM30 14h1v1h-1zM31 14h1v1h-1zM33 14h1v1h-1zM3 15h1v1h-1zM4 15h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM12 15h1v1h-1zM14 15h1v1h-1zM17 15h1v1h-1zM20 15h1v1h-1zM23 15h1v1h-1zM25 15h1v1h-1zM26 15h1v1h-1zM27 15h1v1h-1zM28 15h1v1h-1zM29 15h1v1h-1zM32 15h1v1h-1zM33 15h1v1h-1zM34 15h1v1h-1zM2 16h1v1h-1zM5 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM22 16h1v1h-1zM26 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM33 16h1v1h-1zM3 17h1v1h-1zM4 17h1v1h-1zM6 17h1v1h-1zM9 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM14 17h1v1h-1zM15 17h1v1h-1zM17 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM25 17h1v1h-1zM27 17h1v1h-1zM28 17h1v1h-1zM29 17h1v1h-1zM30 17h1v1h-1zM32 17h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM5 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM18 18h1v1h-1zM19 18h1v1h-1zM22 18h1v1h-1zM24 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM31 18h1v1h-1zM34 18h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM6 19h1v1h-1zM7 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM14 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM25 19h1v1h-1zM27 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM33 19h1v1h-1zM34 19h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM13 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM20 20h1v1h-1zM23 20h1v1h-1zM27 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM7 21h1v1h-1zM9 21h1v1h-1zM11 21h1v1h-1zM13 21h1v1h-1zM16 21h1v1h-1zM18 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM29 21h1v1h-1zM30 21h1v1h-1zM31 21h1v1h-1zM32 21h1v1h-1zM33 21h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM10 22h1v1h-1zM11 22h1v1h-1zM13 22h1v1h-1zM16 22h1v1h-1zM20 22h1v1h-1zM23 22h1v1h-1zM25 22h1v1h-1zM30 22h1v1h-1zM31 22h1v1h-1zM2 23h1v1h-1zM3 23h1v1h-1zM6 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM13 23h1v1h-1zM15 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM22 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM27 23h1v1h-1zM28 23h1v1h-1zM29 23h1v1h-1zM31 23h1v1h-1zM32 23h1v1h-1zM34 23h1v1h-1zM2 24h1v1h-1zM5 24h1v1h-1zM7 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM10 24h1v1h-1zM12 24h1v1h-1zM13 24h1v1h-1zM19 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM24 24h1v1h-1zM27 24h1v1h-1zM30 24h1v1h-1zM31 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM2 25h1v1h-1zM4 25h1v1h-1zM6 25h1v1h-1zM9 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM14 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM18 25h1v1h-1zM21 25h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM25 25h1v1h-1zM26 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM32 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM7 26h1v1h-1zM8 26h1v1h-1zM11 26h1v1h-1zM15 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM22 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM31 26h1v1h-1zM33 26h1v1h-1zM34 26h1v1h-1zM10 27h1v1h-1zM19 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM33 27h1v1h-1zM34 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM13 28h1v1h-1zM14 28h1v1h-1zM15 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM19 28h1v1h-1zM22 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM11 29h1v1h-1zM16 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM21 29h1v1h-1zM22 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h1v1h-1zM12 30h1v1h-1zM14 30h1v1h-1zM15 30h1v1h-1zM16 30h1v1h-1zM17 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM23 30h1v1h-1zM24 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM31 30h1v1h-1zM34 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM12 31h1v1h-1zM14 31h1v1h-1zM15 31h1v1h-1zM17 31h1v1h-1zM20 31h1v1h-1zM25 31h1v1h-1zM27 31h1v1h-1zM30 31h1v1h-1zM31 31h1v1h-1zM32 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM11 32h1v1h-1zM12 32h1v1h-1zM14 32h1v1h-1zM15 32h1v1h-1zM16 32h1v1h-1zM17 32h1v1h-1zM18 32h1v1h-1zM22 32h1v1h-1zM23 32h1v1h-1zM24 32h1v1h-1zM25 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM31 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM11 33h1v1h-1zM14 33h1v1h-1zM17 33h1v1h-1zM20 33h1v1h-1zM23 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM27 33h1v1h-1zM30 33h1v1h-1zM32 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM13 34h1v1h-1zM17 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM26 34h1v1h-1zM27 34h1v1h-1zM29 34h1v1h-1zM31 34h1v1h-1zM33 34h1v1h-1z"]};
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+
+/* ---------- escala do palco ---------- */
+function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080),st=$('#stage');
+  st.style.transform='scale('+s+')';st.style.left=(innerWidth-1920*s)/2+'px';st.style.top=(innerHeight-1080*s)/2+'px'}
+addEventListener('resize',fit);fit();
+
+/* ---------- QR codes ---------- */
+$$('[data-qr]').forEach(h=>{const q=QR[h.dataset.qr];h.innerHTML='<svg viewBox="0 0 '+q[0]+' '+q[0]+'" shape-rendering="crispEdges" aria-label="QR Code do projeto '+h.dataset.qr+' no Wokwi"><rect width="'+q[0]+'" height="'+q[0]+'" fill="#fff"/><path d="'+q[1]+'" fill="#0F1F4D"/></svg>'});
+
+/* ---------- mascote ---------- */
+const BOARD='<g class="board"><rect x="100" y="120" width="600" height="380" rx="40" fill="#0FA3AE" stroke="#0A1638" stroke-width="8"/><rect x="40" y="190" width="140" height="110" rx="10" fill="#C9D3E3" stroke="#0A1638" stroke-width="8"/><rect x="60" y="212" width="100" height="66" rx="6" fill="#8FA0BC"/><rect x="40" y="360" width="120" height="100" rx="14" fill="#1B2440" stroke="#0A1638" stroke-width="8"/><rect x="200" y="132" width="400" height="36" rx="6" fill="#1B2440"/><line x1="212" y1="150" x2="590" y2="150" stroke="#FFD23F" stroke-width="12" stroke-dasharray="14 10"/><rect x="200" y="452" width="250" height="36" rx="6" fill="#1B2440"/><line x1="212" y1="470" x2="440" y2="470" stroke="#FFD23F" stroke-width="12" stroke-dasharray="14 10"/><rect x="480" y="452" width="170" height="36" rx="6" fill="#1B2440"/><line x1="492" y1="470" x2="640" y2="470" stroke="#FFD23F" stroke-width="12" stroke-dasharray="14 10"/><rect x="440" y="330" width="230" height="80" rx="8" fill="#1B2440"/><line x1="452" y1="326" x2="658" y2="326" stroke="#C9D3E3" stroke-width="6" stroke-dasharray="10 8"/><line x1="452" y1="414" x2="658" y2="414" stroke="#C9D3E3" stroke-width="6" stroke-dasharray="10 8"/><circle class="glow" cx="590" cy="215" r="34" fill="#FFD23F"/><rect x="578" y="208" width="24" height="14" rx="4" fill="#FFD23F"/><circle cx="190" cy="430" r="26" fill="#FF5C5C" stroke="#0A1638" stroke-width="6"/><g class="eye"><circle cx="300" cy="250" r="38" fill="#fff" stroke="#0A1638" stroke-width="6"/><circle cx="310" cy="254" r="17" fill="#0A1638"/><circle cx="316" cy="247" r="6" fill="#fff"/></g><g class="eye"><circle cx="410" cy="250" r="38" fill="#fff" stroke="#0A1638" stroke-width="6"/><circle cx="420" cy="254" r="17" fill="#0A1638"/><circle cx="426" cy="247" r="6" fill="#fff"/></g><path d="M322 320 Q355 360 388 320" fill="none" stroke="#0A1638" stroke-width="8" stroke-linecap="round"/><circle cx="250" cy="312" r="16" fill="#FF8FA3" opacity=".8"/><circle cx="460" cy="312" r="16" fill="#FF8FA3" opacity=".8"/></g>';
+const STARS='<polygon class="st" points="90,36 100,60 124,70 100,80 90,104 80,80 56,70 80,60" fill="#FFD23F"/><polygon class="st" style="animation-delay:.7s" points="740,68 747,83 762,90 747,97 740,112 733,97 718,90 733,83" fill="#35D0F5"/><polygon class="st" style="animation-delay:1.2s" points="730,514 738,532 756,540 738,548 730,566 722,548 704,540 722,532" fill="#fff"/><polygon class="st" style="animation-delay:.3s" points="60,502 66,514 78,520 66,526 60,538 54,526 42,520 54,514" fill="#7BE0B0"/>';
+$$('[data-mascot]').forEach(h=>{h.innerHTML='<svg viewBox="0 0 800 600" width="100%" height="100%" aria-label="Placa Arduino sorridente">'+BOARD+(h.dataset.mascot==='stars'?STARS:'')+'</svg>'});
+$$('[data-mascot-inner]').forEach(g=>{g.innerHTML=BOARD});
+(function(){const g=$('#codelines'),L=[[28,100,120,'#35D0F5'],[28,136,200,'#9DB4E8'],[52,172,160,'#FFD23F'],[52,208,214,'#9DB4E8'],[28,244,90,'#35D0F5'],[28,292,150,'#FF8FA3'],[52,328,220,'#9DB4E8'],[52,364,130,'#FFD23F'],[52,400,190,'#9DB4E8'],[28,436,60,'#35D0F5']];
+  L.forEach((l,i)=>{const r=el('rect',{x:l[0],y:l[1],width:l[2],height:14,rx:7,fill:l[3]},g);r.style.cssText='transform-box:fill-box;transform-origin:left center;animation:grow 3.6s ease-out infinite;animation-delay:'+(i*.2)+'s'})})();
+
+/* ---------- apresentação ---------- */
+const slides=$$('.slide'),views={p:$('#v-present'),s:$('#v-sim')},scenes=$$('.scene');
+let auto=false,selapsed=0;const SDUR=[20000,23000,17000,20000];
+let mode='p',idx=0,sidx=0,paused=false,elapsed=0,last=performance.now(),lastAct=performance.now();
+const names=['Ambiente','Reservatório','Irrigação','Ar'];
+function buildDots(){const d=$('#dots');d.innerHTML='';
+  if(mode==='p'){slides.forEach((s,i)=>{const b=document.createElement('button');b.className='dot'+(i===idx?' on':'');b.setAttribute('aria-label','Slide '+(i+1));b.onclick=()=>goSlide(i);d.appendChild(b)})}
+  else{names.forEach((n,i)=>{const b=document.createElement('button');b.className='stab'+(i===sidx?' on':'');b.textContent=n;b.onclick=()=>goScene(i);d.appendChild(b)})}}
+function goSlide(i){idx=(i+slides.length)%slides.length;elapsed=0;slides.forEach((s,k)=>{s.classList.remove('active')});void $('#v-present').offsetWidth;slides[idx].classList.add('active');buildDots()}
+function goScene(i){sidx=(i+scenes.length)%scenes.length;selapsed=0;scenes.forEach((s,k)=>s.classList.toggle('on',k===sidx));buildDots();if(auto&&sims[sidx].demoStart)sims[sidx].demoStart();else if(sims[sidx].enter)sims[sidx].enter();$('#autobadge').classList.toggle('on',auto)}
+function setMode(m,i){mode=m;views.p.classList.toggle('on',m==='p');views.s.classList.toggle('on',m==='s');
+  $('#tab-p').classList.toggle('on',m==='p');$('#tab-s').classList.toggle('on',m==='s');
+  if(m==='p')auto=false;$('#b-play').style.visibility=(m==='p'||auto)?'visible':'hidden';$('#prog').style.display=(m==='p'||auto)?'block':'none';$('#autobadge').classList.toggle('on',auto);
+  if(m==='p'){goSlide(i==null?idx:i)}else{goScene(i==null?sidx:i)}}
+$('#tab-p').onclick=()=>setMode('p',0);$('#tab-s').onclick=()=>{auto=false;setMode('s')};
+function takeOver(){if(mode==='s'&&auto){auto=false;$('#autobadge').classList.remove('on');$('#b-play').style.visibility='hidden';$('#prog').style.display='none'}}
+$$('.stagecard,.panel').forEach(e=>e.addEventListener('pointerdown',takeOver));
+$('#b-prev').onclick=()=>mode==='p'?goSlide(idx-1):goScene(sidx-1);
+$('#b-next').onclick=()=>mode==='p'?goSlide(idx+1):goScene(sidx+1);
+$('#b-play').onclick=()=>{paused=!paused;$('#pp').innerHTML=paused?'<path d="M7 5l12 7-12 7z"/>':'<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';$('#b-play').setAttribute('aria-label',paused?'Continuar':'Pausar')};
+$('#b-full').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+$$('[data-go]').forEach(b=>b.onclick=()=>{auto=false;setMode('s',+b.dataset.go)});
+addEventListener('keydown',e=>{lastAct=performance.now();
+  if(e.key==='ArrowRight')$('#b-next').click();else if(e.key==='ArrowLeft')$('#b-prev').click();
+  else if(e.key===' '&&mode==='p'){e.preventDefault();$('#b-play').click()}
+  else if(e.key==='f')$('#b-full').click();else if(e.key==='s'){auto=false;setMode('s')}else if(e.key==='Escape')setMode('p',0);
+  else if(mode==='s'&&'1234'.includes(e.key))goScene(+e.key-1)});
+['pointermove','pointerdown','input'].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now()}));
+
+/* ---------- simuladores ---------- */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+function mix(c1,c2,t){const p=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));const a=p(c1),b=p(c2);return '#'+a.map((v,i)=>Math.round(lerp(v,b[i],t)).toString(16).padStart(2,'0')).join('')}
+function setStatus(id,cls,txt){const s=$(id);s.className='status'+(cls?' '+cls:'');s.textContent=txt}
+const sims=[],alarms=[false,false,false,false];
+/* ---- som do alarme (WebAudio) ---- */
+let actx=null,soundOn=true,lastBeep=0;
+function unlock(){try{if(!actx){const C=window.AudioContext||window.webkitAudioContext;if(C)actx=new C()}if(actx&&actx.state!=='running')actx.resume()}catch(e){}}
+function beep(f,d){if(!actx||actx.state!=='running')return;try{const o=actx.createOscillator(),g=actx.createGain();o.type='square';o.frequency.value=f;g.gain.value=.0001;o.connect(g);g.connect(actx.destination);const t=actx.currentTime;g.gain.exponentialRampToValueAtTime(.12,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.02)}catch(e){}}
+['pointerdown','keydown'].forEach(ev=>addEventListener(ev,unlock));
+$('#b-snd').onclick=()=>{soundOn=!soundOn;unlock();$('#snd-on').style.display=soundOn?'':'none';$('#snd-off').style.display=soundOn?'none':'';if(soundOn)beep(660,.15)};
+/* ---- desenhos auxiliares ---- */
+function label(svg,x,y,text,kind,anchor,tx,ty){const fs=26,lines=text.split('\n'),w=Math.max(...lines.map(l=>l.length))*fs*.53+32,h=lines.length*32+14,x0=anchor==='end'?x-w:anchor==='start'?x:x-w/2;
+  const C={in:['#2350E8','#fff'],out:['#FFD23F','#0F1F4D'],br:['#0FA3AE','#fff'],no:['#fff','#0F1F4D']}[kind||'no'];
+  const g=el('g',{},svg);
+  if(tx!=null){el('line',{x1:x0+w/2,y1:y,x2:tx,y2:ty,stroke:'#0F1F4D','stroke-width':4,'stroke-linecap':'round'},g);el('circle',{cx:tx,cy:ty,r:8,fill:'#0F1F4D',stroke:'#fff','stroke-width':3},g)}
+  el('rect',{x:x0,y:y-h/2,width:w,height:h,rx:Math.min(24,h/2),fill:C[0],stroke:'#0F1F4D','stroke-width':4},g);
+  lines.forEach((l,i)=>{const t=el('text',{x:x0+w/2,y:y-h/2+7+32*i+24,'text-anchor':'middle','font-family':'Fredoka,Arial,sans-serif','font-weight':600,'font-size':fs,fill:C[1]},g);t.textContent=l});return g}
+function board(g,x,y,w,h){const k=el('g',{transform:'translate('+x+' '+y+')'},g),S={stroke:'#0F1F4D','stroke-width':4};
+  el('rect',{width:w,height:h,rx:14,fill:'#0A8F9A',stroke:'#0F1F4D','stroke-width':6},k);
+  [[w*.08,h*.18],[w*.92,h*.18],[w*.08,h*.84],[w*.92,h*.84]].forEach(p=>el('circle',{cx:p[0],cy:p[1],r:6,fill:'#E8F1F2',stroke:'#07626A','stroke-width':2},k));
+  el('rect',Object.assign({x:-24,y:h*.14,width:62,height:h*.32,rx:4,fill:'url(#gMetal)'},S),k);
+  el('rect',Object.assign({x:-16,y:h*.6,width:46,height:h*.26,rx:5,fill:'#1B2440'},S),k);
+  el('rect',{x:w*.34,y:6,width:w*.6,height:16,rx:3,fill:'#1B2440'},k);el('line',{x1:w*.34+6,y1:14,x2:w*.94-6,y2:14,stroke:'#D4AF37','stroke-width':6,'stroke-dasharray':'5 6'},k);
+  el('rect',{x:w*.3,y:h-22,width:w*.3,height:16,rx:3,fill:'#1B2440'},k);el('line',{x1:w*.3+6,y1:h-14,x2:w*.6-6,y2:h-14,stroke:'#D4AF37','stroke-width':6,'stroke-dasharray':'5 6'},k);
+  el('rect',{x:w*.64,y:h-22,width:w*.3,height:16,rx:3,fill:'#1B2440'},k);el('line',{x1:w*.64+6,y1:h-14,x2:w*.94-6,y2:h-14,stroke:'#D4AF37','stroke-width':6,'stroke-dasharray':'5 6'},k);
+  el('line',{x1:w*.52,y1:h*.56,x2:w*.9,y2:h*.56,stroke:'#C9D3E3','stroke-width':6,'stroke-dasharray':'4 5'},k);el('line',{x1:w*.52,y1:h*.78,x2:w*.9,y2:h*.78,stroke:'#C9D3E3','stroke-width':6,'stroke-dasharray':'4 5'},k);
+  el('rect',{x:w*.5,y:h*.58,width:w*.42,height:h*.18,rx:3,fill:'#1B2440'},k);
+  el('rect',{x:w*.06,y:h*.04,width:18,height:14,rx:3,fill:'#E8453C',stroke:'#0F1F4D','stroke-width':3},k);
+  el('circle',{cx:w*.3,cy:h*.62,r:9,fill:'#C9D3E3',stroke:'#0F1F4D','stroke-width':3},k);el('circle',{cx:w*.3,cy:h*.82,r:9,fill:'#C9D3E3',stroke:'#0F1F4D','stroke-width':3},k);
+  const t=el('text',{x:w*.66,y:h*.44,'text-anchor':'middle','font-family':'Fredoka,Arial,sans-serif','font-weight':700,'font-size':Math.round(h*.2),fill:'#E8F1F2'},k);t.textContent='UNO';
+  [w*.34,w*.43].forEach(cx=>{el('circle',{cx,cy:h*.38,r:11,fill:'#fff',stroke:'#0A1638','stroke-width':3},k);el('circle',{cx:cx+2,cy:h*.39,r:5,fill:'#0A1638'},k)})}
+function chips(){$$('.panel').forEach(p=>{const d=document.createElement('div');d.className='chips';d.innerHTML='<span class="chip in">Entrada: sensor</span><span class="chip br">Arduino decide</span><span class="chip out">Saída: age</span>';p.insertBefore(d,p.querySelector('.ctl'))})}
+chips();
+
+(function(){
+  const a=$('#sc0 svg'),b=$('#sc1 svg'),c=$('#sc2 svg'),d=$('#sc3 svg');
+  board($('#t-board'),540,100,280,150);board($('#r-board'),560,50,280,130);board($('#i-board'),100,70,300,140);board($('#a-board'),470,70,270,130);
+  label(a,430,92,'Sensor DHT22','in','c',430,120);label(a,680,70,'Arduino','br');label(a,890,315,'LED\nverde','out');label(a,1020,315,'LED\nvermelho','out');label(a,1125,92,'Buzzer','out','c',1125,162);label(a,640,745,'Alimentos guardados','no');label(a,180,80,'Lá fora','no');label(a,275,772,'O que o sensor mede','in');
+  label(b,700,28,'Arduino','br','c');label(b,300,322,'Sensor\nde nível','in','end',522,322);label(b,230,95,'Torneira','no','c',108,168);label(b,560,878,'Caixa d’água\n(vista por dentro)','no');label(b,800,800,'Saída','no','start',860,760);label(b,1045,338,'LEDs de aviso','out');label(b,1045,560,'Buzzer','out');
+  label(c,250,36,'Arduino','br');label(c,160,445,'LED\nverde','out');label(c,360,445,'LED\nazul','out');label(c,165,868,'Caixa d’água','no');label(c,360,640,'Bomba d’água','out','c',355,700);label(c,700,330,'Irrigador','out','start',634,325);label(c,860,640,'Sensor de\numidade do solo','in','start',778,590);label(c,870,425,'Planta','no','start',700,440);
+  label(d,607,34,'Arduino','br');label(d,820,410,'Sensor de gás','in');label(d,1050,305,'LEDs de aviso','out');label(d,1050,505,'Buzzer','out');label(d,270,835,'Fogão a gás','no');label(d,730,640,'Botijão de gás','no','start',660,660);
+})();
+/* 1: temperatura e umidade */
+sims[0]=(function(){
+  const slT=$('#t-sl-t'),slH=$('#t-sl-h'),drops=$('#t-drops'),dl=[];
+  for(let i=0;i<40;i++){const x=72+((i*53)%250),l=el('line',{x1:x,y1:90,x2:x-7,y2:114,stroke:'#3D7BD9','stroke-width':4,'stroke-linecap':'round'},drops);l.setAttribute('class','rain');l.style.animationDuration=(0.65+(i%5)*0.09)+'s';l.style.animationDelay=(-((i*0.173)%1)).toFixed(2)+'s';dl.push(l)}
+  function update(){const T=+slT.value,H=+slH.value;$('#t-vt').textContent=T;$('#t-vh').textContent=H;
+    const alert=T>30||H>70;
+    $('#t-wall').setAttribute('fill',mix('#DCEBFF','#FFD9C4',clamp((T-15)/30,0,1)));
+    $('#t-heat').setAttribute('opacity',(clamp((T-28)/17,0,1)*.25).toFixed(2));
+    
+    const rh=clamp((H-50)/50,0,1);$('#t-sky').setAttribute('fill',mix('#EAF6FF','#8E9BB0',rh));
+    const n=Math.round(rh*40);dl.forEach((d,i)=>d.style.visibility=i<n?'visible':'hidden');
+    $('#t-lamp-g').setAttribute('opacity',alert?.25:1);$('#t-lamp-r').setAttribute('opacity',alert?1:.25);
+    $('#t-lamp-g-h').setAttribute('opacity',alert?0:.35);$('#t-lamp-r-h').setAttribute('opacity',alert?.45:0);
+    $('#t-bell').classList.toggle('shaking',alert);$('#t-sound').setAttribute('opacity',alert?1:0);
+    alarms[0]=alert;$('#t-alert').setAttribute('opacity',alert?1:0);$('#t-alert').classList.toggle('redblink',alert);
+    $('#t-r1').textContent=T+' °C';$('#t-r2').textContent=H+' % de umidade';
+    if(alert){const why=T>30&&H>70?'Quente e úmido demais':T>30?'Temperatura alta':'Umidade alta';setStatus('#t-status','bad','Alerta: '+why)}else setStatus('#t-status','','Tudo normal')}
+  slT.oninput=slH.oninput=update;update();
+  function demoStart(){slT.value=24;slH.value=55;update()}
+  function demo(t){const T=t<2?24:t<8?24+12*(t-2)/6:t<12?36:t<16?36-12*(t-12)/4:24;slT.value=Math.round(T);update()}
+  return{update,enter:update,demoStart,demo}})();
+
+/* 2: reservatório */
+sims[1]=(function(){
+  const sl=$('#r-sl');let L=30,flow=0;
+    const st=$('#r-stream'),ds=$('#r-dstream');
+  function render(){const top=800-430*(L/100);
+    $('#r-wbody').setAttribute('y',top+18);$('#r-wave').setAttribute('transform','translate(0 '+(top-600+20)+')');
+    $('#r-dist').setAttribute('y2',Math.max(354,top));
+    const mid=(352+Math.max(354,top))/2;$('#r-dlab').setAttribute('y',clamp(mid-25,360,730));$('#r-dtxt').setAttribute('y',clamp(mid+11,396,766));
+    $('#r-dtxt').textContent=Math.round(100-L)+' cm';
+    $('#r-pct').textContent=Math.round(L)+' %';$('#r-v').textContent=Math.round(L);sl.value=Math.round(L);
+    const red=L>=85,yel=L>=60&&!red,grn=L<60;
+    $('#r-lg').setAttribute('opacity',grn?1:.25);$('#r-ly').setAttribute('opacity',yel?1:.25);$('#r-lr').setAttribute('opacity',red?1:.25);$('#r-lg-h').setAttribute('opacity',grn?.35:0);$('#r-ly-h').setAttribute('opacity',yel?.4:0);$('#r-lr-h').setAttribute('opacity',red?.45:0);
+    $('#r-lr').classList.toggle('redblink',red);$('#r-buzz').classList.toggle('shaking',red);$('#r-sound').setAttribute('opacity',red?1:0);
+    alarms[1]=red;$('#r-alert').setAttribute('opacity',red?1:0);$('#r-alert').classList.toggle('redblink',red);
+    st.style.display=flow>0?'':'none';st.setAttribute('y2',top+14);
+    ds.style.display=flow<0?'':'none';
+    $('#r-fill').classList.toggle('on',flow>0);$('#r-drain').classList.toggle('on',flow<0);
+    $('#r-fill').textContent=flow>0?'Fechar torneira':'Abrir torneira';$('#r-drain').textContent=flow<0?'Fechar a saída':'Abrir a saída';
+    if(red)setStatus('#r-status','bad','Risco de transbordar!');else if(yel)setStatus('#r-status','warn','Atenção: nível alto');else setStatus('#r-status','','Nível normal')}
+  sl.oninput=()=>{L=+sl.value;render()};
+  $('#r-fill').onclick=()=>{flow=flow>0?0:1;render()};$('#r-drain').onclick=()=>{flow=flow<0?0:-1;render()};
+  function tick(dt){if(flow){L=clamp(L+flow*dt*0.006,0,100);if(L>=100||L<=0)flow=0;render()}}
+  let drained=false;
+  function demoStart(){L=40;flow=1;drained=false;render()}
+  function demo(t){if(flow>0&&L>=95){flow=0;render()}if(t>=12&&!drained){drained=true;flow=-1;render()}if(flow<0&&L<=40){flow=0;render()}}
+  render();return{update:render,enter:render,tick,demoStart,demo}})();
+
+/* 3: irrigação */
+sims[2]=(function(){
+  const sl=$('#i-sl');let M=60,pump=false,sun=false;
+  const wet=$('#i-wet'),dots=[];
+  for(let i=0;i<40;i++){dots.push(el('circle',{cx:495+((i*97)%295),cy:645+((i*61)%135),r:6+(i%4)*2,opacity:0},wet))}
+  const dr=$('#i-drops');
+  [[620,0],[612,.12],[628,.24],[618,.36],[624,.48],[610,.6],[630,.72],[616,.84]].forEach(p=>{const c=el('circle',{cx:p[0],cy:345,r:8,fill:'#35D0F5'},dr);c.setAttribute('class','drop');c.style.animationDelay=p[1]+'s'});
+  const L=[['i-lA',-1,540,1],['i-lB',1,500,1],['i-lC',-1,455,.9],['i-lD',1,425,.85]];
+  function render(){
+    const t=M/100,w=clamp((35-M)/35,0,1);
+    const sc=mix('#D9B27A','#5B3A1E',t);$('#i-soil').setAttribute('fill',sc);$('#i-soil2').setAttribute('fill',sc);
+    $('#i-cracks').setAttribute('opacity',clamp((40-M)/40,0,1).toFixed(2));
+    const n=Math.round(t*40);dots.forEach((d,i)=>d.setAttribute('opacity',i<n?.25:0));
+    L.forEach(l=>{const id=l[0],s=l[1],by=l[2],z=l[3];$('#'+id).setAttribute('transform','translate(640 '+by+') rotate('+(s*(-28+w*95))+') scale('+(-s*z)+' '+z+')');
+      $('#'+id+' .lf').setAttribute('fill',mix(s===1?'#2FB36F':'#4CD08C','#B8A24A',w))});
+    $('#i-lE').setAttribute('transform','translate(640 '+(400+w*14)+') rotate('+(w*28)+')');$('#i-lE .lf').setAttribute('fill',mix('#4CD08C','#B8A24A',w));
+    $('#i-stem').setAttribute('stroke',mix('#1B8F5A','#8A8A3C',w));
+    $('#i-pct').textContent=Math.round(M)+' %';$('#i-v').textContent=Math.round(M);sl.value=Math.round(M);
+    $('#i-lg').setAttribute('opacity',pump?.25:1);$('#i-lg-h').setAttribute('opacity',pump?0:.35);$('#i-lb').setAttribute('opacity',pump?1:.25);$('#i-lb-h').setAttribute('opacity',pump?.4:0);$('#i-pled').setAttribute('opacity',pump?1:.25);
+    $('#i-flow').setAttribute('opacity',pump?1:0);$('#i-flow').classList.toggle('wire',pump);
+    dr.querySelectorAll('circle').forEach(c=>c.style.visibility=pump?'visible':'hidden');
+    $('#i-sun').classList.toggle('on',sun);
+    if(pump)setStatus('#i-status','warn','Solo seco: bomba ligada, regando');else setStatus('#i-status','','Solo com água suficiente')}
+  function decide(){if(M<30)pump=true;else if(M>50)pump=false}
+  sl.oninput=()=>{M=+sl.value;decide();render()};
+  $('#i-dry').onclick=()=>{M=18;decide();render()};
+  $('#i-sun').onclick=()=>{sun=!sun;render()};
+  let fast=false;
+  function tick(dt){const was=pump;const d=(pump?6:((fast&&auto)?-5:(sun?-2.6:-0.5)))*dt/1000;M=clamp(M+d,0,100);decide();if(was&&!pump)fast=false;render()}
+  function demoStart(){M=58;pump=false;sun=false;fast=true;render()}
+  decide();render();return{update:render,enter:render,tick,demoStart}})();
+
+/* 4: qualidade do ar */
+sims[3]=(function(){
+  const sl=$('#a-sl'),g=$('#a-parts'),P=[];
+  for(let i=0;i<70;i++){const c=el('circle',{r:8+(i%3)*3,fill:'#7BA05B',opacity:.55},g);P.push({c,x:150+Math.random()*320,y:150+Math.random()*330,vx:(Math.random()-.2)*14,vy:-(8+Math.random()*16)})}
+  let ppm=3,n=0;
+  function render(){ppm=Math.pow(10,sl.value*3/100);const reading=clamp(Math.round(447+203*Math.log10(Math.max(ppm,1))),0,1023);
+    const shown=ppm<10?ppm.toFixed(1).replace('.0',''):Math.round(ppm);$('#a-v').textContent=shown;
+    n=Math.round(clamp(Math.log10(Math.max(ppm,1))/3,0,1)*70);if(ppm>=1.5&&n<2)n=2;
+    P.forEach((p,i)=>p.c.setAttribute('opacity',i<n?.55:0));
+    $('#a-flame').setAttribute('opacity',.85);
+    const red=ppm>=50,yel=ppm>=10&&!red,grn=ppm<10;
+    $('#a-lg').setAttribute('opacity',grn?1:.25);$('#a-ly').setAttribute('opacity',yel?1:.25);$('#a-lr').setAttribute('opacity',red?1:.25);$('#a-lg-h').setAttribute('opacity',grn?.35:0);$('#a-ly-h').setAttribute('opacity',yel?.4:0);$('#a-lr-h').setAttribute('opacity',red?.45:0);
+    $('#a-lr').classList.toggle('redblink',red);$('#a-buzz').classList.toggle('shaking',red);$('#a-sound').setAttribute('opacity',red?1:0);
+    alarms[3]=red;$('#a-alert').setAttribute('opacity',red?1:0);$('#a-alert').classList.toggle('redblink',red);
+    $('#a-wall').setAttribute('fill',mix('#EAF2FF','#E4E7C8',clamp(Math.log10(Math.max(ppm,1))/3,0,1)));
+    $('#a-r1').textContent='Gás: '+shown+' ppm';$('#a-r2').textContent='Leitura do sensor: '+reading+' de 1023';
+    if(red)setStatus('#a-status','bad','Valor alto de gás!');else if(yel)setStatus('#a-status','warn','Atenção: gás acima do normal');else setStatus('#a-status','','Ar normal')}
+  sl.oninput=render;
+  function tick(dt){const s=dt/1000;P.forEach((p,i)=>{if(i>=n)return;p.x+=p.vx*s+Math.sin((performance.now()/700)+i)*0.5;p.y+=p.vy*s;
+      if(p.y<140||p.x>760||p.x<100){p.x=170+Math.random()*260;p.y=470+Math.random()*20;p.vx=(Math.random()-.1)*26;p.vy=-(10+Math.random()*20)}
+      p.c.setAttribute('cx',p.x.toFixed(1));p.c.setAttribute('cy',p.y.toFixed(1))})}
+  function demoStart(){sl.value=16;render()}
+  function demo(t){const v=t<2?16:t<10?16+54*(t-2)/8:t<13?70:t<18?70-54*(t-13)/5:16;sl.value=v;render()}
+  render();return{update:render,enter:render,tick,demoStart,demo}})();
+
+/* ---------- laço principal ---------- */
+function loop(now){const dt=Math.min(now-last,100);last=now;
+  if(mode==='p'){if(!paused){elapsed+=dt;const d=+slides[idx].dataset.dur;$('#prog').style.transform='scaleX('+clamp(elapsed/d,0,1)+')';if(elapsed>=d){if(idx===slides.length-1){auto=true;setMode('s',0)}else goSlide(idx+1)}}}
+  else{if(auto&&!paused){selapsed+=dt;if(sims[sidx].demo)sims[sidx].demo(selapsed/1000);$('#prog').style.transform='scaleX('+clamp(selapsed/SDUR[sidx],0,1)+')';if(selapsed>=SDUR[sidx]){if(sidx===scenes.length-1)setMode('p',0);else goScene(sidx+1)}}
+    if(sims[sidx].tick&&!(auto&&paused))sims[sidx].tick(dt);if(soundOn&&alarms[sidx]&&now-lastBeep>450){lastBeep=now;beep(((now/450|0)%2)?988:784,.22)}if(!auto&&now-lastAct>90000){setMode('p',0)}}
+  requestAnimationFrame(loop)}
+setMode('p',0);requestAnimationFrame(t=>{last=t;loop(t)});
+</script>
+
+</body>
+</html>
