@@ -561,9 +561,9 @@ sims[2]=(function(){
   [[620,0],[612,.12],[628,.24],[618,.36],[624,.48],[610,.6],[630,.72],[616,.84]].forEach(p=>{const c=el('circle',{cx:p[0],cy:345,r:8,fill:'#35D0F5'},dr);c.setAttribute('class','drop');c.style.animationDelay=p[1]+'s'});
   const L=[['i-lA',-1,540,1],['i-lB',1,500,1],['i-lC',-1,455,.9],['i-lD',1,425,.85]];
   function render(){
-    const t=M/100,w=clamp((35-M)/35,0,1);
+    const t=M/100,w=clamp((52-M)/34,0,1);
     const sc=mix('#D9B27A','#5B3A1E',t);$('#i-soil').setAttribute('fill',sc);$('#i-soil2').setAttribute('fill',sc);
-    $('#i-cracks').setAttribute('opacity',clamp((40-M)/40,0,1).toFixed(2));
+    $('#i-cracks').setAttribute('opacity',clamp((45-M)/20,0,1).toFixed(2));
     const n=Math.round(t*40);dots.forEach((d,i)=>d.setAttribute('opacity',i<n?.25:0));
     L.forEach(l=>{const id=l[0],s=l[1],by=l[2],z=l[3];$('#'+id).setAttribute('transform','translate(640 '+by+') rotate('+(s*(-28+w*95))+') scale('+(-s*z)+' '+z+')');
       $('#'+id+' .lf').setAttribute('fill',mix(s===1?'#2FB36F':'#4CD08C','#B8A24A',w))});
@@ -577,7 +577,7 @@ sims[2]=(function(){
     if(pump)setStatus('#i-status','warn','Solo seco: bomba ligada, regando');else setStatus('#i-status','','Solo com água suficiente')}
   function decide(){if(M<30)pump=true;else if(M>50)pump=false}
   sl.oninput=()=>{M=+sl.value;decide();render()};
-  $('#i-dry').onclick=()=>{M=18;decide();render()};
+  $('#i-dry').onclick=()=>{M=0;decide();render()};
   $('#i-sun').onclick=()=>{sun=!sun;render()};
   let fast=false;
   function tick(dt){const was=pump;const d=(pump?6:((fast&&auto&&!held)?-5:(sun?-2.6:-0.5)))*dt/1000;M=clamp(M+d,0,100);decide();if(was&&!pump)fast=false;render()}
