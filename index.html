@@ -24,7 +24,8 @@
 html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--navy);color:var(--ink);font-family:var(--text)}
 button{font-family:inherit;cursor:pointer}
 #frame{position:fixed;inset:0;background:var(--navy);overflow:hidden}
-#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--paper)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--navy)}
+#v-sim{background:var(--paper)}
 #views{position:absolute;left:0;top:0;width:1920px;height:1008px;overflow:hidden}
 .view{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s}
 .view.on{opacity:1;visibility:visible}
@@ -414,7 +415,7 @@ function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const
 
 /* ---------- escala do palco ---------- */
 function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080),st=$('#stage');
-  st.style.transform='scale('+s+')';st.style.left=(innerWidth-1920*s)/2+'px';st.style.top=(innerHeight-1080*s)/2+'px'}
+  st.style.transform='scale('+s+')';st.style.left=Math.round((innerWidth-1920*s)/2)+'px';st.style.top=Math.round((innerHeight-1080*s)/2)+'px'}
 addEventListener('resize',fit);fit();
 
 /* ---------- QR codes ---------- */
