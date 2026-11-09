@@ -370,7 +370,7 @@ h1,h2,h3{font-family:var(--display)}
     <p class="pdesc">Um sensor enterrado mede a umidade. Se o solo secar, a bomba liga sozinha.</p>
     <div class="ctl"><label for="i-sl">Umidade do solo</label><div class="big"><span id="i-v">60</span><small> %</small></div><input id="i-sl" type="range" min="0" max="100" value="60">
       <div class="btnrow" style="margin-top:8px"><button class="btn" id="i-dry">Secar agora</button><button class="btn" id="i-sun">Sol forte (seca rápido)</button></div></div>
-    <div class="say"><b>O Arduino decide:</b> abaixo de <b>30 %</b> liga a bomba. Ela só desliga quando passar de <b>50 %</b>, para não ligar e desligar toda hora.</div>
+    <div class="say"><b>O Arduino decide:</b> abaixo de <b>30 %</b> liga a bomba. Ela só desliga quando passar de <b>75 %</b>, para não ligar e desligar toda hora.</div>
     <div class="status" id="i-status">Solo com água suficiente</div>
     <div class="qrline"><span class="qrb" data-qr="3"></span><div><a href="https://wokwi.com/projects/479814489557053441" target="_blank" rel="noopener">Abrir no Wokwi</a><span>No Wokwi, um botão giratório faz o papel do sensor.</span></div></div>
   </aside>
@@ -432,7 +432,7 @@ $$('[data-mascot-inner]').forEach(g=>{g.innerHTML=BOARD});
 
 /* ---------- apresentação ---------- */
 const slides=$$('.slide'),views={p:$('#v-present'),s:$('#v-sim')},scenes=$$('.scene');
-let auto=false,stay=false,held=false,lastTouch=0,selapsed=0;const SDUR=[20000,23000,17000,20000];
+let auto=false,stay=false,held=false,lastTouch=0,selapsed=0;const SDUR=[20000,23000,18000,20000];
 let mode='p',idx=0,sidx=0,paused=false,elapsed=0,last=performance.now(),lastAct=performance.now();
 const names=['Ambiente','Reservatório','Irrigação','Ar'];
 function buildDots(){const d=$('#dots');d.innerHTML='';
@@ -575,7 +575,7 @@ sims[2]=(function(){
     dr.querySelectorAll('circle').forEach(c=>c.style.visibility=pump?'visible':'hidden');
     $('#i-sun').classList.toggle('on',sun);
     if(pump)setStatus('#i-status','warn','Solo seco: bomba ligada, regando');else setStatus('#i-status','','Solo com água suficiente')}
-  function decide(){if(M<30)pump=true;else if(M>50)pump=false}
+  function decide(){if(M<30)pump=true;else if(M>75)pump=false}
   sl.oninput=()=>{M=+sl.value;decide();render()};
   $('#i-dry').onclick=()=>{M=0;decide();render()};
   $('#i-sun').onclick=()=>{sun=!sun;render()};
