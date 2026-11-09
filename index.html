@@ -26,6 +26,7 @@ button{font-family:inherit;cursor:pointer}
 #frame{position:fixed;inset:0;background:var(--navy);overflow:hidden}
 #stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:var(--navy)}
 #v-sim{background:var(--paper)}
+#stage::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 4px var(--navy);pointer-events:none;z-index:20}
 #views{position:absolute;left:0;top:0;width:1920px;height:1008px;overflow:hidden}
 .view{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s}
 .view.on{opacity:1;visibility:visible}
@@ -414,7 +415,7 @@ const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
 
 /* ---------- escala do palco ---------- */
-function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080),st=$('#stage');
+function fit(){const m=Math.max(1,Math.floor(Math.min(innerWidth/16,innerHeight/9))),s=m/120,st=$('#stage');
   st.style.transform='scale('+s+')';st.style.left=Math.round((innerWidth-1920*s)/2)+'px';st.style.top=Math.round((innerHeight-1080*s)/2)+'px'}
 addEventListener('resize',fit);fit();
 
