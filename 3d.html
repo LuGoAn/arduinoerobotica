@@ -172,9 +172,14 @@ BUILD[1]=()=>{room();
  // cano de entrada: sai da parede e entra pela tampa
  const py=base+TH+18,ix=tx-25;box(ix-(-206)+3,6,6,MAT.metal,(ix-206)/2,py,tz);boxOn(6,6+py-3-(base+TH+4.5),6,MAT.metal,ix,base+TH+4.5,tz);
  boxOn(9,1.5,9,MAT.metal,ix,base+TH+4.5,tz);
- // saída embaixo, apoiada na base e descendo para o ralo
- const oy=base+2.7;box(40,5,5,MAT.metal,tx+TR+20,oy,tz);boxOn(5,oy+2.5,5,MAT.metal,tx+TR+38,0,tz);cylOn(3.4,4,M('#E5561A'),tx+TR+12,oy+2.5,tz);
- cylOn(5,.6,MAT.black,tx+TR+38,0,tz,undefined,20);
+ // saída: cano sai do fundo da caixa e termina numa torneira virada para o ralo
+ const oy=base+2.7,ox=tx+TR+32;box(ox-(tx+TR)+3,5,5,MAT.metal,(tx+TR+ox)/2,oy,tz);cylOn(3.4,4,M('#E5561A'),tx+TR+6,oy+2.5,tz);
+ cyl(2.8,2.8,9,MAT.metal,ox,oy-2,tz,undefined,16);cyl(3.3,2.2,2,MAT.metal,ox,oy-7,tz,undefined,16);
+ cylOn(6,.4,MAT.black,ox,0,tz,undefined,24);for(let i=0;i<4;i++)boxOn(10,.5,.6,MAT.metal,ox,.4,tz-3+i*2);
+ const outW=cyl(1.7,2.1,1,new THREE.MeshStandardMaterial({color:'#7BE6FF',transparent:true,opacity:.75,roughness:.1}),ox,0,tz,undefined,16);outW.visible=false;
+ const pud=new THREE.Mesh(new THREE.CircleGeometry(9,32),new THREE.MeshStandardMaterial({color:'#7BE6FF',transparent:true,opacity:.45,roughness:.05}));pud.rotation.x=-Math.PI/2;pud.position.set(ox,.5,tz);pud.visible=false;scene.add(pud);
+ const drops=[];for(let i=0;i<6;i++){const d=mesh(new THREE.SphereGeometry(.7,8,6),outW.material,ox,1,tz);d.visible=false;drops.push(d)}
+ let draining=false;
  const B=bench(120,-10,-.5,['#1FA86A','#FFD23F','#E8453C']);
  const pin=B.pinIn();{const a=Math.atan2(pin.z-tz,pin.x-tx),cx=Math.cos(a),cz=Math.sin(a),e=TR+3.6,b=51;
  toBench(B,[[tx+cx*4,base+TH+6,tz+cz*4],[tx+cx*(TR+3.6),base+TH+5.2,tz+cz*(TR+3.6)],[tx+cx*e,base+TH+1,tz+cz*e],[tx+cx*e,base+.7,tz+cz*e],[tx+Math.sign(cx)*b,base+.7,tz+cz*e],[tx+Math.sign(cx)*b,.7,tz+cz*e]])}
@@ -183,8 +188,10 @@ BUILD[1]=()=>{room();
  // jato da torneira quando enche
  const tap=cyl(1.8,1.8,1,new THREE.MeshStandardMaterial({color:'#7BE6FF',transparent:true,opacity:.65}),ix,0,tz);
  return {view:{all:[[230,210,240],[0,80,-40]],ard:B.ardView()},bench:B,
+  tick(t){drops.forEach((d,i)=>{d.visible=draining;if(!draining)return;const ph=(t*2.2+i/6)%1,a=i/6*Math.PI*2;d.position.set(ox+Math.cos(a)*ph*7,1+Math.sin(ph*Math.PI)*4,tz+Math.sin(a)*ph*7)})},
   update(st){const L=clamp(st.L??30,0,100);const h=Math.max(.5,(TH-6)*L/100);water.scale.y=h;water.position.y=base+2+h/2;
    const red=L>=85,yel=L>=60&&!red;B.leds[0].userData.set(!red&&!yel);B.leds[1].userData.set(yel);B.leds[2].userData.set(red);B.alarm=red;
+   draining=!!st.drain&&L>0.5;outW.visible=pud.visible=draining;const sy=oy-8;outW.scale.y=sy;outW.position.y=sy/2;
    const fill=!!st.fill;tap.visible=fill;if(fill){const top=base+TH+1.5,bot=base+2+h;const len=Math.max(1,top-bot);tap.scale.y=len;tap.position.y=bot+len/2}
    setVal(Math.round(L)+' %','Distância até a água: '+Math.round(100-L)+' cm');setSt(red?'bad':yel?'warn':'',red?'Risco de transbordar!':yel?'Atenção: nível alto':'Nível normal')}}};
 
@@ -272,7 +279,7 @@ addEventListener('resize',size);
 addEventListener('message',e=>{const d=e.data;if(!d||d.type!=='sim3d')return;if(d.scene!==SC){state=d.state||{};build(d.scene)}else{state=d.state||{};S.update(state)}});
 // controle próprio quando a página é aberta sozinha
 const sv=$('#s-v'),ss=$('#s-sc');
-function soloState(){const v=+sv.value;const st=[{T:Math.round(15+v*.3),H:Math.round(30+v*.6)},{L:v},{T:Math.round(20+v*.75),heat:v<70},{ppm:Math.pow(10,v*3/100)}][SC];$('#s-t').textContent='';return st}
+function soloState(){const v=+sv.value;const st=[{T:Math.round(15+v*.3),H:Math.round(30+v*.6)},{L:v,drain:v>0&&v<50,fill:v>=50},{T:Math.round(20+v*.75),heat:v<70},{ppm:Math.pow(10,v*3/100)}][SC];$('#s-t').textContent='';return st}
 if(SOLO){ss.value=SC;ss.onchange=()=>{SC=+ss.value;state=soloState();build(SC)};sv.oninput=()=>{state=soloState();S.update(state)};state=soloState()}
 let last=performance.now();const t0=last;
 cv.addEventListener('pointerdown',()=>{$('#tip').style.opacity=0});

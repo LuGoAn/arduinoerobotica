@@ -928,7 +928,7 @@ $$('.guess').forEach(g=>g.onclick=()=>g.classList.toggle('show'));
 $$('.vs .ph').forEach(f=>f.onclick=()=>{const on=!f.classList.contains('big');$$('.vs .ph').forEach(x=>x.classList.remove('big'));if(on)f.classList.add('big')});
 $$('[data-url]').forEach(b=>b.onclick=()=>window.open(b.dataset.url,'_blank','noopener'));
 let fr3=null,on3=false;
-const st3=[()=>({T:+$('#t-sl-t').value,H:+$('#t-sl-h').value}),()=>({L:+$('#r-sl').value,fill:$('#r-fill').classList.contains('on')}),()=>({T:+$('#p-sl').value,heat:$('#p-heat').classList.contains('on')}),()=>({ppm:Math.pow(10,$('#a-sl').value*3/100)})];
+const st3=[()=>({T:+$('#t-sl-t').value,H:+$('#t-sl-h').value}),()=>({L:+$('#r-sl').value,fill:$('#r-fill').classList.contains('on'),drain:$('#r-drain').classList.contains('on')}),()=>({T:+$('#p-sl').value,heat:$('#p-heat').classList.contains('on')}),()=>({ppm:Math.pow(10,$('#a-sl').value*3/100)})];
 function send3(){if(on3&&fr3&&fr3.contentWindow)fr3.contentWindow.postMessage({type:'sim3d',scene:sidx,state:st3[sidx]()},'*')}
 $('#b3d').onclick=()=>{on3=!on3;if(on3&&!fr3){fr3=document.createElement('iframe');fr3.title='Modelo 3D do projeto';fr3.src='3d.html?embed=1&c='+sidx;fr3.onload=send3;$('#v3d').appendChild(fr3)}
   $('#v3d').classList.toggle('on',on3);$('#b3d').classList.toggle('on',on3);$('#b3d').textContent=on3?'Voltar ao 2D':'Ver em 3D';send3()};
