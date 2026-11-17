@@ -270,6 +270,6 @@ function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;const t=(now-t
  requestAnimationFrame(loop)}
 size();build(SC);$('#load').remove();requestAnimationFrame(loop);
 setTimeout(()=>{$('#tip').style.opacity=0},7000);
-window.__ready=true;
+window.__ready=true;window.__dbg=()=>{let n=0;scene.traverse(o=>{if(o.isMesh)n++});return [n,scene.children.length,cam.position.toArray().map(Math.round)]};
 </script>
 </body></html>
