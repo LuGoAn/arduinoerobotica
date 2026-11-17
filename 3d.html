@@ -5,7 +5,7 @@
 <style>
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;overflow:hidden;background:#EAF2FF;font-family:Nunito,Arial,sans-serif;color:#0F1F4D}
-#c{position:absolute;inset:0;display:block;touch-action:none}
+#c{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
 .lab{position:absolute;left:0;top:0;transform:translate(-50%,-100%);pointer-events:none;font:600 15px Fredoka,Arial,sans-serif;padding:4px 12px;border-radius:14px;border:2.5px solid #0F1F4D;white-space:nowrap;box-shadow:2px 2px 0 rgba(15,31,77,.25)}
 .lab.in{background:#2350E8;color:#fff}.lab.out{background:#FFD23F}.lab.br{background:#0FA3AE;color:#fff}.lab.no{background:#fff}
 .lab:after{content:'';position:absolute;left:50%;bottom:-9px;width:2.5px;height:8px;background:#0F1F4D}
@@ -267,8 +267,8 @@ function build(i){SC=i;labels.forEach(l=>l.d.remove());labels=[];scene=new THREE
 function go(which,instant){const v=S.view[which];const p=new THREE.Vector3(...v[0]),t=new THREE.Vector3(...v[1]);
  if(instant){cam.position.copy(p);ctl.target.copy(t);ctl.update();fly=null}else fly={p0:cam.position.clone(),t0:ctl.target.clone(),p,t,s:performance.now()}}
 $('#b-all').onclick=()=>go('all');$('#b-ard').onclick=()=>go('ard');
-let VW=1,VH=1;function size(){const w=cv.clientWidth||innerWidth,h=cv.clientHeight||innerHeight;VW=w;VH=h;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
-addEventListener('resize',size);if(window.ResizeObserver)new ResizeObserver(size).observe(cv);
+let VW=1,VH=1;function size(){const w=innerWidth,h=innerHeight;VW=w;VH=h;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',size);
 addEventListener('message',e=>{const d=e.data;if(!d||d.type!=='sim3d')return;if(d.scene!==SC){state=d.state||{};build(d.scene)}else{state=d.state||{};S.update(state)}});
 // controle próprio quando a página é aberta sozinha
 const sv=$('#s-v'),ss=$('#s-sc');
