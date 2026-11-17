@@ -113,7 +113,7 @@ function bench(x,z,rotY,colors){const g=new THREE.Group();g.position.set(x,0,z);
  wire([[-3.4,.9,2.45],[0,2.3,3.2],[5,2,2.6],[6.2,.9,2.2]],'#FF8A1F',.09,k);
  wire([[-1.2,.9,2.45],[1,1.6,2.8],[3,1.2,2.4],[3.8,.9,2.2]],'#1B2440',.09,k);
  g.updateMatrixWorld(true);
- return {g,k,leds,bz,top:H,ardView:()=>{const t=k.localToWorld(new THREE.Vector3(0,1,0)),p=g.localToWorld(new THREE.Vector3(8,48,62));return [p.toArray(),t.toArray()]},pinIn:()=>{const v=new THREE.Vector3(-3.6,.9,-2.45);return k.localToWorld(v)}}}
+ return {g,k,leds,bz,top:H,ardView:()=>{const t=k.localToWorld(new THREE.Vector3(0,1,0)),p=g.localToWorld(new THREE.Vector3(6,128,50));return [p.toArray(),t.toArray()]},pinIn:()=>{const v=new THREE.Vector3(-3.6,.9,-2.45);return k.localToWorld(v)}}}
 function room(w=420,d=320,hw=230,mat2){scene.add(mesh(new THREE.BoxGeometry(w,2,d),MAT.floor,0,-1,0));
  boxOn(w,hw,4,MAT.wall,0,0,-d/2+2);boxOn(4,hw,d,mat2||MAT.wall2,-w/2+2,0,0);
  boxOn(w,10,1,M('#C9D3E3'),0,0,-d/2+4.5);boxOn(1,10,d,M('#C9D3E3'),-w/2+4.5,0,0)}
