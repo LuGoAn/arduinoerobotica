@@ -731,7 +731,7 @@ function goSlide(i){if(!slides.length)return;idx=Math.max(0,Math.min(slides.leng
 function goScene(i){sidx=(i+scenes.length)%scenes.length;selapsed=0;held=false;scenes.forEach((s,k)=>s.classList.toggle('on',k===sidx));buildDots();if(auto&&sims[sidx].demoStart)sims[sidx].demoStart();else if(sims[sidx].enter)sims[sidx].enter();$('#autobadge').classList.toggle('on',auto)}
 function setMode(m,i){mode=m;views.p.classList.toggle('on',m==='p');views.s.classList.toggle('on',m==='s');
   $('#tab-p').classList.toggle('on',m==='p');$('#tab-s').classList.toggle('on',m==='s');
-  $('#chooser').classList.remove('on');$('#tab-c').classList.remove('on');$('#stage').classList.toggle('hidebar',m==='p');if(m==='p')auto=false;$('#b-play').style.visibility=(m==='s'&&auto)?'visible':'hidden';$('#prog').style.display=(m==='p'||auto)?'block':'none';if(m==='s')$$('#v-present video').forEach(v=>v.pause());$('#autobadge').classList.toggle('on',auto);
+  $('#chooser').classList.remove('on');$('#tab-c').classList.remove('on');$('#stage').classList.toggle('hidebar',m==='p'&&HOVER);if(m==='p')auto=false;$('#b-play').style.visibility=(m==='s'&&auto)?'visible':'hidden';$('#prog').style.display=(m==='p'||auto)?'block':'none';if(m==='s')$$('#v-present video').forEach(v=>v.pause());$('#autobadge').classList.toggle('on',auto);
   if(m==='p'){goSlide(i==null?idx:i)}else{goScene(i==null?sidx:i)}}
 $('#tab-p').onclick=()=>{if(!slides.length)openChooser();else setMode('p')};$('#tab-c').onclick=()=>openChooser();$('#tab-s').onclick=()=>{auto=true;stay=true;setMode('s')};
 function takeOver(){if(mode==='s'){held=true;lastTouch=performance.now();$('#autobadge').classList.remove('on')}}
@@ -908,12 +908,14 @@ function loop(now){const dt=Math.min(now-last,100);last=now;
     if(sims[sidx].tick&&!(auto&&paused&&!held))sims[sidx].tick(dt);if(soundOn&&alarms[sidx]&&now-lastBeep>450){lastBeep=now;beep(((now/450|0)%2)?988:784,.22)}}
   requestAnimationFrame(loop)}
 /* ---------- turma ---------- */
-const GERAL=['cover','onde','arduino','arduino-real','fluxo'],FIM=['wokwi','desafio'];
+const HOVER=matchMedia('(hover:hover) and (pointer:fine)').matches;const GERAL=['cover','onde','arduino','arduino-real','fluxo'],FIM=['wokwi','desafio'];
 const SEQ={misto:[...GERAL,'profissoes','agro-proj','nutri-proj','san-proj','civil-proj',...FIM,'misto-m3','experimentar']};
 ['agro','nutri','san','civil'].forEach(c=>{SEQ[c]=[...GERAL,c,c+'-real'].concat(c==='agro'?['agro-video']:[]).concat([c+'-proj',...FIM,c+'-m1',c+'-m2',c+'-m3','experimentar'])});
 function openChooser(){let last=null;try{last=localStorage.getItem('turma')}catch(e){}$$('.cbtn').forEach(b=>b.classList.toggle('last',b.dataset.curso===last));
-  $$('#v-present video').forEach(v=>v.pause());$('#chooser').classList.add('on');$('#stage').classList.add('hidebar');$('#tab-c').classList.add('on');$('#tab-p').classList.remove('on');$('#tab-s').classList.remove('on');$('#dots').innerHTML='';$('#prog').style.display='none'}
+  $$('#v-present video').forEach(v=>v.pause());$('#chooser').classList.add('on');$('#stage').classList.toggle('hidebar',HOVER);$('#tab-c').classList.add('on');$('#tab-p').classList.remove('on');$('#tab-s').classList.remove('on');$('#dots').innerHTML='';$('#prog').style.display='none'}
 function choose(c){$$('.vs .ph').forEach(x=>x.classList.remove('big'));curso=c;try{localStorage.setItem('turma',c)}catch(e){}slides=SEQ[c].map(id=>ALL[id]).filter(Boolean);$$('.guess').forEach(g=>g.classList.remove('show'));setMode('p',0)}
+let tx=null,ty=0;$('#views').addEventListener('touchstart',e=>{if(e.touches.length===1){tx=e.touches[0].clientX;ty=e.touches[0].clientY}else tx=null},{passive:true});
+$('#views').addEventListener('touchend',e=>{if(tx===null||mode!=='p'||$('#chooser').classList.contains('on'))return;const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;tx=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)$(dx<0?'#b-next':'#b-prev').click()},{passive:true});
 addEventListener('mousemove',e=>{const r=$('#stage').getBoundingClientRect(),k=r.height/1080;$('#stage').classList.toggle('showbar',e.clientY>r.bottom-110*k&&e.clientY<=r.bottom+2)});
 document.documentElement.addEventListener('mouseleave',()=>$('#stage').classList.remove('showbar'));
 $$('.cbtn').forEach(b=>b.onclick=()=>choose(b.dataset.curso));
