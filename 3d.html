@@ -234,7 +234,7 @@ BUILD[3]=()=>{room();
  cylOn(2.6,8,MAT.metal,gx,48,gz,undefined,12);
  wire([[gx,56,gz],[gx-12,70,gz-10],[fx+30,60,fz-24],[fx+20,40,fz-29]],'#1B2440',1.1);
  // sensor de gás na parede lateral, perto do chão (o gás de cozinha é mais pesado que o ar)
- const sx=-210+4,sy=45,sz=-30;const mq=new THREE.Group();mq.position.set(sx,sy,sz);mq.rotation.y=Math.PI/2;scene.add(mq);mq.scale.setScalar(2.4);
+ const sx=-210+4,sy=45,sz=-30;const mq=new THREE.Group();mq.position.set(sx,sy,sz);mq.rotation.y=Math.PI/2;scene.add(mq);mq.scale.setScalar(4);
  boxOn(3.2,.2,2.2,M('#1F5BFF'),0,-1.1,0,mq).rotation.x=Math.PI/2;
  const can=cyl(1,1,1.4,MAT.metal,0,0,.85,mq,24);can.rotation.x=Math.PI/2;const mesh2=cyl(.85,.85,.1,M('#7C8798',{roughness:.9}),0,0,1.6,mq,24);mesh2.rotation.x=Math.PI/2;
  // partículas de gás
@@ -281,6 +281,6 @@ function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;const t=(now-t
  requestAnimationFrame(loop)}
 size();build(SC);$('#load').remove();requestAnimationFrame(loop);
 setTimeout(()=>{$('#tip').style.opacity=0},7000);
-window.__ready=true;window.__dbg=()=>{let n=0;scene.traverse(o=>{if(o.isMesh)n++});return [n,scene.children.length,cam.position.toArray().map(Math.round)]};
+window.__ready=true;window.__look=(p,t)=>{cam.position.set(...p);ctl.target.set(...t);ctl.update()};window.__dbg=()=>{let n=0;scene.traverse(o=>{if(o.isMesh)n++});return [n,scene.children.length,cam.position.toArray().map(Math.round)]};
 </script>
 </body></html>
