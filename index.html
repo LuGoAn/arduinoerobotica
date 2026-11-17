@@ -250,6 +250,10 @@ h1,h2,h3{font-family:var(--display)}
 .vhint{position:absolute;left:112px;top:870px;font-size:26px;color:#7C89A6}
 .vs .ph.big{left:210px!important;top:24px;width:1500px!important;z-index:5;cursor:zoom-out;box-shadow:0 0 0 2000px rgba(15,31,77,.82)}
 .vs .ph.big p{display:none}
+#views{transition:height 0s}#bar{transition:transform .25s}
+#stage.hidebar #views{height:1080px}
+#stage.hidebar #bar{transform:translateY(100%)}
+#stage.hidebar.showbar #bar{transform:none}
 .seebtn{position:absolute;right:112px;top:92px;font:600 30px var(--display);background:var(--navy);color:#fff;border:0;border-radius:40px;padding:16px 32px;box-shadow:6px 6px 0 var(--cyan)}
 </style>
 </head>
@@ -727,7 +731,7 @@ function goSlide(i){if(!slides.length)return;idx=Math.max(0,Math.min(slides.leng
 function goScene(i){sidx=(i+scenes.length)%scenes.length;selapsed=0;held=false;scenes.forEach((s,k)=>s.classList.toggle('on',k===sidx));buildDots();if(auto&&sims[sidx].demoStart)sims[sidx].demoStart();else if(sims[sidx].enter)sims[sidx].enter();$('#autobadge').classList.toggle('on',auto)}
 function setMode(m,i){mode=m;views.p.classList.toggle('on',m==='p');views.s.classList.toggle('on',m==='s');
   $('#tab-p').classList.toggle('on',m==='p');$('#tab-s').classList.toggle('on',m==='s');
-  $('#chooser').classList.remove('on');$('#tab-c').classList.remove('on');if(m==='p')auto=false;$('#b-play').style.visibility=(m==='s'&&auto)?'visible':'hidden';$('#prog').style.display=(m==='p'||auto)?'block':'none';if(m==='s')$$('#v-present video').forEach(v=>v.pause());$('#autobadge').classList.toggle('on',auto);
+  $('#chooser').classList.remove('on');$('#tab-c').classList.remove('on');$('#stage').classList.toggle('hidebar',m==='p');if(m==='p')auto=false;$('#b-play').style.visibility=(m==='s'&&auto)?'visible':'hidden';$('#prog').style.display=(m==='p'||auto)?'block':'none';if(m==='s')$$('#v-present video').forEach(v=>v.pause());$('#autobadge').classList.toggle('on',auto);
   if(m==='p'){goSlide(i==null?idx:i)}else{goScene(i==null?sidx:i)}}
 $('#tab-p').onclick=()=>{if(!slides.length)openChooser();else setMode('p')};$('#tab-c').onclick=()=>openChooser();$('#tab-s').onclick=()=>{auto=true;stay=true;setMode('s')};
 function takeOver(){if(mode==='s'){held=true;lastTouch=performance.now();$('#autobadge').classList.remove('on')}}
@@ -908,8 +912,10 @@ const GERAL=['cover','onde','arduino','arduino-real','fluxo'],FIM=['wokwi','desa
 const SEQ={misto:[...GERAL,'profissoes','agro-proj','nutri-proj','san-proj','civil-proj',...FIM,'misto-m3','experimentar']};
 ['agro','nutri','san','civil'].forEach(c=>{SEQ[c]=[...GERAL,c,c+'-real'].concat(c==='agro'?['agro-video']:[]).concat([c+'-proj',...FIM,c+'-m1',c+'-m2',c+'-m3','experimentar'])});
 function openChooser(){let last=null;try{last=localStorage.getItem('turma')}catch(e){}$$('.cbtn').forEach(b=>b.classList.toggle('last',b.dataset.curso===last));
-  $$('#v-present video').forEach(v=>v.pause());$('#chooser').classList.add('on');$('#tab-c').classList.add('on');$('#tab-p').classList.remove('on');$('#tab-s').classList.remove('on');$('#dots').innerHTML='';$('#prog').style.display='none'}
+  $$('#v-present video').forEach(v=>v.pause());$('#chooser').classList.add('on');$('#stage').classList.add('hidebar');$('#tab-c').classList.add('on');$('#tab-p').classList.remove('on');$('#tab-s').classList.remove('on');$('#dots').innerHTML='';$('#prog').style.display='none'}
 function choose(c){$$('.vs .ph').forEach(x=>x.classList.remove('big'));curso=c;try{localStorage.setItem('turma',c)}catch(e){}slides=SEQ[c].map(id=>ALL[id]).filter(Boolean);$$('.guess').forEach(g=>g.classList.remove('show'));setMode('p',0)}
+addEventListener('mousemove',e=>{const r=$('#stage').getBoundingClientRect(),k=r.height/1080;$('#stage').classList.toggle('showbar',e.clientY>r.bottom-110*k&&e.clientY<=r.bottom+2)});
+document.documentElement.addEventListener('mouseleave',()=>$('#stage').classList.remove('showbar'));
 $$('.cbtn').forEach(b=>b.onclick=()=>choose(b.dataset.curso));
 $$('.guess').forEach(g=>g.onclick=()=>g.classList.toggle('show'));
 $$('.vs .ph').forEach(f=>f.onclick=()=>{const on=!f.classList.contains('big');$$('.vs .ph').forEach(x=>x.classList.remove('big'));if(on)f.classList.add('big')});
