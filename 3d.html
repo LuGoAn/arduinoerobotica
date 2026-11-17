@@ -51,7 +51,7 @@ const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughnes
 const MAT={navy:M('#0F1F4D'),black:M('#1B2440',{roughness:.5}),metal:M('#C9D3E3',{metalness:.85,roughness:.28}),steel:M('#D6DEE9',{metalness:.9,roughness:.22}),
  white:M('#F4F8FF'),wood:M('#C98D57',{roughness:.75}),teal:M('#0A8F9A',{roughness:.45}),gold:M('#D4AF37',{metalness:.8,roughness:.3}),chip:M('#202638',{roughness:.4}),
  floor:M('#D5DEEC',{roughness:.9}),wall:M('#F1F5FC',{roughness:.95}),wall2:M('#E3EAF6',{roughness:.95})};
-function mesh(g,m,x=0,y=0,z=0,par){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;if(par)par.add(o);return o}
+function mesh(g,m,x=0,y=0,z=0,par){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;(par||scene).add(o);return o}
 const box=(w,h,d,m,x,y,z,p)=>mesh(new THREE.BoxGeometry(w,h,d),m,x,y,z,p);
 // caixa apoiada: y é a base
 const boxOn=(w,h,d,m,x,yb,z,p)=>box(w,h,d,m,x,yb+h/2,z,p);
