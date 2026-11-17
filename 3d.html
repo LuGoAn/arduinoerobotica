@@ -245,9 +245,11 @@ BUILD[3]=()=>{room();
  label('Sensor de gás','in',[sx+4,sy+10,sz]);label('Botijão','no',[gx,70,gz+18]);label('Fogão','no',[fx,FH+16,fz+20]);
  label('Arduino','br',[pin.x+8,92,pin.z+6]);const bl=B.k.localToWorld(new THREE.Vector3(3,2.6,-.9));label('LEDs','out',[bl.x,bl.y,bl.z]);
  let n=0;
+ function gasStep(dt,all){parts.forEach((q,i)=>{if(!all&&i>=n){q.p.visible=false;return}q.p.visible=true;q.l+=dt;q.x+=q.vx*dt;q.y=Math.max(3+(i%5)*2,q.y+q.vy*dt);q.z+=q.vz*dt;if(q.x<-200){q.x=-200;q.vz+=dt*2}
+   if(q.l>30||q.z>140){q.l=0;q.x=gx+(Math.random()-.5)*6;q.y=56+Math.random()*4;q.z=gz+(Math.random()-.5)*6}q.p.position.set(q.x,q.y,q.z)})}
+ for(let k=0;k<300;k++)gasStep(.1,true);
  return {view:{all:[[200,180,250],[-40,50,-50]],ard:B.ardView()},bench:B,
-  tick(t,dt){parts.forEach((q,i)=>{if(i>=n){q.p.visible=false;return}q.p.visible=true;q.l+=dt;q.x+=q.vx*dt;q.y=Math.max(3+(i%5)*2,q.y+q.vy*dt);q.z+=q.vz*dt;if(q.x<-200){q.x=-200;q.vz+=dt*2}
-   if(q.l>30||q.z>140){q.l=0;q.x=gx+(Math.random()-.5)*6;q.y=56+Math.random()*4;q.z=gz+(Math.random()-.5)*6}q.p.position.set(q.x,q.y,q.z)})},
+  tick(t,dt){gasStep(dt)},
   update(st){const ppm=st.ppm??3;n=Math.round(clamp(Math.log10(Math.max(ppm,1))/3,0,1)*80);const red=ppm>=50,yel=ppm>=10&&!red;
    B.leds[0].userData.set(!red&&!yel);B.leds[1].userData.set(yel);B.leds[2].userData.set(red);B.alarm=red;
    const shown=ppm<10?ppm.toFixed(1).replace('.0',''):Math.round(ppm);setVal(shown+' ppm','Gás no ar');setSt(red?'bad':yel?'warn':'',red?'Valor alto de gás!':yel?'Atenção: gás acima do normal':'Ar normal')}}};
