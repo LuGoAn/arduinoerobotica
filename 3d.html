@@ -60,6 +60,17 @@ const cylOn=(r,h,m,x,yb,z,p,s)=>cyl(r,r,h,m,x,yb+h/2,z,p,s);
 function rbox(w,h,d,r,m){const s=new THREE.Shape(),x=-w/2,y=-h/2;s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);s.lineTo(x+r,y+h);s.quadraticCurveTo(x,y+h,x,y+h-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);
  const g=new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:true,bevelThickness:r*.4,bevelSize:r*.4,bevelSegments:3});g.translate(0,0,-d/2);return mesh(g,m)}
 function wire(pts,color,r=.45,par){const c=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)),false,'catmullrom',.2);const o=mesh(new THREE.TubeGeometry(c,Math.max(20,pts.length*14),r,8),M(color,{roughness:.45}));(par||scene).add(o);return o}
+function cable(pts,color='#2350E8',r=.6,rad=4){const P=pts.map(p=>new THREE.Vector3(...p));const path=new THREE.CurvePath();let cur=P[0].clone();
+ for(let i=1;i<P.length;i++){const b=P[i];if(i<P.length-1){const a=P[i-1],c=P[i+1];const d1=Math.min(rad,a.distanceTo(b)/2),d2=Math.min(rad,b.distanceTo(c)/2);
+   const p1=b.clone().add(a.clone().sub(b).setLength(d1)),p2=b.clone().add(c.clone().sub(b).setLength(d2));if(cur.distanceTo(p1)>.01)path.add(new THREE.LineCurve3(cur,p1));path.add(new THREE.QuadraticBezierCurve3(p1,b.clone(),p2));cur=p2}
+  else path.add(new THREE.LineCurve3(cur,b.clone()))}
+ const o=mesh(new THREE.TubeGeometry(path,P.length*24,r,8),M(color,{roughness:.45}));return o}
+// do ponto (já no chão) até o pino, subindo pela perna da mesa mais próxima
+function toBench(B,pts,color){const pin=B.pinIn(),last=new THREE.Vector3(...pts[pts.length-1]);const c=B.g.position;let best,bd=1e9;
+ [[-32,-18],[32,-18],[-32,18],[32,18]].forEach(l=>{const w=B.g.localToWorld(new THREE.Vector3(l[0],0,l[1]));const d=w.distanceTo(new THREE.Vector3(last.x,0,last.z));if(d<bd){bd=d;best=w}});
+ const out=new THREE.Vector3(best.x-c.x,0,best.z-c.z).normalize();const o=best.clone().add(out.multiplyScalar(4.5));
+ const top=B.top+.7;const lt=new THREE.Vector3(pin.x,0,pin.z).sub(new THREE.Vector3(o.x,0,o.z)).multiplyScalar(.15);
+ cable([...pts,[o.x,.7,o.z],[o.x,top+.6,o.z],[o.x+lt.x,top,o.z+lt.z],[pin.x,top,pin.z+0.01],[pin.x,pin.y+.3,pin.z]],color)}
 function txtTex(t,w=256,h=64,bg='#0A8F9A',fg='#E8F1F2',font='bold 40px Fredoka, Arial'){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font=font;x.textAlign='center';x.textBaseline='middle';x.fillText(t,w/2,h/2+2);const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;return tx}
 function label(text,kind,pos){const d=document.createElement('div');d.className='lab '+kind;d.textContent=text;labBox.appendChild(d);labels.push({d,p:new THREE.Vector3(...pos)})}
 
@@ -102,7 +113,7 @@ function bench(x,z,rotY,colors){const g=new THREE.Group();g.position.set(x,0,z);
  wire([[-3.4,.9,2.45],[0,2.3,3.2],[5,2,2.6],[6.2,.9,2.2]],'#FF8A1F',.09,k);
  wire([[-1.2,.9,2.45],[1,1.6,2.8],[3,1.2,2.4],[3.8,.9,2.2]],'#1B2440',.09,k);
  g.updateMatrixWorld(true);
- return {g,k,leds,bz,top:H,pinIn:()=>{const v=new THREE.Vector3(-3.6,.9,-2.45);return k.localToWorld(v)}}}
+ return {g,k,leds,bz,top:H,ardView:()=>{const t=k.localToWorld(new THREE.Vector3(0,1,0)),p=g.localToWorld(new THREE.Vector3(8,48,62));return [p.toArray(),t.toArray()]},pinIn:()=>{const v=new THREE.Vector3(-3.6,.9,-2.45);return k.localToWorld(v)}}}
 function room(w=420,d=320,hw=230,mat2){scene.add(mesh(new THREE.BoxGeometry(w,2,d),MAT.floor,0,-1,0));
  boxOn(w,hw,4,MAT.wall,0,0,-d/2+2);boxOn(4,hw,d,mat2||MAT.wall2,-w/2+2,0,0);
  boxOn(w,10,1,M('#C9D3E3'),0,0,-d/2+4.5);boxOn(1,10,d,M('#C9D3E3'),-w/2+4.5,0,0)}
@@ -127,17 +138,16 @@ BUILD[0]=()=>{room(420,320,230,M('#FFF3E0',{roughness:.95}));
  // prateleira 4: caixas pequenas
  [-50,-25,0,25,50].forEach(x=>boxOn(18,16,24,card,sx+x,top(shelfY[3]),sz));
  // sensor DHT22 preso na parede do fundo
- const dx=70,dy=150,dz=-160+4;const dh=new THREE.Group();dh.position.set(dx,dy,dz);scene.add(dh);
+ const B=bench(100,-133,0,['#1FA86A','#E8453C']);const pin0=B.pinIn();const dx=pin0.x,dy=135,dz=-160+4;const dh=new THREE.Group();dh.position.set(dx,dy,dz);dh.scale.setScalar(1.5);scene.add(dh);
  boxOn(9,2,1.2,M('#0F7A55'),0,-11,.6,dh).rotation.x=0;box(7.5,10,3,MAT.white,0,0,1.5,dh);
  const grid=new THREE.Mesh(new THREE.PlaneGeometry(6,7.5),new THREE.MeshBasicMaterial({map:txtTex('',64,80,'#DDE3EE','#000')}));grid.position.set(0,.6,3.02);dh.add(grid);
  for(let i=0;i<4;i++)for(let j=0;j<5;j++)box(.8,.8,.3,MAT.black,-1.8+i*1.2,3+-j*1.25+.2,3.1,dh);
  [-1.5,-.5,.5,1.5].forEach(x=>cylOn(.15,3,MAT.metal,x,-8,1.5,dh,6));
- const B=bench(110,-40,-.35,['#1FA86A','#E8453C']);
- const pin=B.pinIn();wire([[dx,dy-8,dz+2],[dx,dy-40,dz+2],[dx+4,90,dz+8],[pin.x-6,pin.y+18,pin.z-10],[pin.x,pin.y+1,pin.z]],'#2350E8',.6);
+ const pin=pin0;cable([[dx,dy-12,dz+1.2],[dx,B.top+.7,dz+1.2],[dx,B.top+.7,pin.z-1],[pin.x,pin.y+.3,pin.z]]);
  label('Sensor de temperatura e umidade','in',[dx,dy+8,dz+3]);label('Alimentos guardados','no',[sx,190,sz]);label('Arduino','br',[B.pinIn().x+6,90,B.pinIn().z+8]);
  const bl=B.k.localToWorld(new THREE.Vector3(2.2,2.6,-.9));label('LEDs','out',[bl.x,bl.y,bl.z]);
  const fog=new THREE.Fog('#C9D3E3',260,900);scene.fog=fog;
- return {view:{all:[[230,190,260],[0,90,-60]],ard:[[150,140,60],[105,78,-42]]},bench:B,
+ return {view:{all:[[230,190,260],[0,90,-60]],ard:B.ardView()},bench:B,
   update(st){const T=st.T??24,H=st.H??55;const alert=T>30||H>70;B.leds[0].userData.set(!alert);B.leds[1].userData.set(alert);B.alarm=alert;
    fog.near=lerp(260,40,clamp((H-50)/50,0,1));fog.far=lerp(900,420,clamp((H-50)/50,0,1));
    setVal(T+' °C',H+' % de umidade');setSt(alert?'bad':'',alert?('Alerta: '+(T>30&&H>70?'quente e úmido demais':T>30?'temperatura alta':'umidade alta')):'Tudo normal')}}};
@@ -164,12 +174,13 @@ BUILD[1]=()=>{room();
  // saída lá embaixo
  box(40,5,5,MAT.metal,tx+TR+20,base+8,tz);cyl(3.4,3.4,6,M('#E5561A'),tx+TR+10,base+14,tz);
  const B=bench(120,-10,-.5,['#1FA86A','#FFD23F','#E8453C']);
- const pin=B.pinIn();wire([[tx+5,base+TH+8,tz-2],[tx+20,base+TH+30,tz+10],[tx+TR+30,base+TH+10,tz+20],[pin.x-8,pin.y+30,pin.z-6],[pin.x,pin.y+1,pin.z]],'#2350E8',.6);
+ const pin=B.pinIn();{const a=Math.atan2(pin.z-tz,pin.x-tx),cx=Math.cos(a),cz=Math.sin(a),e=TR+3.6,b=51;
+ toBench(B,[[tx+cx*4,base+TH+6,tz+cz*4],[tx+cx*(TR+3.6),base+TH+5.2,tz+cz*(TR+3.6)],[tx+cx*e,base+TH+1,tz+cz*e],[tx+cx*e,base+.7,tz+cz*e],[tx+Math.sign(cx)*b,base+.7,tz+cz*e],[tx+Math.sign(cx)*b,.7,tz+cz*e]])}
  label('Sensor de nível (ultrassônico)','in',[tx,base+TH+16,tz]);label('Caixa d’água','no',[tx-TR-10,base+60,tz+TR]);label('Arduino','br',[pin.x+8,92,pin.z+6]);
  const bl=B.k.localToWorld(new THREE.Vector3(3,2.6,-.9));label('LEDs','out',[bl.x,bl.y,bl.z]);
  // jato da torneira quando enche
  const tap=cyl(1.8,1.8,1,new THREE.MeshStandardMaterial({color:'#7BE6FF',transparent:true,opacity:.65}),tx-45,0,tz-25);
- return {view:{all:[[230,210,240],[0,80,-40]],ard:[[170,150,100],[110,78,-12]]},bench:B,
+ return {view:{all:[[230,210,240],[0,80,-40]],ard:B.ardView()},bench:B,
   update(st){const L=clamp(st.L??30,0,100);const h=Math.max(.5,(TH-6)*L/100);water.scale.y=h;water.position.y=base+2+h/2;
    const red=L>=85,yel=L>=60&&!red;B.leds[0].userData.set(!red&&!yel);B.leds[1].userData.set(yel);B.leds[2].userData.set(red);B.alarm=red;
    const fill=!!st.fill;tap.visible=fill;if(fill){const top=py-10-10+3,bot=base+2+h;const len=Math.max(1,top-bot);tap.scale.y=len;tap.position.y=bot+len/2}
@@ -198,11 +209,11 @@ BUILD[2]=()=>{room();
  const steam=[];const sm=new THREE.MeshStandardMaterial({color:'#fff',transparent:true,opacity:0,roughness:1,depthWrite:false});
  for(let i=0;i<16;i++){const s=mesh(new THREE.SphereGeometry(4+(i%4),12,8),sm.clone(),tx+((i*37)%50)-25,ML+5,tz+((i*23)%40)-20);s.castShadow=false;scene.add(s);steam.push({s,o:i/16})}
  const B=bench(110,-20,-.45,['#FFD23F','#1FA86A','#E8453C']);
- const pin=B.pinIn();wire([[px,legH+TH+7,pz],[px+10,legH+TH+25,pz+10],[px+40,105,pz+20],[pin.x-8,pin.y+26,pin.z-6],[pin.x,pin.y+1,pin.z]],'#2350E8',.6);
+ const pin=B.pinIn();toBench(B,[[px,legH+TH+5,pz],[px,legH+TH+9,pz],[tx+TR+3,legH+TH+6,pz],[tx+TR+3,legH+TH-6,pz],[tx+TR+3,.7,pz+6]]);
  label('Sonda de temperatura','in',[px,legH+TH+12,pz]);label('Tanque de leite','no',[tx-TR-6,legH+TH*.5,tz+TR]);label('Aquecedor','no',[tx-26,10,tz+26]);
  label('Arduino','br',[pin.x+8,92,pin.z+6]);const bl=B.k.localToWorld(new THREE.Vector3(3,2.6,-.9));label('LEDs','out',[bl.x,bl.y,bl.z]);
  let heat=false,T=30;
- return {view:{all:[[200,200,230],[-10,60,-30]],ard:[[160,150,90],[105,78,-22]]},bench:B,
+ return {view:{all:[[200,200,230],[-10,60,-30]],ard:B.ardView()},bench:B,
   tick(t,dt){flames.forEach((f,i)=>{f.visible=heat;f.scale.y=.8+.35*Math.sin(t*9+i*1.7)});fl.intensity=heat?60+20*Math.sin(t*13):0;
    const k=clamp((T-50)/30,0,1);steam.forEach((p,i)=>{const ph=(t*.25+p.o)%1;p.s.position.y=ML+3+ph*70;p.s.material.opacity=k*.5*(1-ph);p.s.scale.setScalar(.6+ph*1.4)})},
   update(st){T=st.T??30;heat=!!st.heat;const yel=T<72,red=T>80;B.leds[0].userData.set(yel);B.leds[1].userData.set(!yel&&!red);B.leds[2].userData.set(red);B.alarm=red;
@@ -230,11 +241,11 @@ BUILD[3]=()=>{room();
  const parts=[];const pmM=new THREE.MeshStandardMaterial({color:'#7BA05B',transparent:true,opacity:.45,depthWrite:false});
  for(let i=0;i<80;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(1.4+(i%3)*.8,8,6),pmM);scene.add(p);parts.push({p,x:gx+(Math.random()-.5)*20,y:56+Math.random()*10,z:gz+(Math.random()-.5)*20,vx:-(4+Math.random()*10),vy:(Math.random()-.6)*3,vz:(Math.random()-.3)*6})}
  const B=bench(110,-10,-.5,['#1FA86A','#FFD23F','#E8453C']);
- const pin=B.pinIn();wire([[sx+2,sy-3,sz],[sx+3,8,sz+10],[-40,3,40],[60,3,30],[pin.x-30,3,pin.z+20],[pin.x-14,40,pin.z],[pin.x,pin.y+1,pin.z]],'#2350E8',.6);
+ const pin=B.pinIn();toBench(B,[[sx+1.5,sy-3,sz],[sx+.8,sy-6,sz],[sx+.8,.7,sz],[sx+20,.7,sz+30]]);
  label('Sensor de gás','in',[sx+4,sy+10,sz]);label('Botijão','no',[gx,70,gz+18]);label('Fogão','no',[fx,FH+16,fz+20]);
  label('Arduino','br',[pin.x+8,92,pin.z+6]);const bl=B.k.localToWorld(new THREE.Vector3(3,2.6,-.9));label('LEDs','out',[bl.x,bl.y,bl.z]);
  let n=0;
- return {view:{all:[[200,180,250],[-40,50,-50]],ard:[[170,150,110],[110,78,-12]]},bench:B,
+ return {view:{all:[[200,180,250],[-40,50,-50]],ard:B.ardView()},bench:B,
   tick(t,dt){parts.forEach((q,i)=>{if(i>=n){q.p.visible=false;return}q.p.visible=true;q.x+=q.vx*dt;q.y+=q.vy*dt;q.z+=q.vz*dt;
    if(q.x<-205||q.y<1||q.y>120||q.z>120||q.z<-150){q.x=gx+(Math.random()-.5)*10;q.y=56+Math.random()*6;q.z=gz+(Math.random()-.5)*10}q.p.position.set(q.x,q.y,q.z)})},
   update(st){const ppm=st.ppm??3;n=Math.round(clamp(Math.log10(Math.max(ppm,1))/3,0,1)*80);const red=ppm>=50,yel=ppm>=10&&!red;
@@ -258,7 +269,7 @@ addEventListener('message',e=>{const d=e.data;if(!d||d.type!=='sim3d')return;if(
 // controle próprio quando a página é aberta sozinha
 const sv=$('#s-v'),ss=$('#s-sc');
 function soloState(){const v=+sv.value;const st=[{T:Math.round(15+v*.3),H:Math.round(30+v*.6)},{L:v},{T:Math.round(20+v*.75),heat:v<70},{ppm:Math.pow(10,v*3/100)}][SC];$('#s-t').textContent='';return st}
-if(SOLO){ss.value=SC;ss.onchange=()=>{state=soloState();build(+ss.value)};sv.oninput=()=>{state=soloState();S.update(state)};state=soloState()}
+if(SOLO){ss.value=SC;ss.onchange=()=>{SC=+ss.value;state=soloState();build(SC)};sv.oninput=()=>{state=soloState();S.update(state)};state=soloState()}
 let last=performance.now();const t0=last;
 cv.addEventListener('pointerdown',()=>{$('#tip').style.opacity=0});
 function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;const t=(now-t0)/1000;
