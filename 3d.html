@@ -267,8 +267,8 @@ function build(i){SC=i;labels.forEach(l=>l.d.remove());labels=[];scene=new THREE
 function go(which,instant){const v=S.view[which];const p=new THREE.Vector3(...v[0]),t=new THREE.Vector3(...v[1]);
  if(instant){cam.position.copy(p);ctl.target.copy(t);ctl.update();fly=null}else fly={p0:cam.position.clone(),t0:ctl.target.clone(),p,t,s:performance.now()}}
 $('#b-all').onclick=()=>go('all');$('#b-ard').onclick=()=>go('ard');
-function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
-addEventListener('resize',size);
+let VW=1,VH=1;function size(){const w=cv.clientWidth||innerWidth,h=cv.clientHeight||innerHeight;VW=w;VH=h;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',size);if(window.ResizeObserver)new ResizeObserver(size).observe(cv);
 addEventListener('message',e=>{const d=e.data;if(!d||d.type!=='sim3d')return;if(d.scene!==SC){state=d.state||{};build(d.scene)}else{state=d.state||{};S.update(state)}});
 // controle próprio quando a página é aberta sozinha
 const sv=$('#s-v'),ss=$('#s-sc');
@@ -281,7 +281,7 @@ function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;const t=(now-t
  ctl.update();if(S.tick)S.tick(t,dt);
  const B=S.bench;B.bz.userData.rings.forEach((r,i)=>{const ph=(t*1.6+i/3)%1;r.material.opacity=B.alarm?(1-ph)*.9:0;r.scale.setScalar(.6+ph*1.4)});B.bz.position.x=6.2+(B.alarm?Math.sin(t*60)*.05:0);
  R.render(scene,cam);
- const w=innerWidth,h=innerHeight;labels.forEach(l=>{const v=l.p.clone().project(cam);const vis=v.z<1&&Math.abs(v.x)<1.1&&Math.abs(v.y)<1.1;l.d.style.display=vis?'':'none';if(vis)l.d.style.transform='translate('+((v.x+1)/2*w)+'px,'+((1-v.y)/2*h)+'px) translate(-50%,-100%)'});
+ const w=VW,h=VH;labels.forEach(l=>{const v=l.p.clone().project(cam);const vis=v.z<1&&Math.abs(v.x)<1.1&&Math.abs(v.y)<1.1;l.d.style.display=vis?'':'none';if(vis)l.d.style.transform='translate('+((v.x+1)/2*w)+'px,'+((1-v.y)/2*h)+'px) translate(-50%,-100%)'});
  requestAnimationFrame(loop)}
 size();build(SC);$('#load').remove();requestAnimationFrame(loop);
 setTimeout(()=>{$('#tip').style.opacity=0},7000);
