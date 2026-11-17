@@ -239,7 +239,7 @@ BUILD[3]=()=>{room();
  const can=cyl(1,1,1.4,MAT.metal,0,0,.85,mq,24);can.rotation.x=Math.PI/2;const mesh2=cyl(.85,.85,.1,M('#7C8798',{roughness:.9}),0,0,1.6,mq,24);mesh2.rotation.x=Math.PI/2;
  // partículas de gás
  const parts=[];const pmM=new THREE.MeshStandardMaterial({color:'#7BA05B',transparent:true,opacity:.45,depthWrite:false});
- for(let i=0;i<80;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(1.4+(i%3)*.8,8,6),pmM);scene.add(p);parts.push({p,x:gx,y:56,z:gz,l:Math.random()*30,vx:-(5+Math.random()*8),vy:-(1+Math.random()*2),vz:Math.random()*5-.5})}
+ for(let i=0;i<80;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(1.4+(i%3)*.8,8,6),pmM);scene.add(p);parts.push({p,x:gx,y:56,z:gz,l:Math.random()*30,vx:-(5+Math.random()*8),vy:-(4+Math.random()*4),vz:Math.random()*5-.5})}
  const B=bench(110,-10,-.5,['#1FA86A','#FFD23F','#E8453C']);
  const pin=B.pinIn();toBench(B,[[sx+1.5,sy-3,sz],[sx+2.4,sy-6,sz],[sx+2.4,.7,sz],[sx+20,.7,sz+30]]);
  label('Sensor de gás','in',[sx+4,sy+10,sz]);label('Botijão','no',[gx,70,gz+18]);label('Fogão','no',[fx,FH+16,fz+20]);
