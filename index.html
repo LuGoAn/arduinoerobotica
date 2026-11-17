@@ -257,7 +257,7 @@ h1,h2,h3{font-family:var(--display)}
 #stage.hidebar.showbar #bar{transform:none}
 .seebtn{position:absolute;right:112px;top:92px;font:600 30px var(--display);background:var(--navy);color:#fff;border:0;border-radius:40px;padding:16px 32px;box-shadow:6px 6px 0 var(--cyan)}
 #v3d{position:absolute;left:48px;top:36px;width:1200px;height:936px;border-radius:44px;border:6px solid var(--navy);overflow:hidden;box-shadow:10px 10px 0 var(--navy);background:#DCE6F5;z-index:5;display:none}
-#v3d.on{display:block}#v-sim:not(.on) #v3d,#v-sim:not(.on) #b3d{display:none}#v3d iframe{width:100%;height:100%;border:0;display:block}
+#v3d.on{display:block}#v3d.off,#b3d.off{display:none!important}#v3d iframe{width:100%;height:100%;border:0;display:block}
 #b3d{position:absolute;left:1060px;top:60px;z-index:6;font:600 26px var(--display);background:var(--navy);color:#fff;border:0;border-radius:36px;padding:12px 26px;box-shadow:5px 5px 0 var(--cyan);cursor:pointer}
 #b3d.on{background:#fff;color:var(--navy);box-shadow:5px 5px 0 var(--navy);left:1030px}
 </style>
@@ -932,7 +932,9 @@ const st3=[()=>({T:+$('#t-sl-t').value,H:+$('#t-sl-h').value}),()=>({L:+$('#r-sl
 function send3(){if(on3&&fr3&&fr3.contentWindow)fr3.contentWindow.postMessage({type:'sim3d',scene:sidx,state:st3[sidx]()},'*')}
 $('#b3d').onclick=()=>{on3=!on3;if(on3&&!fr3){fr3=document.createElement('iframe');fr3.title='Modelo 3D do projeto';fr3.src='3d.html?embed=1&c='+sidx;fr3.onload=send3;$('#v3d').appendChild(fr3)}
   $('#v3d').classList.toggle('on',on3);$('#b3d').classList.toggle('on',on3);$('#b3d').textContent=on3?'Voltar ao 2D':'Ver em 3D';send3()};
-setInterval(send3,100);
+function vis3(){const off=mode!=='s'||$('#chooser').classList.contains('on');$('#v3d').classList.toggle('off',off);$('#b3d').classList.toggle('off',off)}
+{const a=setMode,b=openChooser;setMode=function(){a.apply(this,arguments);vis3()};openChooser=function(){b.apply(this,arguments);vis3()}}
+setInterval(()=>{vis3();send3()},100);
 openChooser();requestAnimationFrame(t=>{last=t;loop(t)});
 </script>
 
