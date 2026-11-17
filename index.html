@@ -910,7 +910,7 @@ function loop(now){const dt=Math.min(now-last,100);last=now;
   if(mode==='p'){}
   else{if(held&&now-lastTouch>8000){held=false;goScene(sidx)}
     if(auto&&!paused&&!held){selapsed+=dt;if(sims[sidx].demo)sims[sidx].demo(selapsed/1000);$('#prog').style.transform='scaleX('+clamp(selapsed/SDUR[sidx],0,1)+')';if(selapsed>=SDUR[sidx]){if(stay)goScene(sidx);else if(sidx===scenes.length-1)setMode('p',0);else goScene(sidx+1)}}
-    if(sims[sidx].tick&&!(auto&&paused&&!held))sims[sidx].tick(dt);if(soundOn&&alarms[sidx]&&now-lastBeep>450){lastBeep=now;beep(((now/450|0)%2)?988:784,.22)}}
+    if(sims[sidx].tick&&!(auto&&paused&&!held))sims[sidx].tick(dt);if(soundOn&&alarms[sidx]&&!$('#chooser').classList.contains('on')&&now-lastBeep>450){lastBeep=now;beep(((now/450|0)%2)?988:784,.22)}}
   requestAnimationFrame(loop)}
 /* ---------- turma ---------- */
 const HOVER=matchMedia('(hover:hover) and (pointer:fine)').matches;const GERAL=['cover','onde','arduino','arduino-real','fluxo'],FIM=['wokwi','desafio'];
