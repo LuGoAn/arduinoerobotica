@@ -191,6 +191,62 @@ h1,h2,h3{font-family:var(--display)}
 .pingc{transform-box:fill-box;transform-origin:center;animation:ping 1.4s ease-out infinite}
 .redblink{animation:blinkRed .7s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.board,.eye,.glow,.st,.wire,.drop,.dropS,.wavy,.pingc,.shaking,.redblink,.rain,.flowdown{animation:none}}
+
+#chooser{position:absolute;inset:0;z-index:4;background:radial-gradient(circle at 76% 40%,#2350E8 0%,#0F1F4D 65%);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+#chooser.on{display:flex}
+#chooser h2{font:700 96px/1.05 var(--display)}
+#chooser p{font-size:34px;color:var(--soft)}
+.cgrid{display:grid;grid-template-columns:repeat(5,310px);gap:26px;margin-top:34px}
+.cbtn{height:270px;border:0;border-radius:32px;background:#F4F8FF;color:var(--navy);font:600 36px/1.15 var(--display);box-shadow:8px 8px 0 var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;text-align:center;transition:transform .2s}
+.cbtn span{width:66px;height:66px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:34px}
+.cbtn:hover{transform:translateY(-8px)}
+.cbtn.last{outline:6px solid var(--yellow);outline-offset:4px}
+.slide.real{background:var(--paper)}
+.slide.real h2{position:absolute;left:112px;top:84px;width:1700px;font:700 88px/1.05 var(--display)}
+.rsub{position:absolute;left:112px;top:200px;width:1700px;font-size:34px;color:var(--ink2)}
+.ph{position:absolute;top:280px;margin:0;background:#fff;border:5px solid var(--navy);border-radius:28px;overflow:hidden;box-shadow:8px 8px 0 var(--sh)}
+.ph img,.ph video{display:block;width:100%;object-fit:cover;background:#0F1F4D}
+.ph figcaption{padding:16px 22px 18px}
+.ph h3{font:600 32px/1.15 var(--display)}
+.ph p{font-size:25px;line-height:1.3;color:var(--ink2);margin-top:6px}
+.ph small{display:block;font-size:15px;line-height:1.3;color:#5D6B8A;margin-top:8px}
+.slide.mis{background:var(--paper)}
+.mis .mtag{position:absolute;left:112px;top:78px;font:600 30px var(--display);background:var(--yellow);color:var(--navy);padding:8px 24px;border-radius:30px;rotate:-2deg}
+.mis h2{position:absolute;left:112px;top:146px;width:1700px;font:700 92px/1.05 var(--display)}
+.mis h2 span{color:var(--yellow)}
+.m2 h2 span{color:var(--blue)}
+.mis .mbig{position:absolute;left:112px;top:300px;width:1010px;font:500 42px/1.3 var(--display)}
+[data-id="misto-m3"] .mbig{width:1696px}
+.howto{position:absolute;left:1180px;top:296px;width:628px;background:#fff;color:var(--navy);border-radius:32px;padding:28px 34px;box-shadow:8px 8px 0 var(--navy)}
+.howto h3{font:600 36px var(--display);margin-bottom:10px}
+.howto ol{margin:0;padding-left:36px;font-size:28px;line-height:1.45}
+.mqr{position:absolute;left:1180px;top:700px;display:flex;align-items:center;gap:22px;font-size:28px;color:var(--soft)}
+.mqr .qrb{background:#fff;border:4px solid var(--navy);border-radius:16px;padding:6px;line-height:0}
+.mqr svg{width:180px;height:180px}
+.mfoot{position:absolute;left:112px;top:880px;width:1010px;font:600 36px/1.2 var(--display);color:var(--yellow)}
+.msub{position:absolute;left:112px;top:262px;width:1700px;font-size:32px;color:var(--ink2)}
+.ggrid{position:absolute;left:112px;top:330px;width:1696px;display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.guess{position:relative;text-align:left;background:#fff;border:5px solid var(--navy);border-radius:28px;padding:24px 30px 24px 104px;min-height:292px;box-shadow:8px 8px 0 var(--navy);color:var(--navy);font-family:var(--text)}
+.gn{position:absolute;left:30px;top:20px;font:700 66px var(--display);color:var(--blue)}
+.guess h3{font:600 38px/1.15 var(--display)}
+.gq{font-size:28px;color:var(--ink2);margin-top:8px}
+.ans{margin-top:16px;opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s;background:var(--mint);border-radius:18px;padding:12px 20px}
+.ans b{display:block;font:700 34px var(--display)}
+.ans span{font-size:24px;color:var(--ink2)}
+.tap{position:absolute;right:26px;bottom:18px;font-size:21px;color:#7C89A6}
+.guess.show .ans{opacity:1;transform:none}
+.guess.show .tap{display:none}
+.code{position:absolute;left:112px;top:560px;width:1010px;background:#1B2440;border-radius:24px;padding:24px 32px}
+.code small{display:block;font-size:24px;line-height:1.35;color:var(--soft)}
+.code pre,.mx pre{font:700 40px/1.3 Consolas,'Courier New',monospace;color:#fff;margin:14px 0;white-space:pre-wrap}
+.code mark,.mx mark{background:var(--yellow);color:var(--navy);border-radius:8px;padding:0 8px}
+.bonus{position:absolute;left:1180px;top:300px;width:628px;background:var(--yellow);color:var(--navy);border-radius:28px;padding:28px 32px;font-size:30px;line-height:1.4;rotate:1deg}
+.bonus code{font-family:Consolas,monospace;background:#fff;padding:1px 6px;border-radius:6px;font-size:25px}
+.mxgrid{position:absolute;left:112px;top:470px;width:1696px;display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.mx{background:#F4F8FF;color:var(--navy);border-radius:24px;padding:22px 28px;box-shadow:8px 8px 0 var(--sh)}
+.mx h3{font:600 32px var(--display)}
+.mx pre{font-size:32px;color:var(--navy)}
+.seebtn{position:absolute;right:112px;top:92px;font:600 30px var(--display);background:var(--navy);color:#fff;border:0;border-radius:40px;padding:16px 32px;box-shadow:6px 6px 0 var(--cyan)}
 </style>
 </head>
 <body>
@@ -209,18 +265,20 @@ h1,h2,h3{font-family:var(--display)}
 <clipPath id="i-clip"><path d="M480 636H800L754 790H526z"/></clipPath>
 </defs></svg>
 <main id="views">
+<div id="chooser" class="on"><h2>Qual é a turma de hoje?</h2><p>A apresentação se monta com os exemplos e o desafio do curso escolhido.</p><div class="cgrid"><button class="cbtn" data-curso="agro" style="--c:#35D0F5"><span>1</span>Agroindústria</button><button class="cbtn" data-curso="nutri" style="--c:#FFD23F"><span>2</span>Nutrição e Dietética</button><button class="cbtn" data-curso="san" style="--c:#7BE0B0"><span>3</span>Saneamento</button><button class="cbtn" data-curso="civil" style="--c:#FF8FA3"><span>4</span>Desenho da Construção Civil</button><button class="cbtn" data-curso="misto" style="--c:#FFFFFF"><span>5</span>Turma mista</button></div></div>
+
 
 <!-- ================= APRESENTAÇÃO ================= -->
 <section class="view on" id="v-present">
 
-<div class="slide s-cover" data-dur="8000">
+<div class="slide s-cover" data-id="cover">
   <p class="pill b" style="--d:.2">Introdução à Robótica</p>
   <h1 class="b" style="--d:.5">Arduino<br><span>e Robótica</span></h1>
   <p class="tag b" style="--d:.9">Tecnologia que transforma ideias em soluções</p>
   <div class="mascot b" style="--d:.3" data-mascot="stars"></div>
 </div>
 
-<div class="slide s-onde" data-dur="11000">
+<div class="slide s-onde" data-id="onde">
   <h2 class="sh b" style="--d:.1">Onde encontramos a robótica?</h2>
   <svg class="squig bf" style="--d:.4" width="520" height="28" viewBox="0 0 520 28"><path d="M6 14 Q36 -4 66 14 T126 14 T186 14 T246 14 T306 14 T366 14 T426 14 T486 14" fill="none" stroke="#FFD23F" stroke-width="10" stroke-linecap="round"/></svg>
   <div class="cards5">
@@ -232,7 +290,7 @@ h1,h2,h3{font-family:var(--display)}
   </div>
 </div>
 
-<div class="slide s-arduino" data-dur="11000">
+<div class="slide s-arduino" data-id="arduino">
   <h2 class="b" style="--d:.1">O que é<br><span>Arduino?</span></h2>
   <p class="big b" style="--d:.8">Uma plaquinha que funciona como o cérebro de um projeto.</p>
   <p class="small b" style="--d:1.4">A gente liga sensores e luzes nela e escreve o que ela deve fazer.</p>
@@ -245,7 +303,7 @@ h1,h2,h3{font-family:var(--display)}
   </svg>
 </div>
 
-<div class="slide s-fluxo" data-dur="14000">
+<div class="slide s-fluxo" data-id="fluxo">
   <h2 class="sh b" style="--d:.1">Como funciona um sistema com Arduino?</h2>
   <div class="flow">
     <div class="card b" style="--d:.9;--r:-1.5deg;background:#BDEBFA">
@@ -263,7 +321,7 @@ h1,h2,h3{font-family:var(--display)}
   <div class="example b" style="--d:8"><svg viewBox="0 0 24 24" aria-label="Ideia"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg><p><b>Exemplo na horta:</b> o sensor percebe que a terra está seca, o Arduino decide regar e a bomba d’água liga.</p></div>
 </div>
 
-<div class="slide s-prof" data-dur="14000">
+<div class="slide s-prof" data-id="profissoes">
   <h2 class="sh b" style="--d:.1">Robótica nas <span>nossas profissões</span></h2>
   <div class="cards4">
     <div class="pc b" style="--d:.8;--r:-1.5deg;--sh:#35D0F5"><svg viewBox="0 0 360 220" aria-label="Plantação com irrigação"><rect width="360" height="220" rx="22" fill="#CDF3E2"/><circle cx="300" cy="46" r="24" fill="#FFD23F"/><rect y="168" width="360" height="52" fill="#A9743F"/><rect x="60" y="112" width="10" height="58" fill="#64748B"/><circle cx="65" cy="106" r="13" fill="#0F1F4D"/><path d="M78 98 C112 56 150 62 172 106" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 12" stroke-linecap="round"/><path d="M80 108 C118 90 156 102 178 134" fill="none" stroke="#2350E8" stroke-width="6" stroke-dasharray="2 12" stroke-linecap="round"/><rect x="176" y="118" width="8" height="52" fill="#1B8F5A"/><path d="M180 140 C180 118 164 112 150 114 C150 130 162 142 180 140 Z" fill="#4CD08C"/><path d="M181 130 C181 108 198 102 212 104 C212 122 200 132 181 130 Z" fill="#1FA86A"/><rect x="256" y="130" width="8" height="40" fill="#1B8F5A"/><path d="M260 148 C260 128 246 124 234 126 C234 140 244 150 260 148 Z" fill="#4CD08C"/><path d="M261 140 C261 120 276 114 290 116 C290 132 278 142 261 140 Z" fill="#1FA86A"/></svg><h3>Agroindústria</h3><p>Irrigação automatizada e monitoramento das condições de armazenamento.</p></div>
@@ -273,7 +331,7 @@ h1,h2,h3{font-family:var(--display)}
   </div>
 </div>
 
-<div class="slide s-wokwi" data-dur="11000">
+<div class="slide s-wokwi" data-id="wokwi">
   <h2 class="b" style="--d:.1">Conhecendo<br>o <span>Wokwi</span></h2>
   <p class="txt b" style="--d:.8">Um simulador online: a gente monta o circuito, programa a placa e testa tudo no navegador.</p>
   <div class="opts">
@@ -313,9 +371,9 @@ h1,h2,h3{font-family:var(--display)}
   </svg>
 </div>
 
-<div class="slide s-exp" data-dur="14000">
+<div class="slide s-exp" data-id="experimentar">
   <h2 class="b" style="--d:.1">Vamos <span>experimentar!</span></h2>
-  <p class="sub bf" style="--d:.6">Aponte a câmera do celular para o QR Code e abra o projeto. A seguir, veja cada um funcionando!</p>
+  <p class="sub bf" style="--d:.6">No computador: arduinoerobotica.vercel.app → Simulador → Abrir no Wokwi. No celular: aponte a câmera para o QR Code.</p>
   <div class="xcards">
     <button class="xc b" data-go="0" style="--d:1.2;--r:-2deg;background:#fff"><div class="top"><span class="n" style="color:#2350E8">1</span><span class="qrb" data-qr="1"></span></div><h3>Monitoramento ambiental</h3><p>Temperatura e umidade.</p></button>
     <button class="xc b" data-go="1" style="--d:2.2;--r:1.5deg;background:#FFE9A8"><div class="top"><span class="n">2</span><span class="qrb" data-qr="2"></span></div><h3>Controle de reservatórios</h3><p>Monitoramento do nível de água.</p></button>
@@ -325,6 +383,227 @@ h1,h2,h3{font-family:var(--display)}
   <div class="quote b" style="--d:5.6"><p>“Não é preciso ser especialista em tecnologia para descobrir como ela pode <span>transformar a sua profissão!</span>”</p></div>
 </div>
 
+<div class="slide deck" data-id="agro" style="background:#0F1F4D;color:#FFFFFF;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<h2 style="position:absolute;left:128px;top:110px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#FFFFFF">Robótica na <span style="color:#35D0F5">Agroindústria</span></h2>
+<p class="b" style="--d:1;position:absolute;left:128px;top:228px;width:1664px;font-size:36px;line-height:1.3;color:#DCE8FF">Quem cuida da plantação quando ninguém está olhando?</p>
+<div class="b" style="--d:2;position:absolute;left:128px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #35D0F5;rotate:-1.5deg">
+<svg aria-label="Plantação sendo regada por um irrigador automático" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#CDF3E2"/><circle cx="410" cy="44" r="24" fill="#FFD23F"/><rect y="150" width="472" height="50" fill="#A9743F"/><rect x="70" y="92" width="12" height="60" fill="#64748B"/><circle cx="76" cy="86" r="15" fill="#0F1F4D"/><path d="M92 80 C150 30 210 40 240 96" fill="none" stroke="#2350E8" stroke-width="7" stroke-dasharray="2 14" stroke-linecap="round"/><path d="M94 92 C160 70 220 84 250 120" fill="none" stroke="#2350E8" stroke-width="7" stroke-dasharray="2 14" stroke-linecap="round"/><rect x="246" y="104" width="9" height="48" fill="#1B8F5A"/><path d="M250 124 C250 102 232 96 216 98 C216 114 230 126 250 124 Z" fill="#4CD08C"/><path d="M251 114 C251 92 270 86 286 88 C286 106 272 116 251 114 Z" fill="#1FA86A"/><rect x="346" y="112" width="9" height="40" fill="#1B8F5A"/><path d="M350 130 C350 110 334 106 320 108 C320 122 332 132 350 130 Z" fill="#4CD08C"/><path d="M351 122 C351 102 368 96 382 98 C382 114 370 124 351 122 Z" fill="#1FA86A"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Irrigação automática</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">O sensor mede a terra e a bomba liga só quando precisa. Economiza água.</p>
+</div>
+<div class="b" style="--d:3;position:absolute;left:700px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #FFD23F;rotate:1deg">
+<svg aria-label="Silo de grãos com termômetro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#FFE9A8"/><rect y="170" width="472" height="30" fill="#A9743F"/><rect x="150" y="62" width="110" height="110" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="6"/><path d="M150 62 Q205 10 260 62 Z" fill="#9DB4E8" stroke="#0F1F4D" stroke-width="6" stroke-linejoin="round"/><path d="M150 100 H260 M150 136 H260" stroke="#0F1F4D" stroke-width="4"/><rect x="270" y="90" width="80" height="82" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="6"/><path d="M270 90 L310 64 L350 90 Z" fill="#E8453C" stroke="#0F1F4D" stroke-width="6" stroke-linejoin="round"/><rect x="384" y="40" width="22" height="100" rx="11" fill="#FFFFFF" stroke="#0F1F4D" stroke-width="5"/><circle cx="395" cy="150" r="20" fill="#FF5C5C" stroke="#0F1F4D" stroke-width="5"/><rect x="391" y="80" width="8" height="70" rx="4" fill="#FF5C5C"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Silos e armazéns</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Sensores de temperatura e umidade avisam antes de os grãos estragarem.</p>
+</div>
+<div class="b" style="--d:4;position:absolute;left:1272px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #7BE0B0;rotate:-1deg">
+<svg aria-label="Estufa com plantas e ventilador" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#BDEBFA"/><rect y="170" width="472" height="30" fill="#6CBF5E"/><path d="M80 172 V100 Q236 10 392 100 V172 Z" fill="#EAF6FF" fill-opacity=".85" stroke="#0F1F4D" stroke-width="6" stroke-linejoin="round"/><path d="M160 172 V68 M236 172 V52 M312 172 V68" stroke="#0F1F4D" stroke-width="4"/><g fill="#1FA86A"><circle cx="120" cy="156" r="16"/><circle cx="198" cy="156" r="16"/><circle cx="274" cy="156" r="16"/><circle cx="352" cy="156" r="16"/></g><circle cx="236" cy="108" r="26" fill="#FFFFFF" stroke="#0F1F4D" stroke-width="5"/><path d="M236 108 L236 86 M236 108 L255 119 M236 108 L217 119" stroke="#2350E8" stroke-width="8" stroke-linecap="round"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Estufas</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Ventiladores e janelas abrem sozinhos quando esquenta demais.</p>
+</div>
+
+</div>
+<div class="slide real" data-id="agro-real"><h2 class="b" style="--d:0">Na vida real: <span style="color:#35D0F5">Agroindústria</span></h2><p class="rsub b" style="--d:1">Fotos de verdade de onde essa tecnologia já está.</p><figure class="ph b" style="--d:2;left:128px;width:395px;--sh:#35D0F5"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/Button_dripper.JPG/960px-Button_dripper.JPG" alt="Gotejador" style="height:400px"><figcaption><h3>Gotejador</h3><p>Solta a água gota a gota, direto na raiz da planta.</p><small>Foto: Borisshin · CC BY-SA 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:3;left:551px;width:395px;--sh:#35D0F5"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Application_of_IrritecTape-drip-tape.jpg/960px-Application_of_IrritecTape-drip-tape.jpg" alt="Mangueira de gotejamento" style="height:400px"><figcaption><h3>Mangueira de gotejamento</h3><p>Sendo instalada ao longo das linhas da plantação.</p><small>Foto: MajaGra · CC BY-SA 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:4;left:974px;width:395px;--sh:#35D0F5"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Grain_field_pivot_irrigation_2181.jpg/960px-Grain_field_pivot_irrigation_2181.jpg" alt="Pivô central" style="height:400px"><figcaption><h3>Pivô central</h3><p>Gira sozinho e irriga um círculo enorme de plantação.</p><small>Foto: Ingeniero hidr. · CC BY-SA 3.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:5;left:1397px;width:395px;--sh:#35D0F5"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Grain_elevator_in_Colorado.jpg/960px-Grain_elevator_in_Colorado.jpg" alt="Silos de grãos" style="height:400px"><figcaption><h3>Silos de grãos</h3><p>Guardam toneladas de grãos; sensores vigiam calor e umidade.</p><small>Foto: Quintin Soloviev · CC BY 4.0 · Wikimedia Commons</small></figcaption></figure></div>
+<div class="slide real" data-id="agro-video"><h2 class="b" style="--d:0">Funcionando <span style="color:#35D0F5">de verdade</span></h2><p class="rsub b" style="--d:1">Gotejamento, a água entrando na terra e um pivô visto de cima.</p><figure class="ph vid b" style="--d:2;left:128px;width:536px;--sh:#35D0F5"><video data-src="https://upload.wikimedia.org/wikipedia/commons/transcoded/7/70/Drip_irrigation.ogv/Drip_irrigation.ogv.480p.vp9.webm" muted loop playsinline preload="none" style="height:470px;object-fit:cover"></video><figcaption><h3>Gotejamento funcionando</h3><small>Vídeo: Juandev · CC BY-SA 3.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph vid b" style="--d:3;left:692px;width:536px;--sh:#35D0F5"><video data-src="https://upload.wikimedia.org/wikipedia/commons/transcoded/b/b1/Subsurface_drip_emission_on_loamy_soil.ogv/Subsurface_drip_emission_on_loamy_soil.ogv.480p.vp9.webm" muted loop playsinline preload="none" style="height:470px;object-fit:cover"></video><figcaption><h3>A água se espalhando na terra</h3><small>Vídeo: Gil, Rodríguez-Sinobas et al. · CC BY 3.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph vid b" style="--d:4;left:1256px;width:536px;--sh:#35D0F5"><video data-src="https://upload.wikimedia.org/wikipedia/commons/transcoded/d/d3/20200728-NRCS-LSC-9001-Pivot_Irrigation.webm/20200728-NRCS-LSC-9001-Pivot_Irrigation.webm.480p.vp9.webm" muted loop playsinline preload="none" style="height:470px;object-fit:cover"></video><figcaption><h3>Pivô central visto de cima</h3><small>Vídeo: USDA · Domínio público · Wikimedia Commons</small></figcaption></figure></div>
+<div class="slide deck" data-id="agro-proj" style="background:#F4F8FF;color:#0F1F4D;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<p style="position:absolute;left:128px;top:96px;width:440px;font-family:'Fredoka', Arial, sans-serif;font-size:30px;font-weight:600;color:#0F1F4D;background:#35D0F5;padding:10px 26px;border-radius:40px;rotate:-2deg">Projeto de Agroindústria</p>
+<h2 style="position:absolute;left:128px;top:172px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:84px;font-weight:700;line-height:1.05;color:#0F1F4D">Irrigação automatizada</h2>
+<div class="b" style="--d:1;position:absolute;left:128px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#BDEBFA;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#2350E8">1 · ENTRADA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Sensor de umidade do solo</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Mede o quanto a terra está molhada, de 0% (seca) a 100% (encharcada).</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:2;position:absolute;left:617px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:3;position:absolute;left:725px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#FFE9A8;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#B27F00">2 · O ARDUINO DECIDE</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Abaixo de 30%: liga a bomba</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Ela só desliga quando a terra ficar úmida de novo.</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:4;position:absolute;left:1214px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:5;position:absolute;left:1322px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#CDF3E2;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#1B8F5A">3 · SAÍDA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Bomba d’água rega a planta</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">LED azul aceso: bomba ligada. LED verde aceso: solo ok.</p>
+</div>
+<p class="b" style="--d:6;position:absolute;left:128px;top:800px;width:1664px;font-size:32px;line-height:1.35;color:#FFFFFF;background:#0F1F4D;padding:26px 44px;border-radius:44px"><b style="color:#FFD23F">No simulador:</b> um botão giratório faz o papel do sensor. Girar para a esquerda é como a terra secar.</p>
+
+<button class="seebtn b" data-go="2" style="--d:7">Ver funcionando no simulador</button></div>
+<div class="slide mis" data-id="agro-m1" style="background:#2350E8;color:#fff"><p class="mtag b" style="--d:0">Missão 1 · 1 ponto</p><h2 class="b" style="--d:1">Façam <span>disparar!</span></h2><p class="mbig b" style="--d:2">Façam a bomba ligar: o LED azul tem que acender. No Wokwi, um botão giratório faz o papel do sensor: girar para a esquerda é secar a terra.</p><div class="howto b" style="--d:3"><h3>Como abrir o projeto</h3><ol><li>Entrem em <b>arduinoerobotica.vercel.app</b></li><li>Cliquem em <b>Simulador</b> e escolham <b>Irrigação</b></li><li>Cliquem em <b>Abrir no Wokwi</b> e depois no <b>play</b> (triângulo verde)</li></ol></div><div class="mqr b" style="--d:4"><span class="qrb" data-qr="3"></span><small>ou pelo celular</small></div><p class="mfoot b" style="--d:5">Conseguiram? Levantem a mão! A primeira dupla ganha o ponto.</p></div>
+<div class="slide mis m2" data-id="agro-m2"><p class="mtag b" style="--d:0">Missão 2 · 1 ponto por acerto</p><h2 class="b" style="--d:1">Adivinhem <span>antes de testar</span></h2><p class="msub b" style="--d:1">Cada dupla responde primeiro. Depois testem no Wokwi e confiram aqui.</p><div class="ggrid"><button class="guess b" style="--d:2"><span class="gn">1</span><h3>A terra está em 80%</h3><p class="gq">A bomba fica ligada?</p><div class="ans"><b>Bomba desligada</b><span>Terra úmida, não precisa regar.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:3"><span class="gn">2</span><h3>A terra está em 25%</h3><p class="gq">A bomba fica ligada?</p><div class="ans"><b>Bomba ligada</b><span>Abaixo de 30%, a bomba liga.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:4"><span class="gn">3</span><h3>A terra estava em 60% e secou até 35%</h3><p class="gq">A bomba fica ligada?</p><div class="ans"><b>Bomba desligada</b><span>Ainda não chegou abaixo de 30%.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:5"><span class="gn">4</span><h3>A terra estava em 10% e foi molhada até 35%</h3><p class="gq">A bomba fica ligada?</p><div class="ans"><b>Bomba ligada</b><span>Ela já estava ligada e só desliga com a terra bem úmida.</span></div><span class="tap">clique para ver a resposta</span></button></div></div>
+<div class="slide mis m3" data-id="agro-m3" style="background:#0F1F4D;color:#fff"><p class="mtag b" style="--d:0">Missão 3 · 3 pontos</p><h2 class="b" style="--d:1">Vocês são <span>os técnicos</span></h2><p class="mbig b" style="--d:2">Cada planta gosta de uma terra diferente: a alface quer terra sempre úmida, o cacto aguenta terra seca. Escolham uma planta da região e decidam quando a bomba deve ligar.</p><div class="code b" style="--d:3"><small>No código (lado esquerdo do Wokwi), achem esta linha e troquem só o número:</small><pre>const int LIGA_ABAIXO = <mark>30</mark>;</pre><small>Depois cliquem em parar e em play de novo para testar.</small></div><div class="bonus b" style="--d:4"><b>Bônus · 2 pontos:</b> Achem a linha <code>DESLIGA_ACIMA</code> e mudem o número: o que acontece se ele ficar muito perto do valor da missão 3?</div><p class="mfoot b" style="--d:5">No final, algumas duplas contam o valor que escolheram e por quê.</p></div>
+<div class="slide deck" data-id="nutri" style="background:#0F1F4D;color:#FFFFFF;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<h2 style="position:absolute;left:128px;top:110px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:78px;font-weight:700;line-height:1.05;color:#FFFFFF">Robótica na <span style="color:#FFD23F">Nutrição e Dietética</span></h2>
+<p class="b" style="--d:1;position:absolute;left:128px;top:228px;width:1664px;font-size:36px;line-height:1.3;color:#DCE8FF">E se a geladeira do restaurante parar de madrugada, sem ninguém perceber?</p>
+<div class="b" style="--d:2;position:absolute;left:128px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #FFD23F;rotate:-1.5deg">
+<svg aria-label="Câmara fria com termômetro e alarme" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#BDEBFA"/><rect x="140" y="20" width="150" height="170" rx="14" fill="#FFFFFF" stroke="#0F1F4D" stroke-width="6"/><line x1="140" y1="88" x2="290" y2="88" stroke="#0F1F4D" stroke-width="6"/><rect x="262" y="40" width="9" height="32" rx="4" fill="#0F1F4D"/><rect x="262" y="108" width="9" height="46" rx="4" fill="#0F1F4D"/><path d="M196 46 l10 10 m0 -10 l-10 10 M178 51 h36" stroke="#35D0F5" stroke-width="5" stroke-linecap="round"/><rect x="320" y="40" width="22" height="100" rx="11" fill="#FFFFFF" stroke="#0F1F4D" stroke-width="5"/><circle cx="331" cy="150" r="20" fill="#FF5C5C" stroke="#0F1F4D" stroke-width="5"/><rect x="327" y="66" width="8" height="84" rx="4" fill="#FF5C5C"/><circle cx="390" cy="70" r="22" fill="#E8453C" stroke="#0F1F4D" stroke-width="5"/><path d="M420 54 q14 16 0 32 M434 44 q24 26 0 52" fill="none" stroke="#E8453C" stroke-width="5" stroke-linecap="round"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Câmaras frias e geladeiras</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Alarme quando a temperatura sobe e o alimento corre risco.</p>
+</div>
+<div class="b" style="--d:3;position:absolute;left:700px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #35D0F5;rotate:1deg">
+<svg aria-label="Prateleira de despensa com sacos e potes e uma gota de umidade" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#FFE9A8"/><rect x="60" y="96" width="300" height="12" fill="#7B5A33"/><rect x="60" y="176" width="300" height="12" fill="#7B5A33"/><path d="M84 96 V52 Q84 40 100 40 H130 Q146 40 146 52 V96 Z" fill="#F2E3C6" stroke="#0F1F4D" stroke-width="5"/><path d="M164 96 V46 H230 V96 Z" fill="#E3B36A" stroke="#0F1F4D" stroke-width="5"/><rect x="252" y="54" width="44" height="42" rx="8" fill="#FFFFFF" stroke="#0F1F4D" stroke-width="5"/><rect x="306" y="62" width="40" height="34" rx="8" fill="#FFFFFF" stroke="#0F1F4D" stroke-width="5"/><path d="M90 176 V136 H150 V176 Z M170 176 V128 Q200 116 230 128 V176 Z" fill="#F2E3C6" stroke="#0F1F4D" stroke-width="5"/><rect x="252" y="140" width="90" height="36" rx="8" fill="#E8453C" stroke="#0F1F4D" stroke-width="5"/><path d="M412 50 C430 80 438 94 438 108 A26 26 0 0 1 386 108 C386 94 394 80 412 50 Z" fill="#35D0F5" stroke="#0F1F4D" stroke-width="5"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Estoque e despensa</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Umidade alta estraga farinha, grãos e embalagens. O sensor avisa.</p>
+</div>
+<div class="b" style="--d:4;position:absolute;left:1272px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #FF8FA3;rotate:-1deg">
+<svg aria-label="Fogão industrial com panela e painel de temperatura" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#CDF3E2"/><rect x="100" y="104" width="272" height="86" rx="12" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="6"/><rect x="88" y="92" width="296" height="18" rx="8" fill="#64748B" stroke="#0F1F4D" stroke-width="5"/><path d="M150 92 V58 Q150 50 158 50 H252 Q260 50 260 58 V92 Z" fill="#9DB4E8" stroke="#0F1F4D" stroke-width="5"/><path d="M180 40 q8 -12 0 -24 M206 40 q8 -12 0 -24 M232 40 q8 -12 0 -24" fill="none" stroke="#9DB4E8" stroke-width="5" stroke-linecap="round"/><rect x="290" y="128" width="64" height="36" rx="6" fill="#0F1F4D"/><text x="322" y="154" text-anchor="middle" font-family="Fredoka, Arial, sans-serif" font-size="24" font-weight="700" fill="#4CD08C">180°</text><circle cx="140" cy="146" r="14" fill="#1B2440"/><circle cx="190" cy="146" r="14" fill="#1B2440"/><circle cx="240" cy="146" r="14" fill="#1B2440"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Cozinha industrial</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Equipamentos que controlam sozinhos o tempo e a temperatura de preparo.</p>
+</div>
+
+</div>
+<div class="slide real" data-id="nutri-real"><h2 class="b" style="--d:0">Na vida real: <span style="color:#FFD23F">Nutrição e Dietética</span></h2><p class="rsub b" style="--d:1">Fotos de verdade de onde essa tecnologia já está.</p><figure class="ph b" style="--d:2;left:128px;width:536px;--sh:#FFD23F"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Food_Safety_-_Cut_Waste_in_Refrigerators_%2820120106-OC-AMW-0073%29.jpg/960px-Food_Safety_-_Cut_Waste_in_Refrigerators_%2820120106-OC-AMW-0073%29.jpg" alt="Termômetro na geladeira" style="height:470px"><figcaption><h3>Termômetro na geladeira</h3><p>A temperatura precisa ficar baixa o tempo todo.</p><small>Foto: USDA · Domínio público · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:3;left:692px;width:536px;--sh:#FFD23F"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/Industrial_bakery_kitchen.jpg/960px-Industrial_bakery_kitchen.jpg" alt="Cozinha industrial" style="height:470px"><figcaption><h3>Cozinha industrial</h3><p>Fornos e câmaras com controle de temperatura.</p><small>Foto: Eric Polk · CC BY-SA 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:4;left:1256px;width:536px;--sh:#FFD23F"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/9/93/Fixing_Pret_a_Mange_Fridge_in_NJ_Tpk_Vincent_Lombardi_Stop.jpg/960px-Fixing_Pret_a_Mange_Fridge_in_NJ_Tpk_Vincent_Lombardi_Stop.jpg" alt="Geladeira comercial em conserto" style="height:470px"><figcaption><h3>Geladeira comercial em conserto</h3><p>Se ela para e ninguém percebe, o estoque inteiro estraga.</p><small>Foto: Bonnachoven · CC0 · Wikimedia Commons</small></figcaption></figure></div>
+<div class="slide deck" data-id="nutri-proj" style="background:#F4F8FF;color:#0F1F4D;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<p style="position:absolute;left:128px;top:96px;width:540px;font-family:'Fredoka', Arial, sans-serif;font-size:30px;font-weight:600;color:#0F1F4D;background:#FFD23F;padding:10px 26px;border-radius:40px;rotate:-2deg">Projeto de Nutrição e Dietética</p>
+<h2 style="position:absolute;left:128px;top:172px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:84px;font-weight:700;line-height:1.05;color:#0F1F4D">Temperatura e umidade do estoque</h2>
+<div class="b" style="--d:1;position:absolute;left:128px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#BDEBFA;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#2350E8">1 · ENTRADA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Sensor DHT22</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Mede a temperatura e a umidade do ar onde os alimentos ficam guardados.</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:2;position:absolute;left:617px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:3;position:absolute;left:725px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#FFE9A8;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#B27F00">2 · O ARDUINO DECIDE</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Passou de 30 °C ou de 70%?</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Se qualquer um dos dois passar do limite, é alerta.</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:4;position:absolute;left:1214px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:5;position:absolute;left:1322px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#CDF3E2;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#1B8F5A">3 · SAÍDA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Luz e apito de alerta</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">LED verde: tudo certo. LED vermelho e apito: alerta.</p>
+</div>
+<p class="b" style="--d:6;position:absolute;left:128px;top:800px;width:1664px;font-size:32px;line-height:1.35;color:#FFFFFF;background:#0F1F4D;padding:26px 44px;border-radius:44px"><b style="color:#FFD23F">No simulador:</b> clique no sensor e arraste os controles para mudar a temperatura e a umidade.</p>
+
+<button class="seebtn b" data-go="0" style="--d:7">Ver funcionando no simulador</button></div>
+<div class="slide mis" data-id="nutri-m1" style="background:#2350E8;color:#fff"><p class="mtag b" style="--d:0">Missão 1 · 1 ponto</p><h2 class="b" style="--d:1">Façam <span>disparar!</span></h2><p class="mbig b" style="--d:2">Coloquem o estoque em alerta: o LED vermelho tem que acender e o apito tocar. Cliquem no sensor branco e arrastem os controles.</p><div class="howto b" style="--d:3"><h3>Como abrir o projeto</h3><ol><li>Entrem em <b>arduinoerobotica.vercel.app</b></li><li>Cliquem em <b>Simulador</b> e escolham <b>Ambiente</b></li><li>Cliquem em <b>Abrir no Wokwi</b> e depois no <b>play</b> (triângulo verde)</li></ol></div><div class="mqr b" style="--d:4"><span class="qrb" data-qr="1"></span><small>ou pelo celular</small></div><p class="mfoot b" style="--d:5">Conseguiram? Levantem a mão! A primeira dupla ganha o ponto.</p></div>
+<div class="slide mis m2" data-id="nutri-m2"><p class="mtag b" style="--d:0">Missão 2 · 1 ponto por acerto</p><h2 class="b" style="--d:1">Adivinhem <span>antes de testar</span></h2><p class="msub b" style="--d:1">Cada dupla responde primeiro. Depois testem no Wokwi e confiram aqui.</p><div class="ggrid"><button class="guess b" style="--d:2"><span class="gn">1</span><h3>29 °C e 50% de umidade</h3><p class="gq">Vai disparar o alerta?</p><div class="ans"><b>Não dispara</b><span>Os dois estão abaixo do limite.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:3"><span class="gn">2</span><h3>31 °C e 50% de umidade</h3><p class="gq">Vai disparar o alerta?</p><div class="ans"><b>Dispara</b><span>A temperatura passou de 30 °C.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:4"><span class="gn">3</span><h3>25 °C e 75% de umidade</h3><p class="gq">Vai disparar o alerta?</p><div class="ans"><b>Dispara</b><span>A umidade passou de 70%: basta um dos dois.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:5"><span class="gn">4</span><h3>30 °C e 70% de umidade</h3><p class="gq">Vai disparar o alerta?</p><div class="ans"><b>Não dispara</b><span>Só dispara quando PASSA do limite; igual não conta.</span></div><span class="tap">clique para ver a resposta</span></button></div></div>
+<div class="slide mis m3" data-id="nutri-m3" style="background:#0F1F4D;color:#fff"><p class="mtag b" style="--d:0">Missão 3 · 3 pontos</p><h2 class="b" style="--d:1">Vocês são <span>os técnicos</span></h2><p class="mbig b" style="--d:2">O alerta toca acima de 30 °C. Isso serve para uma despensa de alimentos secos? E para uma geladeira? Escolham o lugar e decidam o limite certo.</p><div class="code b" style="--d:3"><small>No código (lado esquerdo do Wokwi), achem esta linha e troquem só o número:</small><pre>const float TEMP_MAX = <mark>30.0</mark>;</pre><small>Depois cliquem em parar e em play de novo para testar.</small></div><div class="bonus b" style="--d:4"><b>Bônus · 2 pontos:</b> Mudem o som do apito: na linha <code>tone(BUZZER, 1000, 300);</code> troquem o 1000 por 2000 (agudo) ou 400 (grave).</div><p class="mfoot b" style="--d:5">No final, algumas duplas contam o valor que escolheram e por quê.</p></div>
+<div class="slide deck" data-id="san" style="background:#0F1F4D;color:#FFFFFF;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<h2 style="position:absolute;left:128px;top:110px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#FFFFFF">Robótica no <span style="color:#7BE0B0">Saneamento</span></h2>
+<p class="b" style="--d:1;position:absolute;left:128px;top:228px;width:1664px;font-size:36px;line-height:1.3;color:#DCE8FF">Quem avisa que a caixa d’água vai transbordar, ou que está vazando?</p>
+<div class="b" style="--d:2;position:absolute;left:128px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #7BE0B0;rotate:-1.5deg">
+<svg aria-label="Reservatório de água com sensor de nível na tampa" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#CFE0FF"/><rect x="170" y="44" width="150" height="136" rx="16" fill="#2350E8" stroke="#0F1F4D" stroke-width="6"/><rect x="186" y="60" width="118" height="108" rx="10" fill="#FFFFFF"/><rect x="186" y="104" width="118" height="64" rx="10" fill="#35D0F5"/><rect x="160" y="34" width="170" height="20" rx="8" fill="#2350E8" stroke="#0F1F4D" stroke-width="5"/><rect x="220" y="54" width="50" height="18" rx="4" fill="#FFD23F" stroke="#0F1F4D" stroke-width="4"/><path d="M228 80 q17 10 34 0 M222 92 q23 14 46 0" fill="none" stroke="#0F1F4D" stroke-width="4" stroke-linecap="round"/><path d="M80 70 H160" stroke="#64748B" stroke-width="16"/><path d="M320 150 H400" stroke="#64748B" stroke-width="16"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Reservatórios</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">O sensor mede o nível e liga ou desliga a bomba sozinho.</p>
+</div>
+<div class="b" style="--d:3;position:absolute;left:700px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #35D0F5;rotate:1deg">
+<svg aria-label="Copo de água com sensor de qualidade mergulhado" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#BDEBFA"/><path d="M160 40 H312 L296 184 H176 Z" fill="#FFFFFF" fill-opacity=".9" stroke="#0F1F4D" stroke-width="6" stroke-linejoin="round"/><path d="M168 92 H304 L296 180 H176 Z" fill="#35D0F5"/><rect x="226" y="20" width="22" height="130" rx="10" fill="#1B2440" stroke="#0F1F4D" stroke-width="4"/><circle cx="237" cy="150" r="12" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="4"/><rect x="340" y="56" width="96" height="70" rx="12" fill="#0F1F4D"/><text x="388" y="102" text-anchor="middle" font-family="Fredoka, Arial, sans-serif" font-size="28" font-weight="700" fill="#4CD08C">OK</text><path d="M248 30 Q300 10 340 70" fill="none" stroke="#0F1F4D" stroke-width="4"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Qualidade da água</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Sensores medem se a água está limpa ou turva, sem esperar análise.</p>
+</div>
+<div class="b" style="--d:4;position:absolute;left:1272px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #FFD23F;rotate:-1deg">
+<svg aria-label="Cano com vazamento e alerta" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#FFE9A8"/><rect y="150" width="472" height="50" fill="#C9D3E3"/><path d="M40 90 H432" stroke="#64748B" stroke-width="30"/><path d="M40 90 H432" stroke="#9DB4E8" stroke-width="6" stroke-dasharray="40 30"/><path d="M220 106 C226 124 232 132 232 140 A12 12 0 0 1 208 140 C208 132 214 124 220 106 Z" fill="#35D0F5" stroke="#0F1F4D" stroke-width="4"/><ellipse cx="220" cy="168" rx="46" ry="10" fill="#35D0F5" opacity=".7"/><path d="M344 22 L382 84 H306 Z" fill="#FFD23F" stroke="#0F1F4D" stroke-width="5" stroke-linejoin="round"/><path d="M344 42 V62 M344 70 V74" stroke="#0F1F4D" stroke-width="6" stroke-linecap="round"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Vazamentos</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Medidores avisam quando a água some sem ninguém estar usando.</p>
+</div>
+
+</div>
+<div class="slide real" data-id="san-real"><h2 class="b" style="--d:0">Na vida real: <span style="color:#7BE0B0">Saneamento</span></h2><p class="rsub b" style="--d:1">Fotos de verdade de onde essa tecnologia já está.</p><figure class="ph b" style="--d:2;left:128px;width:395px;--sh:#7BE0B0"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Primary_sedimentation_tank1_w.JPG/960px-Primary_sedimentation_tank1_w.JPG" alt="Estação de tratamento" style="height:400px"><figcaption><h3>Estação de tratamento</h3><p>Tanque onde a sujeira se separa da água.</p><small>Foto: Wikimedia Commons · CC BY-SA 3.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:3;left:551px;width:395px;--sh:#7BE0B0"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/Leak_in_rusted_pipe_side_view.jpg/960px-Leak_in_rusted_pipe_side_view.jpg" alt="Vazamento em cano" style="height:400px"><figcaption><h3>Vazamento em cano</h3><p>Água perdida sem ninguém perceber.</p><small>Foto: Shamrock Lee · CC BY 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:4;left:974px;width:395px;--sh:#7BE0B0"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Water_meters_in_india.jpg/960px-Water_meters_in_india.jpg" alt="Hidrômetros" style="height:400px"><figcaption><h3>Hidrômetros</h3><p>Medem quanta água passa pelo cano.</p><small>Foto: Nizil Shah · CC BY-SA 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:5;left:1397px;width:395px;--sh:#7BE0B0"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/HC_SR04_Ultrasonic_sensor_1480322_3_4_HDR_Enhancer.jpg/960px-HC_SR04_Ultrasonic_sensor_1480322_3_4_HDR_Enhancer.jpg" alt="Sensor ultrassônico" style="height:400px"><figcaption><h3>Sensor ultrassônico</h3><p>O mesmo sensor do nosso projeto de nível de água.</p><small>Foto: Nevit Dilmen · CC BY-SA 3.0 · Wikimedia Commons</small></figcaption></figure></div>
+<div class="slide deck" data-id="san-proj" style="background:#F4F8FF;color:#0F1F4D;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<p style="position:absolute;left:128px;top:96px;width:400px;font-family:'Fredoka', Arial, sans-serif;font-size:30px;font-weight:600;color:#0F1F4D;background:#7BE0B0;padding:10px 26px;border-radius:40px;rotate:-2deg">Projeto de Saneamento</p>
+<h2 style="position:absolute;left:128px;top:172px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:84px;font-weight:700;line-height:1.05;color:#0F1F4D">Nível do reservatório de água</h2>
+<div class="b" style="--d:1;position:absolute;left:128px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#BDEBFA;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#2350E8">1 · ENTRADA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Sensor ultrassônico</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Fica na tampa e mede a distância até a água, como um morcego.</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:2;position:absolute;left:617px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:3;position:absolute;left:725px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#FFE9A8;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#B27F00">2 · O ARDUINO DECIDE</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Três faixas de nível</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Abaixo de 60%: normal. De 60% a 84%: atenção. 85% ou mais: perigo.</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:4;position:absolute;left:1214px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:5;position:absolute;left:1322px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#CDF3E2;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#1B8F5A">3 · SAÍDA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">LEDs e apito</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Verde, amarelo ou vermelho. No vermelho, apita: vai transbordar.</p>
+</div>
+<p class="b" style="--d:6;position:absolute;left:128px;top:800px;width:1664px;font-size:32px;line-height:1.35;color:#FFFFFF;background:#0F1F4D;padding:26px 44px;border-radius:44px"><b style="color:#FFD23F">No simulador:</b> clique no sensor e arraste a distância. Distância grande = caixa vazia. Pequena = cheia.</p>
+
+<button class="seebtn b" data-go="1" style="--d:7">Ver funcionando no simulador</button></div>
+<div class="slide mis" data-id="san-m1" style="background:#2350E8;color:#fff"><p class="mtag b" style="--d:0">Missão 1 · 1 ponto</p><h2 class="b" style="--d:1">Façam <span>disparar!</span></h2><p class="mbig b" style="--d:2">Façam a caixa “transbordar”: o LED vermelho tem que acender e o apito tocar. Cliquem no sensor azul e arrastem a distância. Lembrem: distância pequena é caixa cheia.</p><div class="howto b" style="--d:3"><h3>Como abrir o projeto</h3><ol><li>Entrem em <b>arduinoerobotica.vercel.app</b></li><li>Cliquem em <b>Simulador</b> e escolham <b>Reservatório</b></li><li>Cliquem em <b>Abrir no Wokwi</b> e depois no <b>play</b> (triângulo verde)</li></ol></div><div class="mqr b" style="--d:4"><span class="qrb" data-qr="2"></span><small>ou pelo celular</small></div><p class="mfoot b" style="--d:5">Conseguiram? Levantem a mão! A primeira dupla ganha o ponto.</p></div>
+<div class="slide mis m2" data-id="san-m2"><p class="mtag b" style="--d:0">Missão 2 · 1 ponto por acerto</p><h2 class="b" style="--d:1">Adivinhem <span>antes de testar</span></h2><p class="msub b" style="--d:1">Cada dupla responde primeiro. Depois testem no Wokwi e confiram aqui.</p><div class="ggrid"><button class="guess b" style="--d:2"><span class="gn">1</span><h3>A água está a 50 cm do sensor</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Verde</b><span>Caixa com 50%: abaixo de 60%.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:3"><span class="gn">2</span><h3>A água está a 30 cm do sensor</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Amarelo</b><span>Caixa com 70%: entre 60% e 84%.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:4"><span class="gn">3</span><h3>A água está a 10 cm do sensor</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Vermelho e apito</b><span>Caixa com 90%: 85% ou mais.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:5"><span class="gn">4</span><h3>A água está a 45 cm do sensor</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Verde</b><span>Caixa com 55%: abaixo de 60%.</span></div><span class="tap">clique para ver a resposta</span></button></div></div>
+<div class="slide mis m3" data-id="san-m3" style="background:#0F1F4D;color:#fff"><p class="mtag b" style="--d:0">Missão 3 · 3 pontos</p><h2 class="b" style="--d:1">Vocês são <span>os técnicos</span></h2><p class="mbig b" style="--d:2">O alarme de perigo toca com a caixa em 85%. Pensem na caixa d’água da escola: com quanto de antecedência vocês querem ser avisados para dar tempo de desligar a bomba?</p><div class="code b" style="--d:3"><small>No código (lado esquerdo do Wokwi), achem esta linha e troquem só o número:</small><pre>const int NIVEL_PERIGO = <mark>85</mark>;</pre><small>Depois cliquem em parar e em play de novo para testar.</small></div><div class="bonus b" style="--d:4"><b>Bônus · 2 pontos:</b> A caixa da escola é mais alta: mudem <code>ALTURA</code> de 100.0 para 150.0 e testem 50 cm de novo. O LED mudou? Por quê?</div><p class="mfoot b" style="--d:5">No final, algumas duplas contam o valor que escolheram e por quê.</p></div>
+<div class="slide deck" data-id="civil" style="background:#0F1F4D;color:#FFFFFF;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<h2 style="position:absolute;left:128px;top:110px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:78px;font-weight:700;line-height:1.05;color:#FFFFFF">Robótica na <span style="color:#FF8FA3">Construção Civil</span></h2>
+<p class="b" style="--d:1;position:absolute;left:128px;top:228px;width:1664px;font-size:36px;line-height:1.3;color:#DCE8FF">Um prédio consegue perceber o que acontece dentro dele?</p>
+<div class="b" style="--d:2;position:absolute;left:128px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #FF8FA3;rotate:-1.5deg">
+<svg aria-label="Cozinha com botijão de gás e sensor de vazamento na parede" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#FFE9A8"/><rect y="176" width="472" height="24" fill="#C9D3E3"/><rect x="70" y="96" width="140" height="82" rx="10" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="5"/><rect x="62" y="86" width="156" height="14" rx="6" fill="#64748B" stroke="#0F1F4D" stroke-width="4"/><rect x="250" y="94" width="56" height="84" rx="22" fill="#FF8A3D" stroke="#0F1F4D" stroke-width="5"/><rect x="264" y="80" width="28" height="18" rx="5" fill="#FFD23F" stroke="#0F1F4D" stroke-width="4"/><g fill="#7BA05B" opacity=".75"><circle cx="300" cy="60" r="9"/><circle cx="324" cy="44" r="7"/><circle cx="346" cy="58" r="8"/></g><rect x="370" y="30" width="56" height="64" rx="10" fill="#2350E8" stroke="#0F1F4D" stroke-width="5"/><circle cx="398" cy="58" r="16" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="4"/><circle cx="398" cy="114" r="12" fill="#E8453C" stroke="#0F1F4D" stroke-width="4"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Gás na cozinha e na garagem</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">O sensor percebe o vazamento e dispara o alarme.</p>
+</div>
+<div class="b" style="--d:3;position:absolute;left:700px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #FFD23F;rotate:1deg">
+<svg aria-label="Corredor com lâmpada acesa e sensor de presença" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#CFE0FF"/><rect y="168" width="472" height="32" fill="#9DB4E8"/><circle cx="236" cy="60" r="44" fill="#FFD23F" opacity=".45"/><circle cx="236" cy="60" r="24" fill="#FFD23F" stroke="#0F1F4D" stroke-width="5"/><rect x="226" y="18" width="20" height="16" rx="3" fill="#C9D3E3" stroke="#0F1F4D" stroke-width="4"/><path d="M236 104 L170 168 H302 Z" fill="#FFD23F" opacity=".3"/><circle cx="236" cy="128" r="10" fill="#0F1F4D"/><path d="M236 138 V160 M224 148 H248 M236 160 L226 168 M236 160 L246 168" stroke="#0F1F4D" stroke-width="6" stroke-linecap="round"/><rect x="360" y="40" width="44" height="30" rx="8" fill="#FFFFFF" stroke="#0F1F4D" stroke-width="4"/><circle cx="382" cy="55" r="8" fill="#E8453C"/><path d="M350 82 q32 18 64 0" fill="none" stroke="#2350E8" stroke-width="4" stroke-linecap="round"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Luz e ar automáticos</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Lâmpada que acende quando alguém passa e ar que liga com o calor.</p>
+</div>
+<div class="b" style="--d:4;position:absolute;left:1272px;top:340px;width:520px;display:flex;flex-direction:column;gap:18px;background:#F4F8FF;padding:24px 24px 32px;border-radius:32px;box-shadow:8px 8px 0px #35D0F5;rotate:-1deg">
+<svg aria-label="Parede com mancha de umidade e sensor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472 200" width="472" height="200"><rect width="472" height="200" rx="22" fill="#CDF3E2"/><rect x="60" y="24" width="300" height="164" fill="#F2E3C6" stroke="#0F1F4D" stroke-width="5"/><path d="M60 64 H360 M60 104 H360 M60 144 H360 M140 24 V64 M260 24 V64 M200 64 V104 M100 104 V144 M300 104 V144 M160 144 V188 M280 144 V188" stroke="#D9C49A" stroke-width="4"/><path d="M120 188 C110 150 150 140 160 118 C176 140 214 136 222 160 C230 176 220 188 220 188 Z" fill="#7A8F6A" opacity=".55"/><rect x="380" y="70" width="56" height="70" rx="10" fill="#1B2440" stroke="#0F1F4D" stroke-width="4"/><rect x="390" y="96" width="36" height="28" rx="4" fill="#FFD23F"/><circle cx="408" cy="82" r="6" fill="#35D0F5"/></svg>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Umidade e infiltração</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Sensores avisam da umidade na parede antes de o mofo aparecer.</p>
+</div>
+
+</div>
+<div class="slide real" data-id="civil-real"><h2 class="b" style="--d:0">Na vida real: <span style="color:#FF8FA3">Construção Civil</span></h2><p class="rsub b" style="--d:1">Fotos de verdade de onde essa tecnologia já está.</p><figure class="ph b" style="--d:2;left:128px;width:395px;--sh:#FF8FA3"><img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/8/83/KP836_Portable_Multi-gas_Detector.jpg" alt="Detector de gás" style="height:400px"><figcaption><h3>Detector de gás</h3><p>Aparelho que técnicos usam para achar vazamentos.</p><small>Foto: SabirovaNigora · CC BY 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:3;left:551px;width:395px;--sh:#FF8FA3"><img loading="lazy" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Gas-Sensor.jpg/960px-Gas-Sensor.jpg" alt="Sensor de gás" style="height:400px"><figcaption><h3>Sensor de gás</h3><p>A pecinha que “sente” o gás no ar.</p><small>Foto: Drahkrub · CC BY-SA 3.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:4;left:974px;width:395px;--sh:#FF8FA3"><img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/0/08/PIR_Sensor_Design_SN-PR15.jpg" alt="Sensor de presença" style="height:400px"><figcaption><h3>Sensor de presença</h3><p>Acende a luz quando alguém passa.</p><small>Foto: Hhkorat · CC BY-SA 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph b" style="--d:5;left:1397px;width:395px;--sh:#FF8FA3"><img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/1/18/Helvar_Touchscreen_924.jpg" alt="Painel de automação" style="height:400px"><figcaption><h3>Painel de automação</h3><p>Controla luz e clima de um prédio inteiro.</p><small>Foto: Symppis · CC BY-SA 3.0 · Wikimedia Commons</small></figcaption></figure></div>
+<div class="slide deck" data-id="civil-proj" style="background:#F4F8FF;color:#0F1F4D;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<p style="position:absolute;left:128px;top:96px;width:600px;font-family:'Fredoka', Arial, sans-serif;font-size:30px;font-weight:600;color:#0F1F4D;background:#FF8FA3;padding:10px 26px;border-radius:40px;rotate:-2deg">Projeto de Desenho da Construção Civil</p>
+<h2 style="position:absolute;left:128px;top:172px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:84px;font-weight:700;line-height:1.05;color:#0F1F4D">Qualidade do ar no ambiente</h2>
+<div class="b" style="--d:1;position:absolute;left:128px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#BDEBFA;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#2350E8">1 · ENTRADA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Sensor de gás</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Percebe a quantidade de gás no ar, medida em ppm.</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:2;position:absolute;left:617px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:3;position:absolute;left:725px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#FFE9A8;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#B27F00">2 · O ARDUINO DECIDE</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">Três faixas de gás</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Abaixo de 10 ppm: normal. De 10 a 49: atenção. 50 ou mais: perigo.</p>
+</div>
+<svg class="b" aria-label="Seta" style="--d:4;position:absolute;left:1214px;top:470px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" width="90" height="60"><path d="M20 10 L46 30 L20 50 M44 10 L70 30 L44 50" fill="none" stroke="#2350E8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="b" style="--d:5;position:absolute;left:1322px;top:330px;width:470px;display:flex;flex-direction:column;gap:14px;background:#CDF3E2;padding:32px;border:5px solid #0F1F4D;border-radius:32px;box-shadow:8px 8px 0px #0F1F4D">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#1B8F5A">3 · SAÍDA</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.1;color:#0F1F4D">LEDs e apito</h3>
+<p style="font-size:30px;line-height:1.35;color:#243A6E">Verde, amarelo ou vermelho. No vermelho, apita: saia e ventile.</p>
+</div>
+<p class="b" style="--d:6;position:absolute;left:128px;top:800px;width:1664px;font-size:32px;line-height:1.35;color:#FFFFFF;background:#0F1F4D;padding:26px 44px;border-radius:44px"><b style="color:#FFD23F">No simulador:</b> clique no sensor e arraste o controle de gás. É só uma demonstração, não um equipamento de segurança.</p>
+
+<button class="seebtn b" data-go="3" style="--d:7">Ver funcionando no simulador</button></div>
+<div class="slide mis" data-id="civil-m1" style="background:#2350E8;color:#fff"><p class="mtag b" style="--d:0">Missão 1 · 1 ponto</p><h2 class="b" style="--d:1">Façam <span>disparar!</span></h2><p class="mbig b" style="--d:2">Façam o alarme de gás disparar: o LED vermelho tem que acender e o apito tocar. Cliquem no sensor de gás e arrastem o controle.</p><div class="howto b" style="--d:3"><h3>Como abrir o projeto</h3><ol><li>Entrem em <b>arduinoerobotica.vercel.app</b></li><li>Cliquem em <b>Simulador</b> e escolham <b>Ar</b></li><li>Cliquem em <b>Abrir no Wokwi</b> e depois no <b>play</b> (triângulo verde)</li></ol></div><div class="mqr b" style="--d:4"><span class="qrb" data-qr="4"></span><small>ou pelo celular</small></div><p class="mfoot b" style="--d:5">Conseguiram? Levantem a mão! A primeira dupla ganha o ponto.</p></div>
+<div class="slide mis m2" data-id="civil-m2"><p class="mtag b" style="--d:0">Missão 2 · 1 ponto por acerto</p><h2 class="b" style="--d:1">Adivinhem <span>antes de testar</span></h2><p class="msub b" style="--d:1">Cada dupla responde primeiro. Depois testem no Wokwi e confiram aqui.</p><div class="ggrid"><button class="guess b" style="--d:2"><span class="gn">1</span><h3>5 ppm de gás no ar</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Verde</b><span>Abaixo de 10 ppm.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:3"><span class="gn">2</span><h3>20 ppm de gás no ar</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Amarelo</b><span>Entre 10 e 49 ppm.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:4"><span class="gn">3</span><h3>9 ppm de gás no ar</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Verde</b><span>Ainda abaixo de 10 ppm.</span></div><span class="tap">clique para ver a resposta</span></button><button class="guess b" style="--d:5"><span class="gn">4</span><h3>60 ppm de gás no ar</h3><p class="gq">Qual LED acende?</p><div class="ans"><b>Vermelho e apito</b><span>50 ppm ou mais.</span></div><span class="tap">clique para ver a resposta</span></button></div></div>
+<div class="slide mis m3" data-id="civil-m3" style="background:#0F1F4D;color:#fff"><p class="mtag b" style="--d:0">Missão 3 · 3 pontos</p><h2 class="b" style="--d:1">Vocês são <span>os técnicos</span></h2><p class="mbig b" style="--d:2">O alarme toca a partir de 50 ppm. Vocês estão desenhando uma casa: o sensor vai para a cozinha ou para um quarto onde alguém dorme? Em qual deles o alarme deveria tocar mais cedo?</p><div class="code b" style="--d:3"><small>No código (lado esquerdo do Wokwi), achem esta linha e troquem só o número:</small><pre>const float LIMITE_ALTO = <mark>50.0</mark>;</pre><small>Depois cliquem em parar e em play de novo para testar.</small></div><div class="bonus b" style="--d:4"><b>Bônus · 2 pontos:</b> Mudem o som do apito: na linha <code>tone(BUZZER, 1000, 200);</code> troquem o 1000 por 2000 (agudo) ou 400 (grave).</div><p class="mfoot b" style="--d:5">No final, algumas duplas contam o valor que escolheram e por quê.</p></div>
+<div class="slide real" data-id="arduino-real"><h2 class="b" style="--d:0">O Arduino <span style="color:#FFD23F">de verdade</span></h2><p class="rsub b" style="--d:1">Uma plaquinha do tamanho de um cartão, ligando LEDs com algumas linhas de código.</p><figure class="ph vid b" style="--d:2;left:128px;width:818px;--sh:#FFD23F"><video data-src="https://upload.wikimedia.org/wikipedia/commons/transcoded/2/24/Arduino_uno_led_blink.webm/Arduino_uno_led_blink.webm.480p.vp9.webm" muted loop playsinline preload="none" style="height:560px;object-fit:cover"></video><figcaption><h3>Arduino Uno piscando um LED</h3><small>Vídeo: Edwiyanto · CC BY-SA 4.0 · Wikimedia Commons</small></figcaption></figure><figure class="ph vid b" style="--d:3;left:974px;width:818px;--sh:#FFD23F"><video data-src="https://upload.wikimedia.org/wikipedia/commons/transcoded/8/8c/Blinking_5_LEDs_with_Arduino.webm/Blinking_5_LEDs_with_Arduino.webm.480p.vp9.webm" muted loop playsinline preload="none" style="height:560px;object-fit:cover"></video><figcaption><h3>Arduino acendendo 5 LEDs em sequência</h3><small>Vídeo: Kenichiro Matohara · CC BY 2.0 · Wikimedia Commons</small></figcaption></figure></div>
+<div class="slide deck" data-id="desafio" style="background:#0F1F4D;color:#FFFFFF;font-family:'Nunito', Arial, sans-serif;padding:128px">
+<h2 style="position:absolute;left:128px;top:96px;width:1664px;font-family:'Fredoka', Arial, sans-serif;font-size:88px;font-weight:700;line-height:1.05;color:#FFFFFF">Desafio em <span style="color:#FFD23F">duplas</span></h2>
+<p class="b" style="--d:1;position:absolute;left:128px;top:212px;width:1664px;font-size:36px;line-height:1.3;color:#DCE8FF">Em duplas, abram o projeto do curso de vocês. As missões aparecem aqui na tela, uma de cada vez.</p>
+<div class="b" style="--d:2;position:absolute;left:128px;top:320px;width:395px;display:flex;flex-direction:column;gap:12px;background:#F4F8FF;padding:30px;border-radius:32px;box-shadow:8px 8px 0px #35D0F5;rotate:-1.5deg">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:80px;font-weight:700;line-height:1.0;color:#2350E8">1</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Faça disparar</h3>
+<p style="font-size:29px;line-height:1.35;color:#243A6E">Coloque o projeto em alerta o mais rápido possível. Conseguiu? Levante a mão!</p>
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#2350E8">1 ponto</p>
+</div>
+<div class="b" style="--d:3;position:absolute;left:551px;top:320px;width:395px;display:flex;flex-direction:column;gap:12px;background:#F4F8FF;padding:30px;border-radius:32px;box-shadow:8px 8px 0px #FFD23F;rotate:1deg">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:80px;font-weight:700;line-height:1.0;color:#B27F00">2</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Adivinhe antes</h3>
+<p style="font-size:29px;line-height:1.35;color:#243A6E">A gente fala um valor. Vai disparar ou não? Respondam primeiro, testem depois.</p>
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#B27F00">1 ponto por acerto</p>
+</div>
+<div class="b" style="--d:4;position:absolute;left:974px;top:320px;width:395px;display:flex;flex-direction:column;gap:12px;background:#F4F8FF;padding:30px;border-radius:32px;box-shadow:8px 8px 0px #7BE0B0;rotate:-1deg">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:80px;font-weight:700;line-height:1.0;color:#1B8F5A">3</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Você é o técnico</h3>
+<p style="font-size:29px;line-height:1.35;color:#243A6E">Mude o limite no código para o valor que faz sentido na sua profissão. Expliquem o porquê.</p>
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#1B8F5A">3 pontos</p>
+</div>
+<div class="b" style="--d:5;position:absolute;left:1397px;top:320px;width:395px;display:flex;flex-direction:column;gap:12px;background:#F4F8FF;padding:30px;border-radius:32px;box-shadow:8px 8px 0px #FF8FA3;rotate:2deg">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:80px;font-weight:700;line-height:1.0;color:#C2405A">+</p>
+<h3 style="font-family:'Fredoka', Arial, sans-serif;font-size:40px;font-weight:600;line-height:1.1;color:#0F1F4D">Bônus</h3>
+<p style="font-size:29px;line-height:1.35;color:#243A6E">Terminou tudo? Personalize o projeto com a ideia extra da missão 3.</p>
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:28px;font-weight:600;color:#C2405A">2 pontos</p>
+</div>
+<p class="b" style="--d:6;position:absolute;left:128px;top:840px;width:1664px;font-size:32px;line-height:1.35;color:#0F1F4D;background:#FFD23F;padding:24px 44px;border-radius:44px;rotate:-.5deg"><b>Dica:</b> no código, mude só o número. Depois clique em parar e em play de novo para testar.</p>
+
+</div>
+<div class="slide mis m3" data-id="misto-m3" style="background:#0F1F4D;color:#fff"><p class="mtag b" style="--d:0">Missão principal · 3 pontos</p><h2 class="b" style="--d:1">Vocês são <span>os técnicos</span></h2><p class="mbig b" style="--d:1">Cada dupla abre o projeto do seu curso, troca o número desta linha pelo valor que faz sentido na profissão e explica o porquê.</p><div class="mxgrid"><div class="mx b" style="--d:2;--sh:#35D0F5"><h3>Agroindústria</h3><pre>const int LIGA_ABAIXO = <mark>30</mark>;</pre></div><div class="mx b" style="--d:3;--sh:#FFD23F"><h3>Nutrição e Dietética</h3><pre>const float TEMP_MAX = <mark>30.0</mark>;</pre></div><div class="mx b" style="--d:4;--sh:#7BE0B0"><h3>Saneamento</h3><pre>const int NIVEL_PERIGO = <mark>85</mark>;</pre></div><div class="mx b" style="--d:5;--sh:#FF8FA3"><h3>Construção Civil</h3><pre>const float LIMITE_ALTO = <mark>50.0</mark>;</pre></div></div></div>
 </section>
 
 <!-- ================= SIMULADOR ================= -->
@@ -396,7 +675,7 @@ h1,h2,h3{font-family:var(--display)}
 
 <nav id="bar" aria-label="Controles">
   <div id="prog"></div>
-  <div class="tabs"><button class="tab on" id="tab-p">Apresentação</button><button class="tab" id="tab-s">Simulador</button></div>
+  <div class="tabs"><button class="tab" id="tab-c">Turma</button><button class="tab on" id="tab-p">Apresentação</button><button class="tab" id="tab-s">Simulador</button></div>
   <div id="dots"></div>
   <div class="ctl-btns">
     <button class="ib" id="b-prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-8 7 8 7z"/></svg></button>
@@ -431,20 +710,22 @@ $$('[data-mascot-inner]').forEach(g=>{g.innerHTML=BOARD});
   L.forEach((l,i)=>{const r=el('rect',{x:l[0],y:l[1],width:l[2],height:14,rx:7,fill:l[3]},g);r.style.cssText='transform-box:fill-box;transform-origin:left center;animation:grow 3.6s ease-out infinite;animation-delay:'+(i*.2)+'s'})})();
 
 /* ---------- apresentação ---------- */
-const slides=$$('.slide'),views={p:$('#v-present'),s:$('#v-sim')},scenes=$$('.scene');
+const ALL={};$$('#v-present .slide').forEach(s=>ALL[s.dataset.id]=s);let slides=[],curso=null;const views={p:$('#v-present'),s:$('#v-sim')},scenes=$$('.scene');
 let auto=false,stay=false,held=false,lastTouch=0,selapsed=0;const SDUR=[20000,23000,18000,20000];
 let mode='p',idx=0,sidx=0,paused=false,elapsed=0,last=performance.now(),lastAct=performance.now();
 const names=['Ambiente','Reservatório','Irrigação','Ar'];
 function buildDots(){const d=$('#dots');d.innerHTML='';
   if(mode==='p'){slides.forEach((s,i)=>{const b=document.createElement('button');b.className='dot'+(i===idx?' on':'');b.setAttribute('aria-label','Slide '+(i+1));b.onclick=()=>goSlide(i);d.appendChild(b)})}
   else{names.forEach((n,i)=>{const b=document.createElement('button');b.className='stab'+(i===sidx?' on':'');b.textContent=n;b.onclick=()=>{stay=true;goScene(i)};d.appendChild(b)})}}
-function goSlide(i){idx=(i+slides.length)%slides.length;elapsed=0;slides.forEach((s,k)=>{s.classList.remove('active')});void $('#v-present').offsetWidth;slides[idx].classList.add('active');buildDots()}
+function goSlide(i){if(!slides.length)return;idx=Math.max(0,Math.min(slides.length-1,i));$$('#v-present .slide').forEach(s=>s.classList.remove('active'));void $('#v-present').offsetWidth;const cur=slides[idx];cur.classList.add('active');
+  $$('#v-present video').forEach(v=>{if(cur.contains(v)){if(!v.src)v.src=v.dataset.src;v.currentTime=0;v.play().catch(()=>{})}else v.pause()});
+  $('#prog').style.transform='scaleX('+(slides.length>1?idx/(slides.length-1):1)+')';buildDots()}
 function goScene(i){sidx=(i+scenes.length)%scenes.length;selapsed=0;held=false;scenes.forEach((s,k)=>s.classList.toggle('on',k===sidx));buildDots();if(auto&&sims[sidx].demoStart)sims[sidx].demoStart();else if(sims[sidx].enter)sims[sidx].enter();$('#autobadge').classList.toggle('on',auto)}
 function setMode(m,i){mode=m;views.p.classList.toggle('on',m==='p');views.s.classList.toggle('on',m==='s');
   $('#tab-p').classList.toggle('on',m==='p');$('#tab-s').classList.toggle('on',m==='s');
-  if(m==='p')auto=false;$('#b-play').style.visibility=(m==='p'||auto)?'visible':'hidden';$('#prog').style.display=(m==='p'||auto)?'block':'none';$('#autobadge').classList.toggle('on',auto);
+  $('#chooser').classList.remove('on');$('#tab-c').classList.remove('on');if(m==='p')auto=false;$('#b-play').style.visibility=(m==='s'&&auto)?'visible':'hidden';$('#prog').style.display=(m==='p'||auto)?'block':'none';if(m==='s')$$('#v-present video').forEach(v=>v.pause());$('#autobadge').classList.toggle('on',auto);
   if(m==='p'){goSlide(i==null?idx:i)}else{goScene(i==null?sidx:i)}}
-$('#tab-p').onclick=()=>setMode('p',0);$('#tab-s').onclick=()=>{auto=true;stay=true;setMode('s')};
+$('#tab-p').onclick=()=>{if(!slides.length)openChooser();else setMode('p')};$('#tab-c').onclick=()=>openChooser();$('#tab-s').onclick=()=>{auto=true;stay=true;setMode('s')};
 function takeOver(){if(mode==='s'){held=true;lastTouch=performance.now();$('#autobadge').classList.remove('on')}}
 $$('.stagecard,.panel').forEach(e=>e.addEventListener('pointerdown',takeOver));
 $('#b-prev').onclick=()=>mode==='p'?goSlide(idx-1):goScene(sidx-1);
@@ -453,9 +734,11 @@ $('#b-play').onclick=()=>{paused=!paused;$('#pp').innerHTML=paused?'<path d="M7 
 $('#b-full').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
 $$('[data-go]').forEach(b=>b.onclick=()=>{auto=true;stay=true;setMode('s',+b.dataset.go)});
 addEventListener('keydown',e=>{lastAct=performance.now();
-  if(e.key==='ArrowRight')$('#b-next').click();else if(e.key==='ArrowLeft')$('#b-prev').click();
-  else if(e.key===' '&&mode==='p'){e.preventDefault();$('#b-play').click()}
-  else if(e.key==='f')$('#b-full').click();else if(e.key==='s'){auto=true;stay=true;setMode('s')}else if(e.key==='Escape')setMode('p',0);
+  if($('#chooser').classList.contains('on')){const k='12345'.indexOf(e.key);if(k>=0)choose(['agro','nutri','san','civil','misto'][k]);return}
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)&&!(e.key===' '&&mode==='s')){e.preventDefault();$('#b-next').click()}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();$('#b-prev').click()}
+  else if(e.key===' '&&mode==='s'){e.preventDefault();$('#b-play').click()}
+  else if(e.key==='f')$('#b-full').click();else if(e.key==='s'){auto=true;stay=true;setMode('s')}else if(e.key==='Escape'){if(slides.length)setMode('p')}
   else if(mode==='s'&&'1234'.includes(e.key)){stay=true;goScene(+e.key-1)}});
 ['pointermove','pointerdown','input'].forEach(ev=>addEventListener(ev,()=>{lastAct=performance.now()}));
 
@@ -611,12 +894,21 @@ sims[3]=(function(){
 
 /* ---------- laço principal ---------- */
 function loop(now){const dt=Math.min(now-last,100);last=now;
-  if(mode==='p'){if(!paused){elapsed+=dt;const d=+slides[idx].dataset.dur;$('#prog').style.transform='scaleX('+clamp(elapsed/d,0,1)+')';if(elapsed>=d){if(idx===slides.length-1){auto=true;stay=false;setMode('s',0)}else goSlide(idx+1)}}}
+  if(mode==='p'){}
   else{if(held&&now-lastTouch>8000){held=false;goScene(sidx)}
     if(auto&&!paused&&!held){selapsed+=dt;if(sims[sidx].demo)sims[sidx].demo(selapsed/1000);$('#prog').style.transform='scaleX('+clamp(selapsed/SDUR[sidx],0,1)+')';if(selapsed>=SDUR[sidx]){if(stay)goScene(sidx);else if(sidx===scenes.length-1)setMode('p',0);else goScene(sidx+1)}}
-    if(sims[sidx].tick&&!(auto&&paused&&!held))sims[sidx].tick(dt);if(soundOn&&alarms[sidx]&&now-lastBeep>450){lastBeep=now;beep(((now/450|0)%2)?988:784,.22)}if((stay||!auto)&&now-lastAct>90000){setMode('p',0)}}
+    if(sims[sidx].tick&&!(auto&&paused&&!held))sims[sidx].tick(dt);if(soundOn&&alarms[sidx]&&now-lastBeep>450){lastBeep=now;beep(((now/450|0)%2)?988:784,.22)}}
   requestAnimationFrame(loop)}
-setMode('p',0);requestAnimationFrame(t=>{last=t;loop(t)});
+/* ---------- turma ---------- */
+const GERAL=['cover','onde','arduino','arduino-real','fluxo'],FIM=['wokwi','desafio'];
+const SEQ={misto:[...GERAL,'profissoes','agro-proj','nutri-proj','san-proj','civil-proj',...FIM,'misto-m3','experimentar']};
+['agro','nutri','san','civil'].forEach(c=>{SEQ[c]=[...GERAL,c,c+'-real'].concat(c==='agro'?['agro-video']:[]).concat([c+'-proj',...FIM,c+'-m1',c+'-m2',c+'-m3','experimentar'])});
+function openChooser(){let last=null;try{last=localStorage.getItem('turma')}catch(e){}$$('.cbtn').forEach(b=>b.classList.toggle('last',b.dataset.curso===last));
+  $$('#v-present video').forEach(v=>v.pause());$('#chooser').classList.add('on');$('#tab-c').classList.add('on');$('#tab-p').classList.remove('on');$('#tab-s').classList.remove('on');$('#dots').innerHTML='';$('#prog').style.display='none'}
+function choose(c){curso=c;try{localStorage.setItem('turma',c)}catch(e){}slides=SEQ[c].map(id=>ALL[id]).filter(Boolean);$$('.guess').forEach(g=>g.classList.remove('show'));setMode('p',0)}
+$$('.cbtn').forEach(b=>b.onclick=()=>choose(b.dataset.curso));
+$$('.guess').forEach(g=>g.onclick=()=>g.classList.toggle('show'));
+openChooser();requestAnimationFrame(t=>{last=t;loop(t)});
 </script>
 
 </body>
