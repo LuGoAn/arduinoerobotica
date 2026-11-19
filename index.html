@@ -286,7 +286,7 @@ h1,h2,h3{font-family:var(--display)}
 .bigqr{position:absolute;left:1300px;top:230px;width:508px;display:flex;flex-direction:column;align-items:center;gap:14px;font-size:30px;color:#fff}
 .bigqr .qrb{background:#fff;border:6px solid var(--navy);border-radius:28px;padding:14px;line-height:0;box-shadow:10px 10px 0 var(--navy)}
 .bigqr svg{width:440px;height:440px}
-.wk{position:absolute;left:112px;right:112px;top:985px;font-size:22px;line-height:1.4;color:#B9CBF5}
+.wk{position:absolute;left:112px;right:112px;top:925px;font-size:22px;line-height:1.4;color:#B9CBF5}
 .ext{position:absolute;left:112px;width:1250px;top:858px;font:500 30px/1.3 var(--display);color:#fff}.ext b{color:var(--yellow)}
 .wk a{color:#DCE6FF;text-decoration:underline}
 .go{font:600 30px var(--display);background:var(--blue);color:#fff;border:0;border-radius:30px;padding:10px 26px;margin-right:10px;cursor:pointer;box-shadow:4px 4px 0 var(--navy);vertical-align:middle}
@@ -324,7 +324,7 @@ h1,h2,h3{font-family:var(--display)}
 .xdes h3{font:600 40px var(--display);color:var(--yellow);margin:0 0 18px}
 .xdes ol{margin:0;padding-left:40px;font-size:29px;line-height:1.38;display:flex;flex-direction:column;gap:16px;color:#DCE6FF}
 .xdes b{color:#fff}
-.xgo{position:absolute;left:1000px;top:930px}
+.xgo{position:absolute;left:1000px;top:850px}
 .s-xtra .go.xgo{background:var(--yellow);color:var(--navy);font-size:34px;padding:16px 38px;border-radius:40px;box-shadow:6px 6px 0 var(--blue)}
 #mview{position:fixed;inset:0;z-index:100;background:#fff;display:none}
 #mview.on{display:block}#mview iframe{width:100%;height:100%;border:0;display:block}
@@ -1101,7 +1101,7 @@ function openChooser(){let last=null;try{last=localStorage.getItem('turma')}catc
 function choose(c){$$('.vs .ph').forEach(x=>x.classList.remove('big'));curso=c;try{localStorage.setItem('turma',c)}catch(e){}slides=SEQ[c].map(id=>ALL[id]).filter(Boolean);$$('.guess').forEach(g=>g.classList.remove('show'));setMode('p',0)}
 let tx=null,ty=0;$('#views').addEventListener('touchstart',e=>{if(e.touches.length===1){tx=e.touches[0].clientX;ty=e.touches[0].clientY}else tx=null},{passive:true});
 $('#views').addEventListener('touchend',e=>{if(tx===null||mode!=='p'||$('#chooser').classList.contains('on'))return;const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;tx=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)$(dx<0?'#b-next':'#b-prev').click()},{passive:true});
-addEventListener('mousemove',e=>{const r=$('#stage').getBoundingClientRect(),k=r.height/1080;$('#stage').classList.toggle('showbar',e.clientY>r.bottom-110*k&&e.clientY<=r.bottom+2)});
+addEventListener('mousemove',e=>{const r=$('#stage').getBoundingClientRect(),k=r.height/1080;const st=$('#stage'),lim=st.classList.contains('showbar')?80:28;st.classList.toggle('showbar',e.clientY>r.bottom-lim*k&&e.clientY<=r.bottom+2)});
 document.documentElement.addEventListener('mouseleave',()=>$('#stage').classList.remove('showbar'));
 $$('.cbtn').forEach(b=>b.onclick=()=>choose(b.dataset.curso));
 $$('.guess').forEach(g=>g.onclick=()=>g.classList.toggle('show'));
