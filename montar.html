@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Montar o projeto · Arduino e Robótica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400..800&display=swap">
+<style>
+:root{--navy:#0F1F4D;--blue:#2350E8;--cyan:#35D0F5;--yellow:#FFD23F;--paper:#F4F8FF;--ink:#0F1F4D;--ink2:#3A4E7E;--soft:#DCE8FF;
+--display:'Fredoka','Trebuchet MS',Arial,sans-serif;--text:'Nunito','Segoe UI',Arial,sans-serif;
+--c-in:#9966FF;--c-ctl:#FFAB19;--c-out:#4C97FF;--c-math:#59C059}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:var(--text)}
+body{display:flex;flex-direction:column;min-height:100vh}
+button{font-family:inherit}
+header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--navy);color:#fff;flex-wrap:wrap}
+header h1{font:600 22px var(--display);margin:0 6px 0 0;white-space:nowrap}
+header h1 span{color:var(--yellow)}
+.projs{display:flex;gap:6px;flex-wrap:wrap}
+.projs button{border:0;border-radius:20px;padding:7px 12px;font-weight:700;font-size:14px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+.projs button.on{background:#fff;color:var(--navy)}
+.spacer{flex:1}
+.prog{font-size:13px;color:#B9CBF5;white-space:nowrap}
+.prog b{color:#fff}
+.acts{display:flex;gap:8px}
+.acts button{border:0;border-radius:12px;padding:9px 14px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px}
+#bHint{background:var(--yellow);color:var(--navy)}
+#bAuto{background:#fff;color:var(--navy)}
+#bReset{background:rgba(255,255,255,.14);color:#fff}
+.acts button:active{transform:translateY(1px)}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;padding:14px;min-height:0}
+.panel{background:#fff;border-radius:18px;box-shadow:0 2px 0 #D6E2FA,0 8px 24px rgba(15,31,77,.08);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.phead{display:flex;align-items:center;gap:10px;padding:12px 16px 8px}
+.phead .n{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font:700 16px var(--display)}
+.phead h2{font:600 19px var(--display);margin:0}
+.phead small{color:var(--ink2);font-size:13px}
+.phead .ok{margin-left:auto;font-size:13px;font-weight:800;color:#1E9E5A;display:none}
+.phead.done .ok{display:block}
+#mission{margin:0 16px 6px;font-size:14px;color:var(--ink2)}
+#mission b{color:var(--ink)}
+#svgwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 8px}
+#board{width:100%;height:100%;max-height:100%;touch-action:none;user-select:none}
+.ctrl{display:flex;align-items:center;gap:14px;padding:10px 16px 14px;border-top:1px solid #E6EDFB;flex-wrap:wrap}
+#power{border:0;border-radius:14px;padding:10px 18px;font:700 16px var(--display);background:#1E9E5A;color:#fff;cursor:pointer;min-width:190px}
+#power.on{background:#D8343F}
+.sens{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700}
+.sens input{width:170px;accent-color:var(--blue)}
+.sens output{min-width:64px;font:600 17px var(--display);color:var(--blue)}
+#mute{margin-left:auto;border:0;background:none;font-size:20px;cursor:pointer}
+/* portas */
+.port{cursor:crosshair}
+.port .hit{fill:transparent}
+.port .dot{fill:#2B2B2B;stroke:none}
+.port.pin .dot{fill:#1A1A1A}
+.port:hover .ring,.dragging-wire .port.free .ring{stroke:var(--yellow);stroke-width:3;fill:rgba(255,210,63,.25)}
+.port .ring{fill:none;stroke:transparent}
+.port.used .ring{stroke:transparent!important}
+.port.hint .ring{stroke:#FF8A00;stroke-width:4;fill:rgba(255,138,0,.35);animation:pulse 1s infinite}
+.port.target .ring{stroke:#1E9E5A;stroke-width:4;fill:rgba(30,158,90,.35)}
+@keyframes pulse{50%{stroke-width:7}}
+.wire{fill:none;stroke-linecap:round;cursor:pointer}
+.wire.bad{stroke-dasharray:10 6}
+.wire.hintbad{animation:blink .7s infinite}
+@keyframes blink{50%{opacity:.25}}
+.wcap{pointer-events:none}
+.lbl{font:700 11px var(--text);fill:#fff}
+.tip{font:700 13px var(--text)}
+#ptip{position:fixed;pointer-events:none;background:var(--navy);color:#fff;font-size:13px;font-weight:700;padding:5px 9px;border-radius:8px;display:none;z-index:50;white-space:nowrap}
+/* programação */
+.seg{margin-left:auto;display:flex;background:#EEF3FD;border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:8px;font-weight:800;font-size:13px;color:var(--ink2);cursor:pointer}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#codeArea{flex:1;min-height:0;display:grid;grid-template-columns:225px 1fr;border-top:1px solid #E6EDFB}
+#codeArea.text{grid-template-columns:1fr}
+#codeArea.text #tray,#codeArea.text #ws{display:none}
+#codeArea:not(.text) #txt{display:none}
+#tray{background:#F5F8FE;border-right:1px solid #E6EDFB;padding:12px 10px;overflow:auto;display:flex;flex-direction:column;gap:9px;align-items:flex-start}
+#tray>.blk,#tray>.cblk{zoom:.86}
+#tray .cblk{min-width:0}
+#tray .th{font-size:12px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em}
+#tray .empty{font-size:13px;color:#8796B8}
+#ws{padding:14px;overflow:auto;position:relative;background-image:radial-gradient(#D9E3F7 1px,transparent 1px);background-size:18px 18px}
+#txt{margin:0;padding:14px 16px;overflow:auto;font:14px/1.55 Consolas,'Courier New',monospace;background:#0F1F4D;color:#E6EDFF}
+#txt .k{color:#FFAB19}#txt .c{color:#7FA0D8}#txt .n{color:#7BE0B0}#txt .f{color:#8FC2FF}#txt .q{color:#FF8FA3}
+/* blocos */
+.blk{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:9px;color:#fff;font-weight:800;font-size:14px;line-height:1.1;cursor:grab;box-shadow:0 3px 0 rgba(0,0,0,.22);user-select:none;touch-action:none;position:relative;white-space:nowrap}
+.blk.in{background:var(--c-in)}.blk.out{background:var(--c-out)}.blk.math{background:var(--c-math);border-radius:22px;padding:6px 12px}
+.blk input{width:60px;border:0;border-radius:12px;padding:3px 6px;font:800 14px var(--text);text-align:center;color:var(--ink)}
+.blk .dotc{width:13px;height:13px;border-radius:50%;border:2px solid #fff;display:inline-block}
+.cblk{display:inline-flex;flex-direction:column;background:var(--c-ctl);border-radius:10px;color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.22);cursor:grab;user-select:none;touch-action:none;min-width:250px}
+.cblk .row{display:flex;align-items:center;gap:8px;padding:8px 12px;font-weight:800;font-size:14px;white-space:nowrap}
+.cblk .body{margin-left:16px;background:#fff;border-radius:6px 0 0 6px;padding:5px 8px 5px 8px;min-height:40px;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.cblk.forever{cursor:default}
+.cblk.forever>.body{min-height:120px}
+.cblk .foot{height:14px}
+.slot{min-width:110px;height:30px;border-radius:16px;background:rgba(0,0,0,.18);border:2px dashed rgba(255,255,255,.55);display:inline-flex;align-items:center}
+.slot.filled{background:none;border:0;min-width:0;height:auto}
+.slot.hl{background:rgba(255,255,255,.55);border-color:#fff}
+.gap{height:7px;width:100%;margin:1px 0;border-radius:4px}
+.gap.hl{background:var(--yellow);height:10px;box-shadow:0 0 0 2px rgba(255,210,63,.4)}
+.body .ph{font-size:12px;color:#9AA8C6;padding:6px 4px;font-weight:700}
+.blk.ghost,.cblk.ghost{position:fixed;z-index:100;pointer-events:none;opacity:.92;transform:rotate(2deg);box-shadow:0 10px 24px rgba(0,0,0,.3)}
+.drag-src{opacity:.28}
+.pulse-b{animation:pb 1s infinite}
+@keyframes pb{50%{box-shadow:0 0 0 6px rgba(255,138,0,.65),0 3px 0 rgba(0,0,0,.22)}}
+.gap.hintgap{background:#FF8A00;height:10px;animation:blink .8s infinite}
+.slot.hintgap{border-color:#FF8A00;background:rgba(255,138,0,.4);animation:blink .8s infinite}
+/* dica */
+#hintbar{position:fixed;left:50%;top:64px;transform:translateX(-50%) translateY(-30px);opacity:0;pointer-events:none;background:var(--navy);color:#fff;border-radius:16px;padding:12px 18px 12px 14px;display:flex;align-items:center;gap:12px;max-width:min(720px,92vw);box-shadow:0 12px 30px rgba(15,31,77,.35);transition:transform .25s,opacity .25s;z-index:60;font-size:15px;line-height:1.35}
+#hintbar.on{transform:translateX(-50%);opacity:1;pointer-events:auto}
+#hintbar .ic{font-size:26px}
+#hintbar b{color:var(--yellow)}
+#hintbar button{white-space:nowrap;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:6px 10px;cursor:pointer;font-weight:800;margin-left:6px}
+#win{position:fixed;inset:0;background:rgba(15,31,77,.55);display:none;align-items:center;justify-content:center;z-index:80}
+#win.on{display:flex}
+#win .card{background:#fff;border-radius:22px;padding:28px 30px;max-width:520px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+#win h3{font:600 30px var(--display);margin:0 0 8px}
+#win p{font-size:17px;color:var(--ink2);margin:0 0 18px}
+#win button{border:0;border-radius:14px;padding:12px 22px;font:700 17px var(--display);background:var(--blue);color:#fff;cursor:pointer}
+@media (max-width:1100px){main{grid-template-columns:1fr}#codeArea{min-height:460px}}
+
+#scenewrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 10px}
+#scene{width:100%;height:100%;max-height:100%;user-select:none}
+.lt{transition:fill .15s}
+.lbl2{font:800 13px var(--text);fill:#33415C}
+.tagw{font:800 12px var(--text);fill:#fff}
+@keyframes flick{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.12)}}
+.flame{transform-box:fill-box;transform-origin:50% 100%;animation:flick .35s infinite}
+@keyframes rise{0%{transform:translateY(0);opacity:.0}30%{opacity:.8}100%{transform:translateY(-60px);opacity:0}}
+.steam{animation:rise 2.4s infinite}
+@keyframes drift{50%{transform:translate(8px,-6px)}}
+.drift{animation:drift 3s ease-in-out infinite}
+@keyframes ping{0%{opacity:.9;transform:scale(.6)}100%{opacity:0;transform:scale(1.25)}}
+#tray .blk.pill,.blk.pill{border-radius:22px}
+.blk.wt{background:#FFAB19}
+.pulse-o{outline:3px dashed #FF8A00;outline-offset:3px}
+.projs button.ex{background:rgba(255,210,63,.18)}
+.projs button.ex.on{background:var(--yellow);color:var(--navy)}
+.key{cursor:pointer}
+.ping{transform-box:fill-box;transform-origin:50% 0;animation:ping 1s infinite}
+</style>
+</head>
+<body>
+<header>
+  <h1>Programar o <span>projeto</span></h1>
+  <div class="projs" id="projs"></div>
+  <div class="spacer"></div>
+  <div class="prog" id="prog"></div>
+  <div class="acts">
+    <button id="bHint" title="Mostra o próximo passo">🔦 Dica</button>
+    <button id="bAuto" title="Encaixa o próximo bloco para você">✨ Encaixar o próximo</button>
+    <button id="bReset" title="Começar de novo">↺ Recomeçar</button>
+  </div>
+</header>
+<main>
+  <section class="panel" id="pBench">
+    <div class="phead" id="hBench"><span class="n">1</span><h2 id="sTitle">Na vida real</h2><small id="sSub"></small></div>
+    <p id="mission"></p>
+    <div id="scenewrap"><svg id="scene" viewBox="0 0 1000 600"></svg></div>
+    <div class="ctrl"><button id="power">▶ Ligar o Arduino</button><div id="sensors" style="display:flex;gap:22px;flex-wrap:wrap"></div><button id="mute" title="Som do alarme">🔊</button></div>
+  </section>
+  <section class="panel" id="pCode">
+    <div class="phead" id="hCode"><span class="n">2</span><h2>Programação</h2><small>arraste os blocos para dentro do “para sempre”</small><span class="ok">✔ programa completo</span><div class="seg"><button class="on" data-v="b">Blocos</button><button data-v="t">Texto</button></div></div>
+    <div id="codeArea"><div id="tray"></div><div id="ws"></div><pre id="txt"></pre></div>
+  </section>
+</main>
+<div id="hintbar"><span class="ic">🔦</span><span id="hintmsg"></span><button id="hintAuto">✨ Encaixar</button><button id="hintX">✕</button></div>
+<div id="win"><div class="card"><h3>🎉 Programa pronto!</h3><p id="winmsg"></p><button id="winok">Bora testar</button></div></div>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const SVGNS='http://www.w3.org/2000/svg';
+const el=(tag,attrs={},parent)=>{const e=document.createElementNS(SVGNS,tag);for(const k in attrs){if(attrs[k]!==null)e.setAttribute(k,attrs[k])}(parent||document.getElementById('scene')).appendChild(e);return e};
+const LEDNM={r:'vermelho',y:'amarelo',g:'verde'};
+const LEDPIN={r:2,y:3,g:4};
+const LEDCOL={r:'#E53935',y:'#FDD835',g:'#43A047'};
+const LON={r:'#FF3B30',y:'#FFE14D',g:'#3BEA6E'},LOFF={r:'#5A2A2A',y:'#5A5228',g:'#244A2E'};
+const P={
+ civil:{nome:'Civil',nomeL:'Construção Civil',proj:'Alarme de gás na cozinha',lugar:'Cozinha de uma casa',
+  missao:'Programe o <b>alarme de gás</b>: sem gás, luz verde; com um pouco de gás, amarela; com muito gás (50 ppm ou mais), luz vermelha e a sirene toca.',
+  win:'Liguem o Arduino e abram o gás do fogão aos pouquinhos. Vejam a luz mudar e a sirene tocar em 50 ppm!',
+  vars:[{k:'gas',nm:'Vazamento de gás',min:0,max:100,v:0,u:' ppm'}],
+  blocks:{
+   read:{t:'read',txt:'ler o sensor de gás'},
+   c1:{t:'cond',parts:['gás','≥',{n:50}]},
+   c2:{t:'cond',parts:['gás','≥',{n:10}]},
+   if3:{t:'if3'},lr:{t:'led',c:'r'},bp:{t:'beep'},ly:{t:'led',c:'y'},lg:{t:'led',c:'g'}},
+  target:['read',{k:'if3',slots:{c1:'c1',c2:'c2'},bodies:{b1:['lr','bp'],b2:['ly'],b3:['lg']}}],
+  ctext:{c1:v=>`gas >= ${v[0]}`,c2:v=>`gas >= ${v[0]}`},
+  eval:{c1:(S,v)=>S.gas>=v[0],c2:(S,v)=>S.gas>=v[0]},
+  readTxt:['int gas = 0;','gas = map(analogRead(A0), 0, 1023, 0, 100); // ppm']},
+ agro:{nome:'Agro',nomeL:'Agroindústria',proj:'Pasteurização do leite',lugar:'Laticínio',
+  missao:'Programe o <b>controle da pasteurização</b>: abaixo de 72 °C luz amarela (ainda não está pronto); de 72 a 80 °C luz verde; acima de 80 °C luz vermelha e a sirene toca.',
+  win:'Liguem o Arduino e aumentem o fogo do tanque. Em 72 °C o leite fica pronto, e depois de 80 °C a sirene avisa que passou do ponto!',
+  vars:[{k:'temp',nm:'Fogo do aquecedor → temperatura',min:20,max:100,v:30,u:' °C'}],
+  blocks:{
+   read:{t:'read',txt:'ler a temperatura do leite'},
+   c1:{t:'cond',parts:['temperatura','>',{n:80}]},
+   c2:{t:'cond',parts:['temperatura','≥',{n:72}]},
+   if3:{t:'if3'},lr:{t:'led',c:'r'},bp:{t:'beep'},lg:{t:'led',c:'g'},ly:{t:'led',c:'y'}},
+  target:['read',{k:'if3',slots:{c1:'c1',c2:'c2'},bodies:{b1:['lr','bp'],b2:['lg'],b3:['ly']}}],
+  ctext:{c1:v=>`temperatura > ${v[0]}`,c2:v=>`temperatura >= ${v[0]}`},
+  eval:{c1:(S,v)=>S.temp>v[0],c2:(S,v)=>S.temp>=v[0]},
+  readTxt:['float temperatura = 0;','temperatura = (analogRead(A0) * 5.0 / 1024 - 0.5) * 100; // °C']},
+ nutri:{nome:'Nutrição',proj:'Estoque de alimentos',lugar:'Despensa de um restaurante',
+  missao:'Programe o <b>alarme do estoque</b>: tudo certo, luz verde; quase no limite, amarela; passou de 30 °C <b>ou</b> de 70% de umidade, luz vermelha e a sirene toca.',
+  win:'Liguem o Arduino e deixem o estoque quente ou úmido. Basta um dos dois passar do limite para a sirene tocar!',
+  vars:[{k:'temp',nm:'Temperatura',min:10,max:45,v:22,u:' °C'},{k:'umid',nm:'Umidade',min:20,max:95,v:50,u:'%'}],
+  blocks:{
+   read:{t:'read',txt:'ler temperatura e umidade'},
+   c1:{t:'cond',parts:['temperatura','>',{n:30},'ou','umidade','>',{n:70}]},
+   c2:{t:'cond',parts:['temperatura','≥',{n:27},'ou','umidade','≥',{n:60}]},
+   if3:{t:'if3'},lr:{t:'led',c:'r'},bp:{t:'beep'},ly:{t:'led',c:'y'},lg:{t:'led',c:'g'}},
+  target:['read',{k:'if3',slots:{c1:'c1',c2:'c2'},bodies:{b1:['lr','bp'],b2:['ly'],b3:['lg']}}],
+  ctext:{c1:v=>`temperatura > ${v[0]} || umidade > ${v[1]}`,c2:v=>`temperatura >= ${v[0]} || umidade >= ${v[1]}`},
+  eval:{c1:(S,v)=>S.temp>v[0]||S.umid>v[1],c2:(S,v)=>S.temp>=v[0]||S.umid>=v[1]},
+  readTxt:['#include <DHT.h>\nDHT dht(7, DHT22);\nfloat temperatura = 0;\nfloat umidade = 0;','temperatura = dht.readTemperature();\n  umidade = dht.readHumidity();'],
+  setupTxt:'  dht.begin();\n'},
+ san:{nome:'Saneamento',proj:'Nível da caixa d’água',lugar:'Caixa d’água de um bairro',
+  missao:'Programe o <b>alarme da caixa d’água</b>: até 60% luz verde; de 60% a 84% amarela; com 85% ou mais, luz vermelha e a sirene toca para desligarem a bomba.',
+  win:'Liguem o Arduino e encham a caixa d’água. Com 85% a sirene tem que tocar antes de transbordar!',
+  vars:[{k:'nivel',nm:'Bomba enchendo a caixa',min:0,max:100,v:30,u:'%'}],
+  blocks:{
+   read:{t:'read',txt:'ler o nível da caixa'},
+   c1:{t:'cond',parts:['nível','≥',{n:85}]},
+   c2:{t:'cond',parts:['nível','≥',{n:60}]},
+   if3:{t:'if3'},lr:{t:'led',c:'r'},bp:{t:'beep'},ly:{t:'led',c:'y'},lg:{t:'led',c:'g'}},
+  target:['read',{k:'if3',slots:{c1:'c1',c2:'c2'},bodies:{b1:['lr','bp'],b2:['ly'],b3:['lg']}}],
+  ctext:{c1:v=>`nivel >= ${v[0]}`,c2:v=>`nivel >= ${v[0]}`},
+  eval:{c1:(S,v)=>S.nivel>=v[0],c2:(S,v)=>S.nivel>=v[0]},
+  readTxt:['int nivel = 0;\n\n// mede a distância até a água e transforma em % da caixa\nint lerNivel(int trig, int echo) {\n  digitalWrite(trig, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(trig, LOW);\n  long cm = pulseIn(echo, HIGH) / 58;\n  return constrain(map(cm, 60, 5, 0, 100), 0, 100);\n}','nivel = lerNivel(10, 9); // % da caixa'],
+  setupTxt:'  pinMode(10, OUTPUT); // TRIG\n  pinMode(9, INPUT);   // ECHO\n'}
+};
+
+const ALERT_HEAD=(R)=>`${R[0]}\n\nvoid acenderSo(int pino) {\n  digitalWrite(2, pino == 2);\n  digitalWrite(3, pino == 3);\n  digitalWrite(4, pino == 4);\n}`;
+['civil','agro','nutri','san'].forEach(k=>{const p=P[k];p.tray=['lg','if3','c2','read','bp','c1','ly','lr'];p.head=ALERT_HEAD(p.readTxt);
+  p.setup='  pinMode(2, OUTPUT); // LED vermelho\n  pinMode(3, OUTPUT); // LED amarelo\n  pinMode(4, OUTPUT); // LED verde\n  pinMode(8, OUTPUT); // buzzer\n'+(p.setupTxt||'');p.loopPost='  delay(100);\n'});
+P.braco={nome:'🤖 Braço',extra:true,proj:'Braço robótico',lugar:'Projeto extra',
+  missao:'Programe o <b>braço robótico</b>: cada potenciômetro controla um motor, e o <b>botão da garra</b> abre e fecha a garra. Depois usem o braço para pegar os bloquinhos e empilhar!',
+  win:'Liguem o Arduino, girem os potenciômetros <b>Base</b> e <b>Braço</b> até a garra chegar num bloquinho e apertem o <b>botão da garra</b> (ou a barra de espaço) para pegar. Apertem de novo para soltar!',
+  done:'O programa está pronto! Ligue o Arduino e gire os potenciômetros. Desafio: mude o <b>180</b> para <b>90</b>, ou aumente o tempo do <b>aguardar</b>.',
+  vars:[{k:'pb',nm:'Potenciômetro Base',min:0,max:1023,v:512,u:''},{k:'pa',nm:'Potenciômetro Braço',min:0,max:1023,v:300,u:''}],
+  blocks:{ig:{t:'if1'},bg:{t:'btn',txt:'botão da <b>garra</b> apertado',nota:'garra',pin:2},gr:{t:'grip'},s1:{t:'servo',nm:'da base',j:'base',v:'base'},s2:{t:'servo',nm:'do braço',j:'braco',v:'braco'},
+    m1:{t:'map',nm:'Base',pot:'pb',pin:'A0',nums:[180,0]},m2:{t:'map',nm:'Braço',pot:'pa',pin:'A1',nums:[180,0]},w:{t:'wait',nums:[0.05]}},
+  tray:['m2','gr','s1','w','bg','m1','ig','s2'],
+  target:[{k:'s1',slots:{v:'m1'}},{k:'s2',slots:{v:'m2'}},{k:'ig',slots:{c:'bg'},bodies:{b:['gr']}},'w'],
+  ctrlTip2:'✊ Garra: aperte o botão vermelho da cena ou a barra de espaço',
+  head:'#include <Servo.h>\nServo base;\nServo braco;\nServo garra;\nbool garraAberta = true;',setup:'  base.attach(9);   // motor da base\n  braco.attach(10); // motor do braço\n  garra.attach(11); // motor da garra\n  pinMode(2, INPUT_PULLUP); // botão da garra\n'};
+const NOTAS=[['Dó',262,'A0'],['Ré',294,'A1'],['Mi',330,'A2'],['Fá',349,'A3'],['Sol',392,'A4'],['Lá',440,'A5']];
+P.piano={nome:'🎹 Piano',extra:true,piano:true,soft:true,proj:'Piano com botões',lugar:'Projeto extra',
+  missao:'O <b>Dó</b> e o <b>Ré</b> já estão prontos. Encaixe os blocos para as teclas <b>Mi, Fá, Sol e Lá</b> também tocarem. Depois toquem uma música!',
+  win:'Liguem o Arduino e toquem! Cliquem e segurem nas teclas, ou usem as teclas <b>A S D F G H</b> do teclado. “Brilha, brilha, estrelinha”: Dó Dó Sol Sol Lá Lá Sol.',
+  done:'O piano está completo! Ligue o Arduino e toque. Desafio: dobre os números das notas (262 → 524) e o piano fica mais agudo.',
+  ctrlTip:'🎹 Clique e segure nas teclas do piano ou use <b>A S D F G H</b> no teclado',
+  vars:[],notas:NOTAS.map(n=>n[0]),blocks:{},tray:[],target:[],
+  head:'int nota = 0;',setup:NOTAS.map(n=>`  pinMode(${n[2]}, INPUT_PULLUP); // tecla ${n[0]}\n`).join('')+'  pinMode(8, OUTPUT); // buzzer\n',
+  loopPre:'  nota = 0;\n',loopPost:'  if (nota > 0) {\n    tone(8, nota);\n  } else {\n    noTone(8);\n  }\n',
+  prefill(st){[1,2].forEach(i=>{st.forever.push('i'+i);st.blocks['i'+i].slots.c='k'+i;st.blocks['i'+i].bodies.b=['n'+i]})}};
+NOTAS.forEach(([n,f,pin],i)=>{const j=i+1;const B=P.piano.blocks;B['i'+j]={t:'if1',eq:'if1'};B['k'+j]={t:'btn',nota:n,pin};B['n'+j]={t:'note',nota:n,nums:[f]};
+  P.piano.target.push({k:'i'+j,slots:{c:'k'+j},bodies:{b:['n'+j]}})});
+P.piano.tray=['i3','n5','k4','i4','k6','n3','i5','k3','n6','i6','k5','n4'];
+
+const ORDER=['civil','agro','nutri','san','braco','piano'];
+let cur=null, PR=null, ST=null, running=false, muted=false;
+/* ---------- cenas (o uso real) ---------- */
+const sv=$('#scene');
+function defs(){
+  const d=el('defs',{},sv);
+  d.innerHTML=`<linearGradient id="metal" x1="0" x2="1"><stop offset="0" stop-color="#9AA5B1"/><stop offset=".25" stop-color="#EEF2F6"/><stop offset=".55" stop-color="#C4CCD6"/><stop offset="1" stop-color="#8994A1"/></linearGradient>
+  <linearGradient id="metalv" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#F2F4F7"/><stop offset="1" stop-color="#A8AFBA"/></linearGradient>
+  <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7EC8F4"/><stop offset="1" stop-color="#D8F0FF"/></linearGradient>
+  <linearGradient id="wood" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#C98F57"/><stop offset="1" stop-color="#A86F3D"/></linearGradient>
+  <linearGradient id="water" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4FC3F7"/><stop offset="1" stop-color="#1E88E5"/></linearGradient>
+  <radialGradient id="fireg" cx=".5" cy=".8" r=".7"><stop offset="0" stop-color="#FFF59D"/><stop offset=".45" stop-color="#FFB300"/><stop offset="1" stop-color="#F4511E"/></radialGradient>
+  <radialGradient id="sung"><stop offset="0" stop-color="#FFF3B0"/><stop offset=".5" stop-color="#FFD23F"/><stop offset="1" stop-color="#FFB300" stop-opacity="0"/></radialGradient>
+  <pattern id="tiles" width="34" height="34" patternUnits="userSpaceOnUse"><rect width="34" height="34" fill="#EFE6D6"/><rect x="1" y="1" width="32" height="32" rx="3" fill="#F8F2E7"/></pattern>
+  <pattern id="mesh" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 0L5 5M5 0L0 5" stroke="#7D8794" stroke-width="1"/></pattern>
+  ${['r','y','g'].map(c=>`<radialGradient id="hg-${c}"><stop offset="0" stop-color="${LON[c]}" stop-opacity=".9"/><stop offset=".5" stop-color="${LON[c]}" stop-opacity=".35"/><stop offset="1" stop-color="${LON[c]}" stop-opacity="0"/></radialGradient>`).join('')}`;
+}
+const T=(x,y,t,cls,p,anchor)=>{const e=el('text',{x,y,class:cls||'lbl2','text-anchor':anchor||'middle'},p||sv);e.textContent=t;return e};
+function cable(d,p){el('path',{d,fill:'none',stroke:'rgba(0,0,0,.15)','stroke-width':7,transform:'translate(2 3)'},p||sv);el('path',{d,fill:'none',stroke:'#3B4252','stroke-width':5,'stroke-linecap':'round'},p||sv)}
+function panelAndArduino(sx,sy,post){
+  // cabos
+  cable(`M${sx} ${sy} C${sx+90} ${sy+40} 700 430 770 400`);
+  cable('M900 345 C915 320 900 290 880 262');cable('M870 345 C880 320 860 290 830 262');
+  if(post)el('rect',{x:836,y:258,width:18,height:82,fill:'#8D99AE'});
+  // painel de alerta
+  el('rect',{x:742,y:74,width:212,height:190,rx:22,fill:'rgba(0,0,0,.18)',transform:'translate(4 6)'});
+  el('rect',{x:742,y:74,width:212,height:190,rx:22,fill:'#1C2B4F'});
+  T(848,104,'PAINEL DE ALERTA','tagw');
+  [['g',790],['y',848],['r',906]].forEach(([c,x])=>{
+    el('circle',{cx:x,cy:158,r:52,fill:`url(#hg-${c})`,id:'H-'+c,opacity:0});
+    el('circle',{cx:x,cy:158,r:27,fill:'#0E1730'});
+    el('circle',{cx:x,cy:158,r:22,fill:LOFF[c],id:'L-'+c,class:'lt'});
+    el('ellipse',{cx:x-7,cy:150,rx:6,ry:4,fill:'#fff',opacity:.35});
+    T(x,206,LEDNM[c],'tagw');
+  });
+  // sirene
+  el('path',{d:'M818 248 h60 v-10 a30 30 0 0 0 -60 0z',fill:'#C62828'});
+  el('rect',{x:812,y:244,width:72,height:12,rx:4,fill:'#37474F'});
+  const w=el('g',{id:'waves',opacity:0});
+  [0,1].forEach(i=>{el('path',{d:`M${800-i*14} ${236-i*8} q-14 -16 0 -32`,fill:'none',stroke:'#FF7043','stroke-width':4,'stroke-linecap':'round'},w);el('path',{d:`M${896+i*14} ${236-i*8} q14 -16 0 -32`,fill:'none',stroke:'#FF7043','stroke-width':4,'stroke-linecap':'round'},w)});
+  sv.appendChild(w);
+  ardu(756,342);
+}
+function ardu(tx,ty){
+  const a=el('g',{transform:`translate(${tx-756} ${ty-342})`});
+  el('rect',{x:756,y:342,width:186,height:122,rx:12,fill:'rgba(0,0,0,.15)',transform:'translate(3 5)'},a);
+  el('rect',{x:756,y:342,width:186,height:122,rx:12,fill:'#00878F'},a);
+  el('rect',{x:742,y:362,width:26,height:30,rx:3,fill:'url(#metalv)'},a);
+  el('rect',{x:790,y:350,width:70,height:9,fill:'#151515'},a);el('rect',{x:866,y:350,width:66,height:9,fill:'#151515'},a);
+  el('rect',{x:800,y:446,width:58,height:9,fill:'#151515'},a);el('rect',{x:866,y:446,width:56,height:9,fill:'#151515'},a);
+  el('rect',{x:812,y:410,width:96,height:22,rx:2,fill:'#1B1B1B'},a);
+  T(850,400,'ARDUINO UNO','tagw',a);
+  el('circle',{cx:925,cy:378,r:4,fill:'#355',id:'onled'},a);
+  T(849,490,'Arduino (já montado)','lbl2',a);
+}
+
+const SCN={
+civil(){
+  el('rect',{x:0,y:0,width:1000,height:600,fill:'#F6EFE4'});
+  el('rect',{x:70,y:130,width:420,height:290,fill:'url(#tiles)'});
+  el('rect',{x:0,y:470,width:1000,height:130,fill:'#CFA97F'});
+  for(let i=0;i<6;i++)el('line',{x1:0,y1:490+i*22,x2:1000,y2:490+i*22,stroke:'#BD956A','stroke-width':2});
+  el('rect',{x:80,y:30,width:400,height:92,rx:6,fill:'url(#wood)'});
+  [0,1,2].forEach(i=>{el('rect',{x:92+i*130,y:40,width:118,height:72,rx:4,fill:'#D9A56E',stroke:'#B07A45'});el('rect',{x:146+i*130,y:96,width:10,height:4,rx:2,fill:'#6D4C2B'})});
+  // fogão
+  el('rect',{x:110,y:304,width:340,height:236,rx:12,fill:'#F3F5F7',stroke:'#C9D0D8','stroke-width':2});
+  el('rect',{x:100,y:286,width:360,height:24,rx:6,fill:'#2C3138'});
+  [[170],[250],[330],[400]].forEach(([x],i)=>{el('ellipse',{cx:x,cy:288,rx:28,ry:7,fill:'#14171C'});el('ellipse',{cx:x,cy:286,rx:14,ry:3.5,fill:'#444B55'})});
+  el('rect',{x:136,y:252,width:70,height:34,rx:6,fill:'url(#metal)'});el('rect',{x:128,y:248,width:86,height:8,rx:3,fill:'#A7B0BB'});
+  el('rect',{x:110,y:318,width:340,height:36,fill:'#E3E7EC'});
+  [160,220,280,340,400].forEach((x,i)=>{el('circle',{cx:x,cy:336,r:11,fill:'#2C3138'});el('rect',{x:x-2,y:326,width:4,height:10,fill:'#E3E7EC',id:i===2?'knob':null,transform:''})});
+  el('rect',{x:140,y:368,width:280,height:150,rx:10,fill:'#E9EDF1',stroke:'#C9D0D8'});
+  el('rect',{x:164,y:394,width:232,height:94,rx:8,fill:'#232830'});
+  el('rect',{x:170,y:378,width:220,height:7,rx:3,fill:'#9AA5B1'});
+  // nuvem de gás
+  const g=el('g',{id:'gascloud',opacity:0});sv.appendChild(g);
+  const inner=el('g',{class:'drift'},g);
+  [[300,240,38],[340,212,46],[392,236,36],[270,206,30],[360,170,34],[420,196,28],[318,168,26]].forEach(([x,y,r])=>el('circle',{cx:x,cy:y,r,fill:'#9FB3A0',opacity:.75},inner));
+  T(345,212,'gás!','lbl2',inner).setAttribute('fill','#3C5140');
+  // sensor na parede
+  el('rect',{x:540,y:150,width:76,height:56,rx:8,fill:'#1565C0'});
+  el('circle',{cx:578,cy:178,r:20,fill:'url(#metal)'});el('circle',{cx:578,cy:178,r:15,fill:'url(#mesh)'});
+  T(578,232,'sensor de gás','lbl2');
+  panelAndArduino(600,206);
+},
+agro(){
+  el('rect',{x:0,y:0,width:1000,height:600,fill:'#E7EDF2'});
+  el('rect',{x:0,y:0,width:1000,height:60,fill:'#DCE4EB'});
+  el('rect',{x:0,y:486,width:1000,height:114,fill:'#B8C2CC'});
+  el('line',{x1:0,y1:486,x2:1000,y2:486,stroke:'#9AA6B2','stroke-width':3});
+  // canos
+  el('rect',{x:440,y:380,width:170,height:20,fill:'url(#metalv)'});el('rect',{x:600,y:380,width:20,height:90,fill:'url(#metalv)'});
+  el('circle',{cx:520,cy:390,r:16,fill:'#C62828'});el('rect',{x:510,y:384,width:20,height:12,rx:3,fill:'#8E1B1B'});
+  [0,1,2].forEach(i=>{const x=560+i*40;el('path',{d:`M${x} 478 v-36 q0 -10 8 -14 v-14 h8 v14 q8 4 8 14 v36z`,fill:'#FFFDF5',stroke:'#C9D0D8'})});
+  T(600,520,'leite pasteurizado','lbl2');
+  // tanque
+  [150,250,330,420].forEach(x=>el('rect',{x:x,y:440,width:14,height:50,fill:'#8D99AE'}));
+  el('rect',{x:140,y:120,width:300,height:330,rx:26,fill:'url(#metal)',stroke:'#7E8996','stroke-width':2});
+  el('ellipse',{cx:290,cy:122,rx:150,ry:26,fill:'#D5DBE2',stroke:'#7E8996','stroke-width':2});
+  el('circle',{cx:290,cy:318,r:66,fill:'#5E6B78'});
+  el('clipPath',{id:'porth'}).appendChild(el('circle',{cx:290,cy:318,r:58}));
+  el('circle',{cx:290,cy:318,r:58,fill:'#2B3440'});
+  const milk=el('g',{'clip-path':'url(#porth)'});sv.appendChild(milk);
+  el('rect',{x:220,y:300,width:140,height:90,fill:'#FFFBF0'},milk);
+  const bub=el('g',{id:'bubbles',opacity:0},milk);
+  [[262,330],[300,345],[322,322],[280,360]].forEach(([x,y],i)=>el('circle',{cx:x,cy:y,r:6+i%2*3,fill:'none',stroke:'#E8DCC2','stroke-width':3,class:'steam',style:`animation-delay:${i*.5}s`},bub));
+  // termômetro de ponteiro
+  el('circle',{cx:290,cy:196,r:40,fill:'#fff',stroke:'#5E6B78','stroke-width':5});
+  for(let i=0;i<=8;i++){const a=(-210+i*30)*Math.PI/180;el('line',{x1:290+Math.cos(a)*30,y1:196+Math.sin(a)*30,x2:290+Math.cos(a)*36,y2:196+Math.sin(a)*36,stroke:'#33415C','stroke-width':2})}
+  el('path',{d:'M290 196 L290 166',stroke:'#E53935','stroke-width':4,'stroke-linecap':'round',id:'needle'});
+  el('circle',{cx:290,cy:196,r:5,fill:'#33415C'});
+  const tt=T(290,228,'30 °C','lbl2');tt.id='ttxt';
+  // aquecedor
+  el('rect',{x:170,y:452,width:240,height:26,rx:6,fill:'#37474F'});
+  const fl=el('g',{id:'flames'});sv.appendChild(fl);
+  [200,240,280,320,360].forEach((x,i)=>el('path',{d:`M${x} 452 q-12 -18 0 -38 q4 14 10 8 q8 16 -10 30z`,fill:'url(#fireg)',class:'flame',style:`animation-delay:${i*.07}s`},fl));
+  T(290,512,'aquecedor','lbl2');
+  const st=el('g',{id:'steam',opacity:0});sv.appendChild(st);
+  [230,290,350].forEach((x,i)=>el('path',{d:`M${x} 96 q-12 -14 0 -28 q12 -14 0 -28`,fill:'none',stroke:'#fff','stroke-width':8,'stroke-linecap':'round',class:'steam',style:`animation-delay:${i*.7}s`},st));
+  // sensor (sonda)
+  el('rect',{x:396,y:60,width:12,height:110,rx:5,fill:'#263238'});el('rect',{x:386,y:50,width:32,height:20,rx:5,fill:'#455A64'});
+  T(468,84,'sensor de','lbl2');T(468,100,'temperatura','lbl2');
+  T(290,150,'tanque de pasteurização','lbl2').setAttribute('fill','#263238');
+  panelAndArduino(410,62);
+},
+nutri(){
+  el('rect',{x:0,y:0,width:1000,height:600,fill:'#EEF2F7'});
+  el('rect',{x:0,y:494,width:1000,height:106,fill:'#D9C4A5'});
+  // janela
+  el('rect',{x:500,y:56,width:170,height:150,rx:8,fill:'#fff',stroke:'#B0BAC9','stroke-width':4});
+  el('rect',{x:510,y:66,width:150,height:130,fill:'url(#sky)'});
+  el('circle',{cx:620,cy:110,r:44,fill:'url(#sung)',id:'sun'});
+  el('line',{x1:585,y1:66,x2:585,y2:196,stroke:'#B0BAC9','stroke-width':4});
+  const drops=el('g',{id:'drops',opacity:0});sv.appendChild(drops);
+  [[525,90],[548,130],[600,160],[640,84],[652,150],[530,170],[575,100]].forEach(([x,y])=>el('path',{d:`M${x} ${y} q5 8 0 12 q-5 -4 0 -12z`,fill:'#90CAF9'},drops));
+  // prateleira
+  [70,450].forEach(x=>el('rect',{x:x,y:80,width:14,height:420,fill:'#8D6E4A'}));
+  [200,320,440].forEach(y=>el('rect',{x:62,y:y,width:404,height:14,rx:3,fill:'url(#wood)'}));
+  const sacks=[['ARROZ',90,200,'#F5F0E6'],['FEIJÃO',190,200,'#E8D9C4'],['FARINHA',300,200,'#FAFAFA'],['AÇÚCAR',90,320,'#F2EEE9'],['MILHO',200,320,'#F6E7B4'],['CAFÉ',320,320,'#D7C2A8'],['MACARRÃO',110,440,'#FFF3D6'],['SAL',260,440,'#F4F6F8'],['AVEIA',350,440,'#EFE4CF']];
+  sacks.forEach(([t,x,y,c])=>{el('path',{d:`M${x} ${y} q-6 -60 10 -78 h70 q16 18 10 78z`,fill:c,stroke:'#B9A588','stroke-width':2});el('path',{d:`M${x+12} ${y-78} q38 -14 70 0`,fill:'none',stroke:'#B9A588','stroke-width':2});T(x+45,y-34,t,'lbl2').setAttribute('font-size','11')});
+  const mold=el('g',{id:'mold',opacity:0});sv.appendChild(mold);
+  [[110,160],[128,170],[220,150],[318,176],[336,160],[118,290],[230,280],[350,270],[140,410],[290,400],[372,420]].forEach(([x,y],i)=>el('circle',{cx:x,cy:y,r:4+i%3*2,fill:'#6B8E23',opacity:.75},mold));
+  // sensor DHT22
+  el('rect',{x:560,y:262,width:56,height:76,rx:6,fill:'#F5F7FA',stroke:'#B8C0CC','stroke-width':2});
+  for(let i=0;i<4;i++)for(let j=0;j<3;j++)el('rect',{x:568+j*14,y:272+i*14,width:10,height:8,rx:2,fill:'#D3D9E2'});
+  T(588,360,'sensor de temperatura','lbl2');T(588,376,'e umidade','lbl2');
+  const disp=el('g',{});sv.appendChild(disp);
+  el('rect',{x:500,y:400,width:176,height:46,rx:10,fill:'#263238'},disp);
+  const dt=T(588,430,'22 °C · 50%','tagw',disp);dt.id='disp';dt.setAttribute('font-size','17');
+  panelAndArduino(616,300);
+},
+san(){
+  el('rect',{x:0,y:0,width:1000,height:600,fill:'url(#sky)'});
+  [[120,70],[610,50]].forEach(([x,y])=>{[0,30,60].forEach((d,i)=>el('circle',{cx:x+d,cy:y+(i===1?-12:0),r:i===1?28:22,fill:'#fff',opacity:.85}))});
+  el('rect',{x:0,y:500,width:1000,height:100,fill:'#7CB342'});
+  el('rect',{x:0,y:500,width:1000,height:10,fill:'#689F38'});
+  // casinha
+  el('path',{d:'M560 500 v-70 l60 -46 l60 46 v70z',fill:'#FFE0B2',stroke:'#C49A6C','stroke-width':2});el('path',{d:'M548 432 l72 -56 l72 56',fill:'none',stroke:'#B5532F','stroke-width':10,'stroke-linecap':'round'});
+  el('rect',{x:606,y:456,width:28,height:44,fill:'#8D6E4A'});
+  // torre
+  [[210,350,520],[430,350,520]].forEach(([x])=>el('rect',{x:x,y:340,width:16,height:165,fill:'#90A4AE'}));
+  el('path',{d:'M218 360 L438 500 M438 360 L218 500',stroke:'#90A4AE','stroke-width':6});
+  // caixa
+  el('rect',{x:180,y:110,width:290,height:240,rx:16,fill:'#ECEFF1',stroke:'#90A4AE','stroke-width':3});
+  el('ellipse',{cx:325,cy:112,rx:145,ry:20,fill:'#CFD8DC',stroke:'#90A4AE','stroke-width':3});
+  el('rect',{x:206,y:138,width:238,height:190,rx:8,fill:'#E3F2FD',stroke:'#B0BEC5'});
+  const w=el('rect',{x:206,y:280,width:238,height:48,fill:'url(#water)',id:'wlevel'});
+  el('path',{d:'M206 0',id:'wave'});
+  [['85%',.85,'#E53935'],['60%',.60,'#F9A825']].forEach(([t,f,c])=>{const y=328-190*f;el('line',{x1:206,y1:y,x2:444,y2:y,stroke:c,'stroke-width':2,'stroke-dasharray':'8 6'});T(458,y+5,t,'lbl2',null,'start').setAttribute('fill',c)});
+  // sensor ultrassônico na tampa
+  el('rect',{x:290,y:84,width:72,height:30,rx:5,fill:'#1565C0'});
+  [306,346].forEach(x=>el('circle',{cx:x,cy:112,r:10,fill:'url(#metal)'}));
+  const pg=el('g',{id:'pings'});sv.appendChild(pg);
+  [0,1].forEach(i=>el('path',{d:'M296 146 q30 18 60 0',fill:'none',stroke:'#1565C0','stroke-width':3,class:'ping',style:`animation-delay:${i*.5}s`},pg));
+  T(326,72,'sensor de nível','lbl2');
+  // bomba e cano
+  el('rect',{x:60,y:456,width:70,height:46,rx:8,fill:'#455A64'});T(95,484,'bomba','tagw');
+  el('path',{d:'M110 456 V96 H230 V118',fill:'none',stroke:'#78909C','stroke-width':14,'stroke-linejoin':'round'});
+  const inflow=el('g',{id:'inflow'});sv.appendChild(inflow);
+  el('rect',{x:226,y:122,width:8,height:150,fill:'#4FC3F7',opacity:.8,id:'stream'},inflow);
+  const spill=el('g',{id:'spill',opacity:0});sv.appendChild(spill);
+  el('path',{d:'M470 200 q24 40 18 300',fill:'none',stroke:'#4FC3F7','stroke-width':10,'stroke-linecap':'round'},spill);
+  T(325,384,'caixa d’água','lbl2');
+  panelAndArduino(362,96);
+}};
+
+SCN.braco=function(){
+  el('rect',{x:0,y:0,width:1000,height:600,fill:'#E9EEF5'});
+  for(let i=0;i<8;i++)el('rect',{x:i*130-20,y:0,width:6,height:440,fill:'#DDE4EE'});
+  el('rect',{x:0,y:440,width:1000,height:160,fill:'url(#wood)'});el('rect',{x:0,y:440,width:1000,height:10,fill:'#8D5A2B'});
+
+  // base
+  el('ellipse',{cx:330,cy:442,rx:96,ry:16,fill:'#37474F'});
+  el('rect',{x:282,y:362,width:96,height:80,rx:12,fill:'#455A64'});
+  el('rect',{x:300,y:402,width:60,height:26,rx:6,fill:'#1565C0'});T(330,420,'motor','tagw');
+  const arm=el('g',{id:'arm'});
+  // braço desenhado em updateScene
+  T(330,470,'motor da base','lbl2');
+  // caixa dos potenciômetros
+  el('rect',{x:40,y:470,width:300,height:100,rx:14,fill:'#263238'});
+  const gb=el('g',{id:'gbtn',class:'key'});el('circle',{cx:290,cy:512,r:26,fill:'#B71C1C'},gb);el('circle',{cx:290,cy:512,r:20,fill:'#E53935',id:'gbtop'},gb);T(290,558,'Garra','tagw',gb);
+  const up=()=>{pressed.garra=false};gb.addEventListener('pointerdown',e=>{e.preventDefault();pressed.garra=true;gb.setPointerCapture&&gb.setPointerCapture(e.pointerId)});gb.addEventListener('pointerup',up);gb.addEventListener('lostpointercapture',up);
+  [['pb',90,'Base'],['pa',190,'Braço']].forEach(([k,x,n])=>{el('circle',{cx:x,cy:512,r:28,fill:'#1565C0'});el('circle',{cx:x,cy:512,r:20,fill:'#90A4AE'});
+    const g=el('g',{id:'knob-'+k});el('rect',{x:x-3,y:490,width:6,height:18,rx:3,fill:'#263238'},g);T(x,558,n,'tagw')});
+  cable('M340 520 C460 560 640 520 770 430');el('g',{id:'cubes'});cable('M370 410 C500 380 650 360 770 380');
+  ardu(770,330);
+};
+SCN.piano=function(){
+  el('rect',{x:0,y:0,width:1000,height:600,fill:'#F3E9DC'});
+  el('rect',{x:0,y:520,width:1000,height:80,fill:'#C9A27E'});
+  // teclado
+  el('rect',{x:70,y:268,width:640,height:260,rx:22,fill:'rgba(0,0,0,.18)',transform:'translate(5 8)'});
+  el('rect',{x:70,y:268,width:640,height:260,rx:22,fill:'#1F2329'});
+  el('rect',{x:96,y:286,width:588,height:36,rx:8,fill:'#2E333B'});T(390,310,'PIANO ARDUINO','tagw');
+  const K=PR.notas;const kw=96;
+  K.forEach((n,i)=>{const x=100+i*kw;const g=el('g',{class:'key','data-n':n});
+    el('rect',{x,y:332,width:kw-6,height:180,rx:8,fill:'#FDFDFB',stroke:'#C9CED6','stroke-width':2,class:'kface'},g);
+    T(x+(kw-6)/2,478,n,'lbl2',g).setAttribute('font-size','20');
+    T(x+(kw-6)/2,500,'ABCDEFGH'.charAt(0)&&'ASDFGH'[i],'lbl2',g).setAttribute('fill','#9AA6B8');});
+  [0,1,3,4].forEach(i=>el('rect',{x:100+(i+1)*kw-24,y:332,width:42,height:104,rx:6,fill:'#14171C',style:'pointer-events:none'}));
+  // alto-falante
+  el('circle',{cx:850,cy:170,r:70,fill:'#263238'});el('circle',{cx:850,cy:170,r:52,fill:'#37474F'});el('circle',{cx:850,cy:170,r:20,fill:'#455A64'});
+  T(850,262,'buzzer (alto-falante)','lbl2');
+  const nts=el('g',{id:'notes',opacity:0});
+  [[760,110,'♪'],[930,90,'♫'],[780,60,'♩'],[920,150,'♪']].forEach(([x,y,t],i)=>{const e=T(x,y,t,'lbl2',nts);e.setAttribute('font-size','40');e.setAttribute('class','steam');e.setAttribute('style',`animation-delay:${i*.4}s;font-size:40px;fill:#2350E8`)});
+  el('rect',{x:470,y:150,width:200,height:60,rx:12,fill:'#263238'});const d=T(570,188,'—','tagw');d.id='ndisp';d.setAttribute('font-size','20');
+  cable('M700 400 C740 420 750 430 780 430');cable('M850 240 C860 300 880 320 870 340');
+  ardu(780,340);
+  $$('.key').forEach(g=>{const n=g.dataset.n;const up=()=>{pressed[n]=false};
+    g.addEventListener('pointerdown',e=>{e.preventDefault();pressed[n]=true;g.setPointerCapture&&g.setPointerCapture(e.pointerId)});
+    g.addEventListener('pointerup',up);g.addEventListener('pointercancel',up);g.addEventListener('lostpointercapture',up)});
+};
+const SERVO={base:90,braco:90,claw:1};let CUBES=[],HELD=null,PREVW=1,GRABWIN=false;
+function resetCubes(){PREVW=1;GRABWIN=false;SERVO.claw=1;CUBES=[{x:580,y:422,c:'#E53935'},{x:626,y:422,c:'#1E88E5'},{x:603,y:386,c:'#FDD835'}].map(o=>Object.assign(o,{vy:0}));HELD=null}
+function drawScene(){sv.innerHTML='';defs();if(cur==='braco')resetCubes();SCN[cur]()}
+function updateScene(out){
+  const v=ST.vals;
+  ['r','y','g'].forEach(c=>{const on=running&&out.led===c;const L=$('#L-'+c);if(L)L.setAttribute('fill',on?LON[c]:LOFF[c]);const H=$('#H-'+c);if(H)H.setAttribute('opacity',on?1:0)});
+  const bz=running&&out.beep;const blink=bz&&(tick%4<2);const w=$('#waves');if(w)w.setAttribute('opacity',blink?1:0);
+  const on=$('#onled');if(on)on.setAttribute('fill',running?'#7CFF6B':'#355');
+  if(cur==='braco'){
+    ['base','braco'].forEach(j=>{const t=out.servo[j];if(t!==undefined){const d=t-SERVO[j];SERVO[j]+=Math.sign(d)*Math.min(Math.abs(d),9)}});
+    const j0=[330,366],L1=170,L2=150,rad=Math.PI/180;const a1=SERVO.base*rad;const p1=[j0[0]+Math.cos(a1)*L1,j0[1]-Math.sin(a1)*L1];
+    const a2=a1+(SERVO.braco-90)*rad;const p2=[p1[0]+Math.cos(a2)*L2,p1[1]-Math.sin(a2)*L2];
+    const g=$('#arm');g.innerHTML='';const seg=(a,b,w,c)=>{el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'rgba(0,0,0,.18)','stroke-width':w,'stroke-linecap':'round',transform:'translate(3 5)'},g);el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:c,'stroke-width':w,'stroke-linecap':'round'},g)};
+    seg(j0,p1,34,'#FFB300');seg(p1,p2,26,'#FFC94D');
+    const gd=[Math.cos(a2),-Math.sin(a2)],nrm=[-gd[1],gd[0]];const tip=(s)=>[p2[0]+gd[0]*34+nrm[0]*s*14,p2[1]+gd[1]*34+nrm[1]*s*14];
+    const want=out.claw===false?0:1;SERVO.claw+=Math.sign(want-SERVO.claw)*Math.min(Math.abs(want-SERVO.claw),.2);
+    const op=8+SERVO.claw*16;const tipp=(s)=>[p2[0]+gd[0]*34+nrm[0]*s*op,p2[1]+gd[1]*34+nrm[1]*s*op];
+    [1,-1].forEach(s=>{const t=tipp(s);el('path',{d:`M${p2[0]+nrm[0]*s*10} ${p2[1]+nrm[1]*s*10} L${t[0]} ${t[1]} L${t[0]-nrm[0]*s*7+gd[0]*4} ${t[1]-nrm[1]*s*7+gd[1]*4}`,fill:'none',stroke:'#546E7A','stroke-width':9,'stroke-linecap':'round','stroke-linejoin':'round'},g)});
+    // caixinhas: pegar, carregar e soltar
+    const grab=[p2[0]+gd[0]*30,p2[1]+gd[1]*30];
+    if(want===0&&PREVW===1)GRABWIN=true;PREVW=want;
+    if(want===0&&GRABWIN&&!HELD){const c=CUBES.find(c=>Math.hypot(c.x-grab[0],c.y-grab[1])<30);if(c){HELD=c;GRABWIN=false}else if(SERVO.claw<=0.01)GRABWIN=false}
+    if(want===1&&HELD){HELD.vy=0;HELD=null}
+    if(HELD){HELD.x=grab[0]+gd[0]*4;HELD.y=grab[1]+gd[1]*4}
+    CUBES.forEach(c=>{if(c===HELD)return;let floor=422;CUBES.forEach(o=>{if(o!==c&&o!==HELD&&Math.abs(o.x-c.x)<34&&o.y>c.y)floor=Math.min(floor,o.y-36)});
+      if(c.y<floor){c.vy=Math.min(c.vy+3,22);c.y=Math.min(floor,c.y+c.vy)}else{c.y=floor;c.vy=0}});
+    const cg=$('#cubes');cg.innerHTML='';CUBES.forEach(c=>el('rect',{x:c.x-18,y:c.y-18,width:36,height:36,rx:4,fill:c.c,stroke:'rgba(0,0,0,.25)','stroke-width':2},cg));
+    $('#gbtop').setAttribute('fill',pressed.garra?'#FF8A80':'#E53935');
+    [[j0,24],[p1,20]].forEach(([p,r])=>{el('circle',{cx:p[0],cy:p[1],r:r,fill:'#37474F'},g);el('circle',{cx:p[0],cy:p[1],r:r*.45,fill:'#90A4AE'},g)});
+    el('circle',{cx:p2[0],cy:p2[1],r:13,fill:'#37474F'},g);
+    const lb=el('text',{x:p1[0],y:p1[1]-30,class:'lbl2','text-anchor':'middle'},g);lb.textContent='motor do braço';
+    [['pb','base'],['pa','braco']].forEach(([k])=>{const kn=$('#knob-'+k);const x=k==='pb'?90:190;kn.setAttribute('transform',`rotate(${-135+ST.vals[k]/1023*270} ${x} 512)`)});
+  }
+  if(cur==='piano'){
+    $$('.key').forEach(g=>{const on=!!pressed[g.dataset.n];g.querySelector('.kface').setAttribute('fill',on?'#FFE082':'#FDFDFB');g.setAttribute('transform',on?'translate(0 4)':'')});
+    const playing=running&&out.note>0;$('#notes').setAttribute('opacity',playing?1:0);
+    const nm=Object.keys(pressed).find(n=>pressed[n]);$('#ndisp').textContent=!running?'desligado':playing?`♪ ${out.note} Hz`:(nm?'sem som (falta programar)':'—');
+  }
+  if(cur==='civil'){const g=$('#gascloud');const f=v.gas/100;g.setAttribute('opacity',(Math.min(1,f*1.4)).toFixed(2));g.setAttribute('transform',`translate(${345*(1-(.45+f*.75))} ${210*(1-(.45+f*.75))}) scale(${.45+f*.75})`)}
+  if(cur==='agro'){const t=v.temp;const a=(-210+(t-20)/80*240)*Math.PI/180;$('#needle').setAttribute('d',`M290 196 L${290+Math.cos(a)*28} ${196+Math.sin(a)*28}`);$('#ttxt').textContent=t+' °C';
+    const f=(t-20)/80;$('#flames').setAttribute('transform',`translate(0 ${452*(1-(.25+f*.95))}) scale(1 ${.25+f*.95})`);$('#flames').setAttribute('opacity',(.35+f*.65).toFixed(2));
+    $('#steam').setAttribute('opacity',Math.max(0,(t-65)/25).toFixed(2));$('#bubbles').setAttribute('opacity',Math.max(0,(t-75)/15).toFixed(2))}
+  if(cur==='nutri'){$('#sun').setAttribute('opacity',(.25+(v.temp-10)/35*.75).toFixed(2));$('#sun').setAttribute('r',30+(v.temp-10)/35*30);
+    const h=Math.max(0,(v.umid-55)/40);$('#drops').setAttribute('opacity',h.toFixed(2));$('#mold').setAttribute('opacity',Math.max(0,(v.umid-68)/27).toFixed(2));$('#disp').textContent=`${v.temp} °C · ${v.umid}%`}
+  if(cur==='san'){const f=v.nivel/100;const h=Math.max(2,190*Math.min(1,f));const w=$('#wlevel');w.setAttribute('y',328-h);w.setAttribute('height',h);$('#stream').setAttribute('height',Math.max(0,206-h-0));$('#spill').setAttribute('opacity',f>=.98?1:0)}
+}
+
+/* ---------- blocos (modelo genérico) ---------- */
+const LAYOUT={if3:['s:c1','b:b1','s:c2','b:b2','b:b3'],if1:['s:c','b:b'],servo:['s:v']};
+const VALT=['cond','map','btn'];
+const ws=$('#ws'),tray=$('#tray');
+function bdef(k){return PR.blocks[k]}
+function isVal(k){return VALT.includes(bdef(k).t)}
+function nkey(n){return typeof n==='string'?n:n.k}
+function fresh(){
+  const blocks={};
+  for(const k in PR.blocks){const d=PR.blocks[k];const b={key:k,nums:d.nums?d.nums.slice():(d.parts||[]).filter(p=>p&&p.n!==undefined).map(p=>p.n),slots:{},bodies:{}};
+    (LAYOUT[d.t]||[]).forEach(e=>{const [w,n]=e.split(':');if(w==='s')b.slots[n]=null;else b.bodies[n]=[]});blocks[k]=b}
+  const st={blocks,forever:[],tray:PR.tray.slice(),vals:Object.fromEntries((PR.vars||[]).map(v=>[v.k,v.v])),txt:false};
+  if(PR.prefill)PR.prefill(st);
+  return st;
+}
+function save(){try{localStorage.setItem('prog2-'+cur,JSON.stringify(ST))}catch(e){}}
+function load(k){try{const s=JSON.parse(localStorage.getItem('prog2-'+k));if(s&&s.blocks&&s.forever&&Object.keys(s.blocks).length===Object.keys(P[k].blocks).length)return s}catch(e){}return null}
+function slotHTML(k,n){const c=ST.blocks[k].slots[n];return `<span class="slot${c?' filled':''}" data-o="${k}" data-slot="${n}">${c?blockHTML(c):''}</span>`}
+function bodyHTML(k,n){return `<div class="body" data-o="${k}" data-list="${n}">${listHTML(ST.blocks[k].bodies[n],k,n)}</div>`}
+function inp(k,i){return `<input type="number" step="any" data-n="${i}" value="${ST.blocks[k].nums[i]}">`}
+function blockHTML(k){
+  const d=bdef(k);
+  switch(d.t){
+   case 'if3':return `<div class="cblk" data-b="${k}"><div class="row">se ${slotHTML(k,'c1')} então</div>${bodyHTML(k,'b1')}<div class="row">senão, se ${slotHTML(k,'c2')} então</div>${bodyHTML(k,'b2')}<div class="row">senão</div>${bodyHTML(k,'b3')}<div class="foot"></div></div>`;
+   case 'if1':return `<div class="cblk" data-b="${k}"><div class="row">se ${slotHTML(k,'c')} então</div>${bodyHTML(k,'b')}<div class="foot"></div></div>`;
+   case 'read':return `<div class="blk in" data-b="${k}">${d.txt}</div>`;
+   case 'led':return `<div class="blk out" data-b="${k}">acender só o LED <span class="dotc" style="background:${LEDCOL[d.c]}"></span> ${LEDNM[d.c]}</div>`;
+   case 'beep':return `<div class="blk out" data-b="${k}">tocar o apito 🔔</div>`;
+   case 'cond':{let ni=0;return `<div class="blk math" data-b="${k}">`+d.parts.map(p=>p&&p.n!==undefined?inp(k,ni++):`<span>${p}</span>`).join(' ')+'</div>'}
+   case 'servo':return `<div class="blk out" data-b="${k}">girar motor ${d.nm} para ${slotHTML(k,'v')} °</div>`;
+   case 'map':return `<div class="blk math" data-b="${k}">potenciômetro <b>${d.nm}</b> de ${inp(k,0)} a ${inp(k,1)}</div>`;
+   case 'wait':return `<div class="blk wt" data-b="${k}">aguardar ${inp(k,0)} segundo</div>`;
+   case 'btn':return `<div class="blk in pill" data-b="${k}">${d.txt||`tecla <b>${d.nota}</b> apertada`}</div>`;
+   case 'grip':return `<div class="blk out" data-b="${k}">abrir / fechar a garra ✊</div>`;
+   case 'note':return `<div class="blk out" data-b="${k}">tocar a nota ${d.nota} ${inp(k,0)} Hz</div>`;
+  }
+}
+function listHTML(arr,o,name){
+  let h=`<div class="gap" data-o="${o}" data-list="${name}" data-i="0"></div>`;
+  arr.forEach((k,i)=>{h+=blockHTML(k)+`<div class="gap" data-o="${o}" data-list="${name}" data-i="${i+1}"></div>`});
+  if(!arr.length)h+=`<div class="ph">solte os blocos aqui</div>`;
+  return h;
+}
+function renderBlocks(){
+  ws.innerHTML=`<div class="cblk forever" data-b="forever"><div class="row">⟳ para sempre</div><div class="body" data-o="root" data-list="forever">${listHTML(ST.forever,'root','forever')}</div><div class="foot"></div></div>`;
+  tray.innerHTML='<div class="th">Blocos</div>'+(ST.tray.length?ST.tray.map(blockHTML).join(''):'<div class="empty">Todos os blocos já estão no programa.</div>');
+  $$('#ws input,#tray input').forEach(inp=>{
+    inp.addEventListener('pointerdown',e=>e.stopPropagation());
+    inp.addEventListener('change',()=>{const k=inp.closest('[data-b]').dataset.b;const v=parseFloat(String(inp.value).replace(',','.'));ST.blocks[k].nums[+inp.dataset.n]=isNaN(v)?0:v;changed(true)});
+  });
+  renderText();
+}
+function listRef(o,name){return o==='root'?ST.forever:ST.blocks[o].bodies[name]}
+function locate(k){
+  if(ST.tray.includes(k))return {where:'tray'};
+  let i=ST.forever.indexOf(k);if(i>=0)return {where:'list',o:'root',name:'forever',i};
+  for(const o in ST.blocks){const b=ST.blocks[o];
+    for(const n in b.bodies){i=b.bodies[n].indexOf(k);if(i>=0)return {where:'list',o,name:n,i}}
+    for(const n in b.slots)if(b.slots[n]===k)return {where:'slot',o,name:n}}
+  return null;
+}
+function detach(k){const L=locate(k);if(!L)return null;if(L.where==='tray')ST.tray.splice(ST.tray.indexOf(k),1);else if(L.where==='list')listRef(L.o,L.name).splice(L.i,1);else ST.blocks[L.o].slots[L.name]=null;return L}
+function toTray(k){detach(k);const back=x=>{ST.tray.push(x);const b=ST.blocks[x];for(const n in b.slots)if(b.slots[n]){const c=b.slots[n];b.slots[n]=null;back(c)}for(const n in b.bodies){const a=b.bodies[n];b.bodies[n]=[];a.forEach(back)}};back(k)}
+function insertAt(k,o,name,i){const L=locate(k);if(L&&L.where==='list'&&L.o===o&&L.name===name&&L.i<i)i--;detach(k);listRef(o,name).splice(i,0,k)}
+function putSlot(k,o,name){const b=ST.blocks[o];if(b.slots[name]&&b.slots[name]!==k)toTray(b.slots[name]);detach(k);b.slots[name]=k}
+/* arrastar */
+let bdrag=null;
+document.addEventListener('pointerdown',e=>{
+  const src=e.target.closest('.blk,.cblk');if(!src||src.dataset.b==='forever'||e.target.closest('input'))return;
+  if(!src.closest('#ws,#tray'))return;
+  e.preventDefault();clearHint();
+  const k=src.dataset.b;const r=src.getBoundingClientRect();
+  const gh=src.cloneNode(true);gh.classList.add('ghost');gh.style.width=r.width+'px';gh.style.left=r.left+'px';gh.style.top=r.top+'px';if(src.closest('#tray'))gh.style.zoom='.86';document.body.appendChild(gh);
+  src.classList.add('drag-src');
+  bdrag={k,src,gh,dx:e.clientX-r.left,dy:e.clientY-r.top,target:null};
+});
+document.addEventListener('pointermove',e=>{
+  if(!bdrag)return;
+  bdrag.gh.style.left=(e.clientX-bdrag.dx)+'px';bdrag.gh.style.top=(e.clientY-bdrag.dy)+'px';
+  $$('.gap.hl,.slot.hl').forEach(x=>x.classList.remove('hl'));
+  const val=isVal(bdrag.k);
+  const gx=e.clientX-bdrag.dx+12,gy=e.clientY-bdrag.dy+12;let best=null,bd=val?90:70;
+  (val?$$('#ws .slot'):$$('#ws .gap')).forEach(c=>{
+    if(bdrag.src.contains(c))return;
+    const r=c.getBoundingClientRect();const cy=r.top+r.height/2;
+    const d=val?Math.hypot(r.left+r.width/2-e.clientX,cy-e.clientY):Math.hypot(Math.max(0,r.left-gx),cy-gy)+(gx<r.left-40?60:0);
+    if(d<bd){bd=d;best=c}
+  });
+  bdrag.target=best;if(best)best.classList.add('hl');
+});
+document.addEventListener('pointerup',e=>{
+  if(!bdrag)return;const {k,gh,src,target}=bdrag;gh.remove();src.classList.remove('drag-src');
+  const tr=tray.getBoundingClientRect();const overTray=e.clientX>tr.left&&e.clientX<tr.right&&e.clientY>tr.top&&e.clientY<tr.bottom;
+  bdrag=null;$$('.gap.hl,.slot.hl').forEach(x=>x.classList.remove('hl'));
+  if(target&&!overTray){if(target.classList.contains('slot'))putSlot(k,target.dataset.o,target.dataset.slot);else insertAt(k,target.dataset.o,target.dataset.list,+target.dataset.i);changed()}
+  else if(overTray&&!ST.tray.includes(k)){toTray(k);changed()}
+  else renderBlocks();
+});
+/* ---------- texto (C++) ---------- */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function valC(k){if(!k)return '/* falta um bloco aqui */';const d=bdef(k),b=ST.blocks[k];
+  if(d.t==='cond')return PR.ctext[k](b.nums);
+  if(d.t==='map')return `map(analogRead(${d.pin}), 0, 1023, ${b.nums[0]}, ${b.nums[1]})`;
+  if(d.t==='btn')return `digitalRead(${d.pin}) == LOW`;return ''}
+function stmtC(k,ind){const d=bdef(k),b=ST.blocks[k];const sp='  '.repeat(ind);
+  const body=n=>b.bodies[n].map(x=>stmtC(x,ind+1)).join('')||`${sp}  // vazio\n`;
+  switch(d.t){
+   case 'read':return sp+PR.readTxt[1].replace(/\n  /g,'\n'+sp)+'\n';
+   case 'led':return `${sp}acenderSo(${LEDPIN[d.c]}); // LED ${LEDNM[d.c]}\n`;
+   case 'beep':return `${sp}tone(8, 1000, 100); // apito\n`;
+   case 'if3':return `${sp}if (${valC(b.slots.c1)}) {\n${body('b1')}${sp}} else if (${valC(b.slots.c2)}) {\n${body('b2')}${sp}} else {\n${body('b3')}${sp}}\n`;
+   case 'if1':return `${sp}if (${valC(b.slots.c)}) {\n${body('b')}${sp}}\n`;
+   case 'servo':return `${sp}${d.v}.write(${valC(b.slots.v)}); // motor ${d.nm}\n`;
+   case 'wait':return `${sp}delay(${Math.round(b.nums[0]*1000)}); // espera ${String(b.nums[0]).replace('.',',')} s\n`;
+   case 'note':return `${sp}nota = ${b.nums[0]}; // ${d.nota}\n`;
+   case 'grip':return `${sp}garraAberta = !garraAberta; // abre ou fecha\n${sp}garra.write(garraAberta ? 90 : 0);\n${sp}delay(300);\n`;
+   default:return `${sp}// (bloco solto: ${valC(k)})\n`;
+  }}
+function genCode(){
+  return `// ${PR.proj} (${PR.nomeL||PR.nome.replace(/^\S+ /,'')})\n${PR.head}\n\nvoid setup() {\n${PR.setup}}\n\nvoid loop() {\n${PR.loopPre||''}${ST.forever.map(k=>stmtC(k,1)).join('')||'  // o programa ainda está vazio\n'}${PR.loopPost||''}}\n`;
+}
+function hl(code){return esc(code).replace(/(\/\/[^\n]*|\/\*.*?\*\/)/g,'<span class="c">$1</span>').replace(/\b(void|int|float|long|bool|return|if|else|include)\b/g,'<span class="k">$1</span>').replace(/\b(\d+(\.\d+)?)\b/g,'<span class="n">$1</span>').replace(/\b(digitalWrite|digitalRead|pinMode|tone|noTone|analogRead|map|delay|acenderSo|lerNivel|setup|loop|pulseIn|delayMicroseconds|constrain|readTemperature|readHumidity|begin|write|attach)\b/g,'<span class="f">$1</span>')}
+function renderText(){$('#txt').innerHTML=hl(genCode())}
+/* ---------- verificação, dica e "encaixar o próximo" ---------- */
+function match(s,t){if(s===t)return true;const a=bdef(s),b=bdef(t);return !!(a.eq&&a.eq===b.eq)}
+function issue(){
+  const cmp=(tl,sl,o,name)=>{
+    for(let i=0;i<tl.length;i++){const node=tl[i],t=nkey(node),s=sl[i];
+      if(s===undefined)return {kind:'add',k:t,o,name,i};
+      if(!match(s,t))return {kind:'wrong',k:s};
+      for(const e of (LAYOUT[bdef(t).t]||[])){const [w,n]=e.split(':');
+        if(w==='s'){const ts=node.slots[n],ss=ST.blocks[s].slots[n];if(!ss)return {kind:'slot',k:ts,o:s,name:n};if(!match(ss,ts))return {kind:'wrong',k:ss}}
+        else{const r=cmp(node.bodies[n],ST.blocks[s].bodies[n],s,n);if(r)return r}}
+    }
+    if(sl.length>tl.length)return {kind:'wrong',k:sl[tl.length]};
+    return null};
+  return cmp(PR.target,ST.forever,'root','forever');
+}
+function counts(){
+  let total=0,ok=0;
+  const walk=(tl,sl,good)=>{tl.forEach((node,i)=>{const t=nkey(node);const s=sl?sl[i]:undefined;total++;const g=good&&s!==undefined&&match(s,t);if(g)ok++;
+    for(const e of (LAYOUT[bdef(t).t]||[])){const [w,n]=e.split(':');
+      if(w==='s'){total++;if(g&&ST.blocks[s].slots[n]&&match(ST.blocks[s].slots[n],node.slots[n]))ok++}
+      else walk(node.bodies[n],g?ST.blocks[s].bodies[n]:null,g)}})};
+  walk(PR.target,ST.forever,true);return {ok,total};
+}
+function avail(t){if(ST.tray.includes(t))return t;const d=bdef(t);if(d.eq){const c=ST.tray.find(x=>bdef(x).eq===d.eq);if(c)return c}return t}
+const LISTNM={b1:'no primeiro <b>então</b> do “se”',b2:'no segundo <b>então</b> (o do “senão, se”)',b3:'no <b>senão</b> do final'};
+function listName(o,n){if(o==='root')return 'dentro do <b>para sempre</b>';const d=bdef(o);if(d.t==='if3')return LISTNM[n];return `dentro do <b>então</b> do “se” que pisca`}
+function slotName(o,n){const d=bdef(o);if(d.t==='if3')return `no ${n==='c1'?'primeiro':'segundo'} espaço vazio do “se”`;if(d.t==='servo')return `no espaço vazio do “girar motor ${d.nm}”`;return 'no espaço vazio do “se” que pisca'}
+function bname(k){const d=bdef(k);switch(d.t){case 'if3':return '“se … senão, se … senão”';case 'if1':return '“se … então”';case 'read':return `“${d.txt}”`;case 'led':return `“acender só o LED ${LEDNM[d.c]}”`;case 'beep':return '“tocar o apito”';
+  case 'cond':return `“${d.parts.map(p=>p&&p.n!==undefined?'…':p).join(' ')}”`;case 'servo':return `“girar motor ${d.nm}”`;case 'map':return `“potenciômetro ${d.nm}”`;case 'wait':return '“aguardar”';case 'btn':return d.txt?`“${d.txt.replace(/<[^>]+>/g,'')}”`:`“tecla ${d.nota} apertada”`;case 'grip':return '“abrir / fechar a garra”';case 'note':return `“tocar a nota ${d.nota}”`}}
+const hintbar=$('#hintbar');let hintOn=null;
+function clearHint(){hintbar.classList.remove('on');hintOn=null;$$('.pulse-b').forEach(x=>x.classList.remove('pulse-b'));$$('.hintgap').forEach(x=>x.classList.remove('hintgap'));$$('.pulse-o').forEach(x=>x.classList.remove('pulse-o'))}
+function doneMsg(){return PR.done||'O programa está pronto! Clique em <b>▶ Ligar o Arduino</b> e mexa na barrinha embaixo da cena.'}
+function showHint(){
+  clearHint();if(ST.txt)setView(false);const I=issue();
+  if(!I){hintMsg(doneMsg());return}
+  hintOn=I;const pulse=k=>{const e=$(`#tray [data-b="${k}"]`)||$(`#ws [data-b="${k}"]`);if(e)e.classList.add('pulse-b')};
+  if(I.kind==='wrong'){hintMsg(`O bloco ${bname(I.k)} não vai aí. Arraste ele de volta para a coluna de blocos.`);pulse(I.k)}
+  else if(I.kind==='slot'){const k=avail(I.k);hintMsg(`Arraste o bloco ${bname(k)} ${slotName(I.o,I.name)}.`);pulse(k);const s=$(`#ws .slot[data-o="${I.o}"][data-slot="${I.name}"]`);if(s)s.classList.add('hintgap');const ob=$(`#ws [data-b="${I.o}"]`);if(ob&&I.o!=='root'&&bdef(I.o).t==='if1')ob.classList.add('pulse-o')}
+  else{const k=avail(I.k);hintMsg(`Arraste o bloco ${bname(k)} para ${listName(I.o,I.name)}.`);pulse(k);const g=$(`#ws .gap[data-o="${I.o}"][data-list="${I.name}"][data-i="${I.i}"]`);if(g)g.classList.add('hintgap');const ob=$(`#ws [data-b="${I.o}"]`);if(ob&&I.o!=='root'&&bdef(I.o).t==='if1')ob.classList.add('pulse-o')}
+}
+function hintMsg(h){$('#hintmsg').innerHTML=h;hintbar.classList.add('on');$('#hintAuto').style.display=issue()?'':'none'}
+function autoStep(){
+  const I=issue();clearHint();if(ST.txt)setView(false);if(!I){hintMsg(doneMsg());return}
+  if(I.kind==='wrong')toTray(I.k);else if(I.kind==='slot')putSlot(avail(I.k),I.o,I.name);else insertAt(avail(I.k),I.o,I.name,I.i);
+  changed();
+}
+/* ---------- simulação ---------- */
+let tick=0,actx=null,osc=null,gain=null,lastRun=0,pressed={};
+const SIM={led:null,beep:false,note:0,servo:{},wait:0,claw:true};let lastGrip=0;
+function evalV(k,S){if(!k)return null;const d=bdef(k),b=ST.blocks[k];
+  if(d.t==='cond'){PR.vars.forEach(v=>{if(S[v.k]===undefined)S[v.k]=0});return PR.eval[k](S,b.nums)}
+  if(d.t==='btn')return !!pressed[d.nota];
+  if(d.t==='map')return b.nums[0]+(b.nums[1]-b.nums[0])*(ST.vals[d.pot]/1023);
+  return null}
+function runProgram(){
+  const S={};const out={led:null,beep:false,note:0,servo:{},wait:0};
+  const exec=k=>{const d=bdef(k),b=ST.blocks[k];
+    switch(d.t){
+     case 'read':PR.vars.forEach(v=>S[v.k]=ST.vals[v.k]);break;
+     case 'led':out.led=d.c;break;case 'beep':out.beep=true;break;
+     case 'if3':if(evalV(b.slots.c1,S))b.bodies.b1.forEach(exec);else if(evalV(b.slots.c2,S))b.bodies.b2.forEach(exec);else b.bodies.b3.forEach(exec);break;
+     case 'if1':if(evalV(b.slots.c,S))b.bodies.b.forEach(exec);break;
+     case 'servo':{const v=evalV(b.slots.v,S);if(v!==null)out.servo[d.j]=Math.max(0,Math.min(180,v));break}
+     case 'wait':out.wait+=Math.max(0,b.nums[0]);break;
+     case 'note':out.note=b.nums[0];break;
+     case 'grip':if(Date.now()-lastGrip>300){SIM.claw=!SIM.claw;lastGrip=Date.now()}break;}};
+  ST.forever.forEach(exec);return out;
+}
+function tone(freq){if(muted)freq=0;if(!gain)return;if(freq>0){osc.frequency.setTargetAtTime(freq,actx.currentTime,.005);gain.gain.setTargetAtTime(PR.soft?.08:.05,actx.currentTime,.01)}else gain.gain.setTargetAtTime(0,actx.currentTime,.01)}
+function initAudio(){try{if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();osc=actx.createOscillator();gain=actx.createGain();osc.type=PR.soft?'triangle':'square';osc.frequency.value=950;gain.gain.value=0;osc.connect(gain).connect(actx.destination);osc.start()}osc.type=PR.soft?'triangle':'square';if(actx.state==='suspended')actx.resume()}catch(e){actx=null;gain=null}}
+setInterval(()=>{if(!PR)return;tick++;const now=Date.now();
+  if(running){if(now-lastRun>=SIM.wait*1000){const o=runProgram();Object.assign(SIM,{led:o.led,beep:o.beep,note:o.note,wait:o.wait});Object.assign(SIM.servo,o.servo);lastRun=now}}
+  else Object.assign(SIM,{led:null,beep:false,note:0,wait:0});
+  updateScene(Object.assign({},SIM,{claw:SIM.claw}));
+  if(PR.piano)tone(running?SIM.note:0);else tone(running&&SIM.beep&&(tick%4<2)?950:0);
+},60);
+/* ---------- interface geral ---------- */
+function renderSensors(){
+  const box=$('#sensors');box.innerHTML='';
+  if(PR.ctrlTip){box.innerHTML=`<span class="sens">${PR.ctrlTip}</span>`;return}
+  if(PR.ctrlTip2){const t=document.createElement('span');t.className='sens';t.innerHTML=PR.ctrlTip2;box.appendChild(t)}
+  PR.vars.forEach(v=>{const d=document.createElement('label');d.className='sens';
+    d.innerHTML=`${v.nm} <input type="range" min="${v.min}" max="${v.max}" value="${ST.vals[v.k]}"><output>${ST.vals[v.k]}${v.u}</output>`;
+    const r=d.querySelector('input');r.addEventListener('input',()=>{ST.vals[v.k]=+r.value;d.querySelector('output').textContent=r.value+v.u;save()});box.appendChild(d)});
+}
+function updateProg(){const c=counts();$('#prog').innerHTML=`Blocos encaixados <b>${c.ok}/${c.total}</b>`;$('#hCode').classList.toggle('done',!issue())}
+let wasDone=false;
+function changed(soft){if(!soft)renderBlocks();else renderText();updateProg();save();
+  const done=!issue();if(done&&!wasDone){$('#winmsg').innerHTML=PR.win;$('#win').classList.add('on')}wasDone=done;
+  if(hintOn)setTimeout(()=>{if(hintbar.classList.contains('on'))showHint()},0);
+}
+function setView(t){ST.txt=t;$('#codeArea').classList.toggle('text',t);$$('.seg button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='t')===t));renderText()}
+function setPower(on){running=on;const b=$('#power');b.classList.toggle('on',on);b.textContent=on?'■ Desligar':'▶ Ligar o Arduino';if(on){initAudio();lastRun=0;SIM.wait=0}else tone(0)}
+function choose(k){
+  cur=k;PR=P[k];ST=load(k)||fresh();setPower(false);pressed={};SIM.servo={};SIM.claw=true;
+  $$('#projs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+  $('#sTitle').textContent=PR.proj;$('#sSub').textContent=PR.lugar;
+  $('#mission').innerHTML=PR.missao;
+  drawScene();renderSensors();clearHint();setView(!!ST.txt);
+  wasDone=!issue();changed();
+  try{localStorage.setItem('prog2-cur',k)}catch(e){}
+  if(location.hash!=='#'+k)history.replaceState(null,'','#'+k);
+}
+$('#projs').innerHTML=ORDER.map(k=>`<button data-k="${k}"${P[k].extra?' class="ex"':''}>${P[k].nome}</button>`).join('');
+$$('#projs button').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.k)));
+$('#bHint').addEventListener('click',showHint);
+$('#bAuto').addEventListener('click',autoStep);
+$('#hintAuto').addEventListener('click',autoStep);
+$('#hintX').addEventListener('click',clearHint);
+let resetArm=0;
+$('#bReset').addEventListener('click',()=>{const b=$('#bReset');if(Date.now()-resetArm>3000){resetArm=Date.now();b.textContent='Clique de novo';setTimeout(()=>b.textContent='↺ Recomeçar',3000);return}
+  b.textContent='↺ Recomeçar';ST=fresh();setPower(false);SIM.servo={};SIM.claw=true;if(cur==='braco')drawScene();renderSensors();clearHint();setView(false);wasDone=!issue();changed()});
+$('#power').addEventListener('click',()=>setPower(!running));
+$('#mute').addEventListener('click',()=>{muted=!muted;$('#mute').textContent=muted?'🔇':'🔊'});
+$$('.seg button').forEach(b=>b.addEventListener('click',()=>{setView(b.dataset.v==='t');save()}));
+$('#winok').addEventListener('click',()=>{$('#win').classList.remove('on');setPower(true)});
+window.addEventListener('hashchange',()=>{const k=location.hash.slice(1);if(P[k]&&k!==cur)choose(k)});
+/* teclado do piano */
+const KEYMAP={a:0,s:1,d:2,f:3,g:4,h:5};
+document.addEventListener('keydown',e=>{if(PR&&cur==='braco'&&e.code==='Space'&&!e.target.closest('input')){pressed.garra=true;e.preventDefault();return}if(!PR||!PR.piano||e.target.closest('input'))return;const i=KEYMAP[e.key.toLowerCase()];if(i!==undefined){pressed[PR.notas[i]]=true;e.preventDefault()}});
+document.addEventListener('keyup',e=>{if(PR&&cur==='braco'&&e.code==='Space'){pressed.garra=false;return}if(!PR||!PR.piano)return;const i=KEYMAP[e.key.toLowerCase()];if(i!==undefined)pressed[PR.notas[i]]=false});
+window.__press=(n,v)=>{pressed[n]=v};
+const h=location.hash.slice(1);let first='civil';try{first=localStorage.getItem('prog2-cur')||'civil'}catch(e){}
+choose(P[h]?h:(P[first]?first:'civil'));
+window.__prog={issue,autoStep,get ST(){return ST},choose,runProgram,SIM};
+
+
+})();
+</script>
+</body>
+</html>
